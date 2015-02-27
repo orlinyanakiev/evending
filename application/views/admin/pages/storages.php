@@ -7,6 +7,26 @@
         <a class="logout" href="<?= base_url();?>member/">Обратно</a>
     </div>
     <div class="content">
+        <a class="add_storage" href="#">Добави нов</a>
+        <div class="storages_list" style="display:<?= is_array($aStorages) && !empty($aStorages) ? 'block' : 'none';?>;">
+            <?php foreach($aStorages as $aStorage) :?>
+                <p><?= $aStorage->Name.' '.$aStorage->Address;?></p>
+            <?php endforeach; ?>
+        </div>
+        <div class="add_storage_form form">
+            <form method="post" action="">
+                <input type="text" name="Name" placeholder="Наименование" />
+                <input type="text" name="Address" placeholder="Адрес" />
+                <select name="Type">
+                    <option value="0">Вид склад</option>
+                    <option value="1">Едно</option>
+                    <option value="2">Две</option>
+                </select>
+                <button type="submit">Добави склад</button>
+            </form>
+        </div>
+        <div class="warning">
 
+        </div>
     </div>
 </div>

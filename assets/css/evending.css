@@ -58,6 +58,7 @@ button {
 
 form input {
     display: block;
+    font-size: 18px;
     border: 2px solid green;
     background-color: #F0FDEA;
     border-radius: 5px;
@@ -121,4 +122,28 @@ a.active {
     margin: 0 8px 10px 7px;
     border: 1px solid black;
     border-radius: 0 0 4px 4px;
+}
+
+.add_storage_form {
+    display: none;
+}
+
+select {
+    display: block;
+    font-size: 18px;
+    color: gray;
+    border: 2px solid green;
+    background-color: #F0FDEA;
+    border-radius: 5px;
+    padding: 8px;
+    margin: 5px;
+    min-width: 250px;
+}
+
+.warning p {
+    color: #FC1800;
+}
+
+.add_producttypes_form {
+    display: none;
 }

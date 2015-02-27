@@ -15,6 +15,7 @@ class admin extends My_AdminController
         $this->Users();
     }
 
+    //Users
     public function Users()
     {
         $this->aData['sTitle'] = 'Потребители';
@@ -25,24 +26,41 @@ class admin extends My_AdminController
         $this->load->view('admin/include/footer',$this->aData);
     }
 
+    //Storages
     public function Storages()
     {
         $this->aData['sTitle'] = 'Складове';
+        $this->aData['aStorages'] = $this->storages->GetAllStorages();
 
         $this->load->view('admin/include/header',$this->aData);
         $this->load->view('admin/pages/storages',$this->aData);
         $this->load->view('admin/include/footer',$this->aData);
     }
 
+    public function AddStorage()
+    {
+        if(is_array($_POST) && !empty($_POST)){
+            $aStorageData = $_POST;
+            $bResult = $this->storages->AddStorage($aStorageData);
+
+            echo json_encode(array('success' => $bResult));
+        }
+    }
+
+    //Products
     public function Products()
     {
         $this->aData['sTitle'] = 'Продукти';
+        $this->aData['aProducts'] = $this->products->GetAllProducts();
+        $this->aData['aProductTypes'] = $this->products->GetAllProductTypes();
+        $this->aData['aProductCategories'] = $this->products->GetAllProductCategories();
 
         $this->load->view('admin/include/header',$this->aData);
         $this->load->view('admin/pages/products',$this->aData);
         $this->load->view('admin/include/footer',$this->aData);
     }
 
+    //Information
     public function Info()
     {
         $this->aData['sTitle'] = 'Справки';

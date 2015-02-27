@@ -10,7 +10,6 @@ class My_MemberController extends My_BaseController
 
             $this->load->model('storages');
             $this->load->model('products');
-            $this->load->model('producttypes');
             $this->CheckUser(true);
         }
 }
