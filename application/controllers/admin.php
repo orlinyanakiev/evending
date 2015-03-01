@@ -50,7 +50,7 @@ class admin extends My_AdminController
     //Products
     public function Products()
     {
-        $this->aData['sTitle'] = 'Продукти';
+        $this->aData['sTitle'] = 'Изделия';
         $this->aData['aProducts'] = $this->products->GetAllProducts();
         $this->aData['aProductTypes'] = $this->products->GetAllProductTypes();
         $this->aData['aProductCategories'] = $this->products->GetAllProductCategories();
@@ -58,6 +58,16 @@ class admin extends My_AdminController
         $this->load->view('admin/include/header',$this->aData);
         $this->load->view('admin/pages/products',$this->aData);
         $this->load->view('admin/include/footer',$this->aData);
+    }
+
+    public function AddProductType()
+    {
+        if(is_array($_POST) && !empty($_POST)){
+            $aProductData = $_POST;
+            $bResult = $this->products->AddProductType($aProductData);
+
+            echo json_encode(array('success' => $bResult));
+        }
     }
 
     //Information

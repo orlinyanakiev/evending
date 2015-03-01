@@ -17,20 +17,24 @@ $( document ).ready(function() {
         return this.optional(element) || value > param;
     },"Wrong!");
 
+    jQuery.validator.addMethod("Price",function(value,element){
+        return this.optional(element) || /^[0-9]+(\.|,)[0-9]{2}$/.test(value);
+    },"Wrong!");
+
     //Register
     $('.register_form button').click(function(e){
         e.preventDefault();
 
-        var self = this;
+        var this_form = $(this).closest("form");
         
-        $(self).closest("form").validate({
+        this_form.validate({
             rules:{
                 Company: { required: true, Company: true },
                 FirstName: { required: true, Person: true },
                 LastName: { required: true, Person: true },
                 LoginName: { required: true, LogNamPass:true },
                 Password: { required: true, LogNamPass:true },
-                Password2:{ equalTo: "#pass" },
+                Password2:{ equalTo: "#pass" }
             },
             messages:{
                 Company: 'Въведете име на фирма',
@@ -38,23 +42,21 @@ $( document ).ready(function() {
                 LastName: 'Въведете валидна фамилия',
                 LoginName: 'Въведете валидно потребителско име',
                 Password: 'Въведете валидна парола',
-                Password2: 'Потвърдете паролата',
+                Password2: 'Потвърдете паролата'
             },
         });
 
-        var form_valid = $(self).closest("form").valid();
+        var form_valid = this_form.valid();
             
         if(form_valid){
-            var data = $(self).closest("form").serialize();
+            var data = this_form.serialize();
 
-            console.log(data);
             $.ajax({
                 dataType: 'json',
                 method: 'post',
                 url: base_url + 'general/AddUser/',
                 data: data,
                 success:function(result){
-                    console.log(result);
                     if(result.success == true){
                         $('.public').find('.warning').html('<strong>Регистрацията премина успешно!</strong><p>Можете да влезнете от <a href="'+ base_url +'">началната страница</a>.</p>');
                         $('.public').find('.directions').html('');
@@ -72,23 +74,24 @@ $( document ).ready(function() {
     //Login
     $('.login_form button').click(function(e){
         e.preventDefault();
-        var self = this;
-        
-        $(self).closest("form").validate({
+
+        var this_form = $(this).closest("form");
+
+        this_form.validate({
             rules:{
                 LoginName: { required: true, LogNamPass:true },
-                Password: { required: true, LogNamPass:true },
+                Password: { required: true, LogNamPass:true }
             },
             messages:{
                 LoginName: 'Въведете валидно потребителско име',
-                Password: 'Въведете валидна парола',
+                Password: 'Въведете валидна парола'
             },
         });
 
-        var form_valid = $(self).closest("form").valid();
+        var form_valid = this_form.valid();
             
         if(form_valid){
-            var data = $(self).closest('form').serialize();
+            var data = this_form.serialize();
 
             $.ajax({
                 dataType: 'json',
@@ -111,7 +114,8 @@ $( document ).ready(function() {
     $('.content a.add_storage').click(function(e){
         e.preventDefault();
 
-        $('.content').find('.storages_list').hide();
+        $('.content').find('a.add_storage').hide();
+        $('.content').find('.list').hide();
         $('.content').find('.add_storage_form').show();
     })
 
@@ -119,23 +123,25 @@ $( document ).ready(function() {
     $('.add_storage_form button').click(function(e){
         e.preventDefault();
 
-        $(this).closest('form').validate({
+        var this_form = $(this).closest('form');
+
+        this_form.validate({
             rules:{
                 Name: { required: true, Company: true },
                 Address: { Company: true },
-                Type: { GreaterThan: 0 },
+                Type: { GreaterThan: 0 }
             },
             messages:{
                 Name: 'Името не е валидно',
                 Address: 'Некоректно въведен адрес',
-                Type: 'Изберете вид',
+                Type: 'Изберете вид'
             },
         })
 
-        var form_valid = $(this).closest('form').valid();
+        var form_valid = this_form.valid();
 
         if(form_valid){
-            var data = $(this).closest('form').serialize();
+            var data = this_form.serialize();
 
             $.ajax({
                 dataType: 'json',
@@ -143,7 +149,6 @@ $( document ).ready(function() {
                 url: base_url + 'admin/AddStorage',
                 data: data,
                 success:function(result){
-                    console.log(result);
                     if(result.success == true){
                         $('.content').find('.warning').html('<p>Складът беше добавен успешно!</p>');
                     }
@@ -155,13 +160,58 @@ $( document ).ready(function() {
         }
     });
 
-    //Show add product form
-    $('.content a.add_producttype').click(function(e){
+    //Show add product type form
+    $('.content a.add_product_type').click(function(e){
         e.preventDefault();
 
-        $('.content').find('.warning').html('');
-        $('.content').find('.add_producttype_form').show();
+        $('.content').find('.add_product_type').hide();
+        $('.content').find('.list').hide();
+        $('.content').find('.add_product_type_form').show();
     });
+
+    //Add product type
+    $('.add_product_type_form button').click(function(e){
+        e.preventDefault();
+
+        var this_form = $(this).closest("form");
+        console.log(this_form);
+
+        this_form.validate({
+            rules:{
+                Name: { required: true, Company: true },
+                Category: { GreaterThan: 0 },
+                Price: { required: true, Price: true },
+                ExpirationTime: { required: true, digits: true }
+            },
+            messages:{
+                Name: 'Въведеното име е некоректно',
+                Category: 'Изберете категория',
+                Price: 'Въведете валидна цена',
+                ExpirationTime: 'Въведете цяло число (дни)'
+            }
+        });
+
+        var form_valid = this_form.valid();
+
+        if(form_valid){
+            var data = this_form.serialize();
+
+            $.ajax({
+                method: 'post',
+                dataType: 'json',
+                url: base_url + 'admin/AddProductType',
+                data: data,
+                success:function(result){
+                    if(result.success == true){
+                        $('.content').find('.warning').html('Операцията е успешна!');
+                    }
+                    if(result.success == false){
+                        $('.content').find('.warning').html('<p>Възникна грешка! Моля опитайте отново</p>');
+                    }
+                }
+            });
+        }
+    })
     //$('.nav a.admin').click(function(e){
     //    e.preventDefault();
     //

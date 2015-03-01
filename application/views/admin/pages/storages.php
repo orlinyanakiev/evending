@@ -2,15 +2,15 @@
     <div class="nav">
         <a class="admin" href="<?= base_url();?>admin/users">Потребители</a>
         <a class="admin active" href="<?= base_url();?>admin/storages">Складове</a>
-        <a class="admin" href="<?= base_url();?>admin/products">Стоки</a>
+        <a class="admin" href="<?= base_url();?>admin/products">Изделия</a>
         <a class="admin" href="<?= base_url();?>admin/info">Справки</a>
         <a class="logout" href="<?= base_url();?>member/">Обратно</a>
     </div>
     <div class="content">
-        <a class="add_storage" href="#">Добави нов</a>
-        <div class="storages_list" style="display:<?= is_array($aStorages) && !empty($aStorages) ? 'block' : 'none';?>;">
+        <a class="add_storage" href="#">Добави нов склад</a>
+        <div class="list" style="display:<?= is_array($aStorages) && !empty($aStorages) ? 'block' : 'none';?>;">
             <?php foreach($aStorages as $aStorage) :?>
-                <p><?= $aStorage->Name.' '.$aStorage->Address;?></p>
+                <div class="storage_container"><?= $aStorage->Name.' '.$aStorage->Address;?></div>
             <?php endforeach; ?>
         </div>
         <div class="add_storage_form form">

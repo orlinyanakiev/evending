@@ -20,14 +20,27 @@ class Products extends CI_Model
     }
 
     //Product Types
+    public function AddProductType($aProductTypeData)
+    {
+        $aProductTypeInsertData = array(
+            'Name' => $aProductTypeData['Name'],
+            'Category' => $aProductTypeData['Category'],
+            'Price' => $aProductTypeData['Price'],
+            'ExpirationTime' => $aProductTypeData['ExpirationTime'],
+        );
+
+        return $this->db->insert($this->sTypeTable,$aProductTypeInsertData);
+    }
+
     public function GetAllProductTypes($iLimit = 10, $iOffest = 0)
     {
         return $this->db->get($this->sTypeTable,$iLimit,$iOffest)->result();
     }
 
     //Product Caterogies
-    public function GetAllProductCategories($iLimit = 10, $iOffest = 0)
+    public function GetAllProductCategories()
     {
-        return $this->db->get($this->sCategoryTable,$iLimit,$iOffest)->result();
+        $this->db->order_by('Id');
+        return $this->db->get($this->sCategoryTable)->result();
     }
 }
