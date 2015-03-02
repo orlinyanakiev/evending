@@ -2,7 +2,7 @@ $( document ).ready(function() {
     var base_url = 'http://localhost/evending/';
 
     jQuery.validator.addMethod("Person",function(value,element){
-        return this.optional(element) || /^[^\`\~\!\@\#\$\%\^\&\*\(\)\_\+\-\=\+\{\}\[\]\;\'\\\:\"\|\<\>\?\,\.\/\s[0-9]]{2,32}$/.test(value);
+        return this.optional(element) || /^[^\`\~\!\@\#\$\%\^\&\*\(\)\_\+\-\=\+\{\}\[\]\;\'\\\:\"\|\<\>\?\,\.\/\s0-9]{2,32}$/.test(value);
     },"Wrong!");
 
     jQuery.validator.addMethod("LogNamPass",function(value,element){
