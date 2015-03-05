@@ -88,6 +88,7 @@ class Users extends CI_Model
 
     public function GetAllUsers($iLimit = 10, $iOffest = 0)
     {
+        $this->db->where('Active','1');
         return $this->db->get($this->sTable,$iLimit,$iOffest)->result();
     }
 }

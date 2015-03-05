@@ -11,7 +11,7 @@
         <div class="list" style="display:<?= is_array($aProductTypes) && !empty($aProductTypes) ? 'block' : 'none' ;?>;">
             <?php foreach ($aProductTypes as $oProductType) : ?>
                 <div class="product_type_container">
-                    <?= $oProductType->Name.' '.$oProductType->Price; ?>
+                    <?= $oProductType->Name.' '.$oProductType->Price.' лв.'; ?>
                 </div>
             <?php endforeach; ?>
         </div>
