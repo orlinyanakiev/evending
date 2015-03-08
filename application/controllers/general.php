@@ -46,7 +46,7 @@ class General extends My_BaseController
         if(is_array($_POST) && !empty($_POST)){
             $aPageData = $_POST;
             $oUser = $this->users->CheckUser($aPageData['LoginName'], $aPageData['Password']);
-            
+
             if(is_object($oUser) && isset($oUser->Id)){
                 
                 $this->session->set_userdata('iUserId', $oUser->Id);

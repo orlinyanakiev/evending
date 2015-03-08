@@ -13,13 +13,13 @@ class Users extends CI_Model
     
     public function CheckUser($sLoginName,$sPassword)
     {
-        $where = array(
+        $aUserData = array(
             'LoginName' => $sLoginName,
             'Password' => sha1($sPassword),
             'Active' => '1',
         );
 
-        $this->db->where($where);
+        $this->db->where($aUserData);
         $aUser = $this->db->get($this->sTable)->row();
         if(isset($aUser->LoginName)){
             return $aUser;
