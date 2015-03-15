@@ -7,16 +7,21 @@ class Member extends My_MemberController
     public function __construct()
     {
         parent::__construct();
-        
-        $this->CheckUser(true);
     }
     
     public function index()
     {
-        $this->aData['sTitle'] = 'Потребителска страница';
-        
+        $this->Distribution();
+    }
+
+    public function Distribution()
+    {
+        $this->aData['sTitle'] = 'Дистрибуция';
+        $this->aData['aProducts'] = $this->products->GetAllProducts();
+        $this->aData['aStorages'] = $this->storages->GetAllStorages();
+
         $this->load->view('member/include/header',$this->aData);
-        $this->load->view('member/pages/start',$this->aData);
+        $this->load->view('member/pages/distribution',$this->aData);
         $this->load->view('member/include/footer',$this->aData);
     }
     

@@ -5,7 +5,7 @@ if (!defined('BASEPATH'))
 
 class Products extends CI_Model
 {
-    private $sTable = 'products';
+    private $sProductTable = 'products';
     private $sTypeTable = 'producttypes';
     private $sCategoryTable = 'productcategories';
 
@@ -16,7 +16,8 @@ class Products extends CI_Model
 
     public function GetAllProducts($iLimit = 10, $iOffest = 0)
     {
-        return $this->db->get($this->sTable,$iLimit,$iOffest)->result();
+        $this->db->where('IsDeleted','0');
+        return $this->db->get($this->sProductTable,$iLimit,$iOffest)->result();
     }
 
     //Product Types
@@ -30,6 +31,12 @@ class Products extends CI_Model
         );
 
         return $this->db->insert($this->sTypeTable,$aProductTypeInsertData);
+    }
+
+    public function GetProductTypeById($iId)
+    {
+        $this->db->where('Id',$iId);
+        return $this->db->get($this->sTypeTable)->result();
     }
 
     public function GetAllProductTypes($iLimit = 10, $iOffest = 0)

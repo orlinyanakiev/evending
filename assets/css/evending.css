@@ -3,7 +3,7 @@ body {
     background-color: aliceblue;
     letter-spacing: 0px;
     font-family: Verdana, Arial ;
-    font-size: 22px;
+    font-size: 21px;
     margin: auto;
     padding: 0px;
     text-align: center;
@@ -33,7 +33,7 @@ button {
     background-color: #F0FDEA;
     padding: 8px;
     margin: 5px 5px 5px 50px;
-    min-width: 140px;
+    min-width: 160px;
 }
 
 .page_wrapper {
@@ -44,16 +44,6 @@ button {
     min-height: 480px;
     width: 720px;
     background-color: #FFE4B7;
-}
-
-.start {
-    border: 1px solid black;
-    border-radius: 8px;
-    margin:auto;
-    padding:0;
-    min-height: 480px;
-    max-width: 720px;
-    background-color: #B89762;
 }
 
 form input {
@@ -68,18 +58,15 @@ form input {
 }
 
 .form {
+    padding-top: 20px;
     padding-left: 50%;
     margin-left: -125px;
     position: relative;
     width: 250px;
 }
 
-.login_form {
-    padding-top: 10px;
-}
-
 .register_form {
-    padding-top: 40px;
+    padding-top: 20px;
 }
 
 .directions {
@@ -95,23 +82,24 @@ form input {
 }
 
 .nav {
+    margin: 3px 0px -6px 8px;
     padding-top: 15px;
-    margin-top: 3px;
-    margin-bottom: -5px;
-    display: block;
-    width: 100%;
+    text-align: left;
     height: 41px;
 }
 
 .nav a {
     background-color: #E2B977;
+    display: inline;
     border: 1px solid green;
     border-radius: 15px 30px 0 0;
     padding: 8px 12px 8px 12px;
 }
 
-a.logout {
-    position: relative;
+.nav a.logout {
+    display: inline;
+    float:right;
+    margin: -9px 8px 0 0;
 }
 
 a.active {
@@ -121,9 +109,8 @@ a.active {
 
 .content {
     display: block;
-    width: 702px;
     min-height: 420px;
-    margin: auto;
+    margin: 0 8px 0px 8px;
     background-color: #FFE4B7;
     border: 1px solid black;
     border-radius: 0 0 4px 4px;
@@ -145,6 +132,11 @@ select {
     min-width: 250px;
 }
 
+.list {
+    text-align: left;
+    margin: 8px;
+}
+
 .warning p {
     color: #FC1800;
 }
@@ -153,9 +145,15 @@ select {
     display: none;
 }
 
-.list {
-    text-align: left;
+.list .column {
+    display: inline;
 }
-.content div {
-    padding: 4px;
+
+.list .first_column {
+    padding-left: 10px;
+}
+
+.list .last_column {
+    margin-right: 10px;
+    float: right;
 }

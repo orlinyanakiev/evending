@@ -47,11 +47,50 @@ class admin extends My_AdminController
         }
     }
 
+    public function GetStorageAvailability()
+    {
+        if(is_array($_POST) && !empty($_POST) && isset($_POST['StorageId'])){
+            $iStorageId = $_POST['StorageId'];
+            $aStorageAvailability = $this->storages->GetStorageAvailability($iStorageId);
+
+            if(is_array($aStorageAvailability) && !empty($aStorageAvailability)){
+                echo json_encode(array('success' => true, 'aStorageAvailability' => $aStorageAvailability));
+                return;
+            }
+            echo json_encode(array('success' => false));
+            return;
+        }
+        echo json_encode(array('success' => false));
+        return;
+    }
+
+    //Storage supply
+    public function Supply()
+    {
+        $this->aData['sTitle'] = 'Зареждане';
+        $this->aData['aStorages'] = $this->storages->GetAllStorages();
+        $this->aData['aProductTypes'] = $this->products->GetAllProductTypes();
+
+        $this->load->view('admin/include/header',$this->aData);
+        $this->load->view('admin/pages/supply',$this->aData);
+        $this->load->view('admin/include/footer',$this->aData);
+    }
+
+    public function StorageSupply()
+    {
+        if(is_array($_POST) && !empty($_POST)){
+            $aStorageSupplyData = $_POST;
+            $oProductType = $this->products->GetProductTypeById((int)$aStorageSupplyData['ProductType']);
+            $bResult = $this->storages->StorageSupply($aStorageSupplyData, $oProductType[0]);
+
+            echo json_encode(array('success' => $bResult));
+        }
+    }
+
     //Products
     public function Products()
     {
         $this->aData['sTitle'] = 'Изделия';
-        $this->aData['aProducts'] = $this->products->GetAllProducts();
         $this->aData['aProductTypes'] = $this->products->GetAllProductTypes();
         $this->aData['aProductCategories'] = $this->products->GetAllProductCategories();
 
@@ -68,15 +107,5 @@ class admin extends My_AdminController
 
             echo json_encode(array('success' => $bResult));
         }
-    }
-
-    //Information
-    public function Info()
-    {
-        $this->aData['sTitle'] = 'Справки';
-
-        $this->load->view('admin/include/header',$this->aData);
-        $this->load->view('admin/pages/info',$this->aData);
-        $this->load->view('admin/include/footer',$this->aData);
     }
 }
