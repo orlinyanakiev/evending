@@ -32,6 +32,39 @@ class Storages extends CI_Model
         return $this->db->get($this->sProductTable)->result();
     }
 
+    public function Distribute($aData)
+    {
+        $iProductId = (int)$aData['Product'];
+        $iQuantity = (int)$aData['Quantity'];
+        $oStorageOne = $this->GetStorageById((int)$aData['Storage1']);
+        $oStorageTwo = $this->GetStorageById((int)$aData['Storage2']);
+
+        $aStorageOneAvailability = json_decode($oStorageOne->Availability, true);
+        if(is_array($aStorageOneAvailability)){
+            if($aStorageOneAvailability[$iProductId] >= $iQuantity){
+                $aStorageOneAvailability[$iProductId] -= $iQuantity;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+        $aStorageTwoAvailability = json_decode($oStorageTwo->Availability, true);
+        if(is_array($aStorageTwoAvailability)){
+            $aStorageTwoAvailability[$iProductId] += $iQuantity;
+        } else {
+            $aStorageTwoAvailability[$iProductId] = $iQuantity;
+        }
+
+        $bStorageOne = $this->UpdateStorageAvailability((int)$oStorageOne->Id, $aStorageOneAvailability);
+        $bStorageTwo = $this->UpdateStorageAvailability((int)$oStorageTwo->Id, $aStorageTwoAvailability);
+
+        if($bStorageOne && $bStorageTwo){
+            return true;
+        }
+    }
+
     public function StorageSupply($aStorageSupplyData, $oProductType)
     {
         $iStorageId = (int) $aStorageSupplyData['Storage'];
@@ -73,46 +106,13 @@ class Storages extends CI_Model
         return false;
     }
 
-    public function GetStorageAvailability($iStorageId)
+    public function UpdateStorageAvailability($iStorageId, array $aAvailability)
     {
-        $iStorageId = (int) $iStorageId;
-        $aStorageAvailability = array();
+        $aUpdateData['Availability'] = json_encode($aAvailability);
 
-        $this->db->select('Availability');
-        $aResult = $this->db->get_where($this->sStoragesTable,array('Id' => $iStorageId))->result();
-
-        $aAvailability = json_decode($aResult[0]->Availability, true);
-        if(is_array($aAvailability) && !empty($aAvailability)){
-            foreach ($aAvailability as $iProductId => $iQuantity){
-                $oProduct = $this->GetProductById($iProductId);
-                $oProductType = $this->GetProductTypeById($oProduct->ProductType);
-                $aStorageAvailability[$iProductId] = array(
-                    'aProduct' => array(
-                        'oData' => $oProduct,
-                        'oType' => $oProductType,
-                    ),
-                    'iQuantity' => (int) $iQuantity
-                );
-            }
-        }
-
-        return $aStorageAvailability;
-    }
-
-    public function GetProductTypeById($iProductTypeId)
-    {
-        $iProductTypeId = (int) $iProductTypeId;
-
-        $aProductType = $this->db->get_where($this->sProductTypeTable,array('Id' => $iProductTypeId))->result();
-        return $aProductType[0];
-    }
-
-    public function GetProductById($iProductId)
-    {
-        $iProductId = (int) $iProductId;
-
-        $aProduct = $this->db->get_where($this->sProductTable,array('Id' => $iProductId))->result();
-        return $aProduct[0];
+        $this->db->where('Id',$iStorageId);
+        $bResult = $this->db->update($this->sStoragesTable,$aUpdateData);
+        return $bResult;
     }
 
     public function GetStorageById($iId)

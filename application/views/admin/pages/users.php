@@ -1,7 +1,7 @@
 <div class="page_wrapper">
     <div class="nav">
         <a class="nav_link active" href="<?= base_url();?>admin/users">Потребители</a>
-        <a class="nav_link" href="<?= base_url();?>admin/storages">Складове</a>
+        <a class="nav_link" href="<?= base_url();?>admin/storages">Хранилища</a>
         <a class="nav_link" href="<?= base_url();?>admin/products">Изделия</a>
         <a class="nav_link" href="<?= base_url();?>admin/supply">Зареждане</a>
         <a class="logout" href="<?= base_url();?>member/distribution">Обратно</a>

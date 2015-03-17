@@ -7,11 +7,15 @@ class Products extends CI_Model
 {
     private $sProductTable = 'products';
     private $sTypeTable = 'producttypes';
-    private $sCategoryTable = 'productcategories';
 
     public function __construct()
     {
         parent::__construct();
+    }
+
+    public function GetProductById($iProductId){
+        $aResult = $this->db->get_where($this->sProductTable,array('Id' => $iProductId))->result();
+        return $aResult[0];
     }
 
     public function GetAllProducts($iLimit = 10, $iOffest = 0)
@@ -36,18 +40,12 @@ class Products extends CI_Model
     public function GetProductTypeById($iId)
     {
         $this->db->where('Id',$iId);
-        return $this->db->get($this->sTypeTable)->result();
+        $aResult = $this->db->get($this->sTypeTable)->result();
+        return $aResult[0];
     }
 
     public function GetAllProductTypes($iLimit = 10, $iOffest = 0)
     {
         return $this->db->get($this->sTypeTable,$iLimit,$iOffest)->result();
-    }
-
-    //Product Caterogies
-    public function GetAllProductCategories()
-    {
-        $this->db->order_by('Id');
-        return $this->db->get($this->sCategoryTable)->result();
     }
 }

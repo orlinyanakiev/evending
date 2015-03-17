@@ -17,15 +17,9 @@
                         </select>
                         <select name="Storage2">
                             <option value="0">Към: </option>
-                            <?php foreach($aStorages as $oStorage) : ?>
-                                <option value="<?=$oStorage->Id?>"><?=$oStorage->Name?></option>
-                            <?php endforeach; ?>
                         </select>
                         <select name="Product">
-                            <option value="0">Продукт: </option>
-                            <?php foreach($aProducts as $oProduct) : ?>
-                                <option value="<?=$oProduct->Id?>"></option>
-                            <?php endforeach; ?>
+                            <option value="0">Изделие: </option>
                         </select>
                         <input type="text" name="Quantity" placeholder="Количество" />
                         <button type="submit">Прехвърли</button>
@@ -35,10 +29,9 @@
                 <div class="no_products">Добавете продукт през "Администрация"</div>
             <?php endif; ?>
         <?php else: ?>
-            <div class="no_storages">Добавете склад през "Администрация"</div>
+            <div class="no_storages">Добавете хранилище през "Администрация"</div>
         <?php endif; ?>
-    </div>
-    <div class="warning">
-
+        <div class="warning">
+        </div>
     </div>
 </div>

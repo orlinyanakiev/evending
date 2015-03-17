@@ -1,5 +1,5 @@
 <div class="page_wrapper public">
-    <p>Въведете необходимата информация.</p>
+    <p>Въведете необходимата информация:</p>
     <div class="form">
         <form class="register_form" method="post" action="">
             <input type="hidden" name="Id" value="">

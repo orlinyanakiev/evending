@@ -29,7 +29,7 @@ class admin extends My_AdminController
     //Storages
     public function Storages()
     {
-        $this->aData['sTitle'] = 'Складове';
+        $this->aData['sTitle'] = 'Хранилища';
         $this->aData['aStorages'] = $this->storages->GetAllStorages();
 
         $this->load->view('admin/include/header',$this->aData);
@@ -49,18 +49,36 @@ class admin extends My_AdminController
 
     public function GetStorageAvailability()
     {
-        if(is_array($_POST) && !empty($_POST) && isset($_POST['StorageId'])){
-            $iStorageId = $_POST['StorageId'];
-            $aStorageAvailability = $this->storages->GetStorageAvailability($iStorageId);
+        if(is_array($_POST) && !empty($_POST) && isset($_POST['StorageId']) && $_POST['StorageId'] > 0){
+            $aStorages = $this->storages->GetAllStorages();
+            $iStorageId = (int) $_POST['StorageId'];
+            $aStorageAvailability = array();
+
+            foreach ($aStorages as $oStorage){
+                if((int)$oStorage->Id == $iStorageId){
+                    $aAvailability = json_decode($oStorage->Availability, true);
+                }
+            }
+
+            if(is_array($aAvailability) && !empty($aAvailability)){
+                foreach ($aAvailability as $iProductId => $iQuantity){
+                    $oProduct = $this->products->GetProductById((int)$iProductId);
+                    $oProductType = $this->products->GetProductTypeById((int)$oProduct->ProductType);
+                    $aStorageAvailability[]= array('oData' => $oProduct, 'oType' => $oProductType, 'iQuantity' => $iQuantity);
+                }
+            } else {
+                echo json_encode(array('success' => false, 'message' => 'Хранилището е празно!'));
+                return;
+            }
 
             if(is_array($aStorageAvailability) && !empty($aStorageAvailability)){
                 echo json_encode(array('success' => true, 'aStorageAvailability' => $aStorageAvailability));
                 return;
             }
-            echo json_encode(array('success' => false));
+            echo json_encode(array('success' => false, 'message' => 'Възникна грешка! Опитайте отново.'));
             return;
         }
-        echo json_encode(array('success' => false));
+        echo json_encode(array('success' => false, 'message' => 'Възникна грешка! Опитайте отново.'));
         return;
     }
 
@@ -81,7 +99,7 @@ class admin extends My_AdminController
         if(is_array($_POST) && !empty($_POST)){
             $aStorageSupplyData = $_POST;
             $oProductType = $this->products->GetProductTypeById((int)$aStorageSupplyData['ProductType']);
-            $bResult = $this->storages->StorageSupply($aStorageSupplyData, $oProductType[0]);
+            $bResult = $this->storages->StorageSupply($aStorageSupplyData, $oProductType);
 
             echo json_encode(array('success' => $bResult));
         }
@@ -92,7 +110,6 @@ class admin extends My_AdminController
     {
         $this->aData['sTitle'] = 'Изделия';
         $this->aData['aProductTypes'] = $this->products->GetAllProductTypes();
-        $this->aData['aProductCategories'] = $this->products->GetAllProductCategories();
 
         $this->load->view('admin/include/header',$this->aData);
         $this->load->view('admin/pages/products',$this->aData);

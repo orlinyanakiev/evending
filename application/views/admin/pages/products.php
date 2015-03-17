@@ -1,7 +1,7 @@
 <div class="page_wrapper">
     <div class="nav">
         <a class="nav_link" href="<?= base_url();?>admin/users">Потребители</a>
-        <a class="nav_link" href="<?= base_url();?>admin/storages">Складове</a>
+        <a class="nav_link" href="<?= base_url();?>admin/storages">Хранилища</a>
         <a class="nav_link active" href="<?= base_url();?>admin/products">Изделия</a>
         <a class="nav_link" href="<?= base_url();?>admin/supply">Зареждане</a>
         <a class="logout" href="<?= base_url();?>member/">Обратно</a>
@@ -28,8 +28,8 @@
                     <input type="text" name="Name" placeholder="Име" />
                     <select name="Category">
                         <option value="0">Категория</option>
-                        <?php foreach($aProductCategories as $oCategory){
-                            echo '<option value="'.$oCategory->Id.'">'.$oCategory->Category.'</option>';};
+                        <?php foreach($aProductCategories as $iKey => $sCategory){
+                            echo "<option value='{$iKey}'>{$sCategory}</option>";};
                         ?>
                     </select>
                     <input type="text" name="Price" placeholder="Цена" />

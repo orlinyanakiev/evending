@@ -58,12 +58,12 @@ $( document ).ready(function() {
                 data: data,
                 success:function(result){
                     if(result.success == true){
-                        $('.public').find('.warning').html('<strong>Регистрацията премина успешно!</strong><p>Можете да влезнете от <a href="'+ base_url +'">началната страница</a>.</p>');
+                        $('.public').find('.warning').html('<strong>Регистрацията премина успешно!</strong><p class="request_success">Можете да влезнете от <a href="'+ base_url +'">началната страница</a>.</p>');
                         $('.public').find('.directions').html('');
                     }
                     if(result.success == false){
                         if(result.warning == "username"){
-                            $('.public').find('.warning').html('<strong>Потребителското име е заето!</strong>');
+                            $('.public').find('.warning').html('<p class="request_failure">Потребителското име е заето!</p>');
                         }
                     }
                 }
@@ -150,10 +150,10 @@ $( document ).ready(function() {
                 data: data,
                 success:function(result){
                     if(result.success == true){
-                        $('.content').find('.warning').html('<p>Складът беше добавен успешно!</p>');
+                        $('.content').find('.warning').html('<p class="request_success">Хранилището беше добавено успешно!</p>');
                     }
                     if(result.success == false){
-                        $('.content').find('.warning').html('<p>Възникна грешка. Опитайте отново.</p>')
+                        $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Опитайте отново.</p>')
                     }
                 }
             });
@@ -202,10 +202,10 @@ $( document ).ready(function() {
                 data: data,
                 success:function(result){
                     if(result.success == true){
-                        $('.content').find('.warning').html('Операцията е успешна!');
+                        $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
                     }
                     if(result.success == false){
-                        $('.content').find('.warning').html('<p>Възникна грешка! Моля опитайте отново</p>');
+                        $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Моля опитайте отново</p>');
                     }
                 }
             });
@@ -222,12 +222,12 @@ $( document ).ready(function() {
             rules:{
                 Storage: { GreaterThan: 0 },
                 Product: { GreaterThan: 0 },
-                Quantity: { required: true, digits: true }
+                Quantity: { required: true, digits: true, GreaterThan: 0 }
             },
             messages:{
-                Storage: 'Изберете склад',
+                Storage: 'Изберете хранилище',
                 Product: 'Изберете продукт',
-                Quantity: 'Изберете количество'
+                Quantity: 'Посочете количество'
             }
         });
 
@@ -243,16 +243,17 @@ $( document ).ready(function() {
                 data: data,
                 success:function(result){
                     if(result.success == true){
-                        $('.content').find('.warning').html('Операцията е успешна!');
+                        $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
                     }
                     if(result.success == false){
-                        $('.content').find('.warning').html('<p>Възникна грешка! Моля опитайте отново</p>');
+                        $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Моля опитайте отново</p>');
                     }
                 }
             });
         }
     })
 
+    //storage availability
     $('.storage_container a.storage_availability').click(function(e){
         e.preventDefault();
 
@@ -266,22 +267,122 @@ $( document ).ready(function() {
             data: { "StorageId": storage_id },
             success: function(result){
                 if(result.success == true){
+                    var iCounter = 0;
+                    var sColor = '';
                     html += '<div class="list" style="display: block">';
                     html += '<div class="container"><div class="column first_column">Продукт (срок на годност)</div><div class="column last_column">Количество</div></div>';
                     $.each(result.aStorageAvailability,function(index,value){
-                        html += '<div class="container"><div class="column first_column" product-id="' + index + '">' + value.aProduct.oType.Name + ' (' +value.aProduct.oData.ExpirationDate + ')</div><div class="column last_column">' + value.iQuantity + '</div></div>';
+                        if(iCounter % 2 == 0){
+                            sColor = 'DDF5B7';
+                        } else {
+                            sColor = 'FFFF99';
+                        }
+                        iCounter += 1;
+                        html += '<div class="container" style="background-color: #' + sColor + ';"><div class="column first_column" product-id="' + value.oData.Id + '">' + value.oType.Name + ' (' +value.oData.ExpirationDate + ')</div><div class="column last_column">' + value.iQuantity + '</div></div>';
                     })
                     html += '<div class="directions"><a href="">Обратно</a></div></div>';
 
                     $('.content').html(html);
                 }
                 if(result.success == false){
-                    $('.content').find('.warning').html('<p>Възникна грешка! Моля опитайте отново</p>');
+                    $('.content').find('.warning').html('<p class="request_failure">'+ result.message +'</p>');
                 }
             }
         })
     })
 
+    //distribution select options
+    $('.distribution_form select[name="Storage1"]').change(function(){
+        var iSelectedStorageId = $(this).val();
+        var second_storage_html = '';
+        var products_html = '';
+
+        //other storages
+        $.ajax({
+            method: 'post',
+            dataType: 'json',
+            url: base_url + 'member/GetRemainingStorages',
+            data: { "iSelectedStorageId" : iSelectedStorageId },
+            success:function(result){
+                if(result.success == true){
+                    second_storage_html += '<option value="0">Към:</option>';
+                    $.each(result.aRemainingStorages,function(index,value){
+                        second_storage_html += '<option value="' + value.Id + '">' + value.Name + '</option>';
+                    });
+
+                    $('.distribution_form').find('select[name="Storage2"]').html(second_storage_html);
+                }
+            }
+        });
+
+        //products
+        $.ajax({
+            method: 'post',
+            dataType: 'json',
+            url: base_url + 'admin/GetStorageAvailability',
+            data: { "StorageId" : iSelectedStorageId },
+            success:function(result){
+                if(result.success == true){
+                    products_html += '<option value="0">Изделие:</option>';
+                    $.each(result.aStorageAvailability,function(index,value){
+                        products_html += '<option value="' + value.oData.Id + '" product-quantity="'+ value.iQuantity +'">' + value.oType.Name + ' (' + value.oData.ExpirationDate + ')</option>';
+                    });
+
+                    $('.distribution_form').find('select[name="Product"]').html(products_html);
+                }
+            }
+        });
+    })
+
+    //distribution quantities
+    $('.distribution_form select[name="Product"]').change(function(){
+        var iQuantity = $(this).find('option:selected').attr('product-quantity');
+
+        $('.distribution_form').find('input[name="Quantity"]').val(iQuantity);
+    })
+
+    //distribution submit
+    $('.distribution_form button').click(function(e){
+        e.preventDefault();
+
+        var this_form = $(this).closest('form');
+
+        this_form.validate({
+            rules:{
+                Storage1: { GreaterThan: 0 },
+                Storage2: { GreaterThan: 0 },
+                Product: { GreaterThan: 0 },
+                Quantity: { required: true, digits: true, GreaterThan: 0 }
+            },
+            messages:{
+                Storage1: 'Изберете хранилище',
+                Storage2: 'Изберете хранилище',
+                Product: 'Изберете продукт',
+                Quantity: 'Посочете количество'
+            }
+        });
+
+        var form_valid = this_form.valid();
+
+        if(form_valid){
+            var data = this_form.serialize();
+
+            $.ajax({
+                method: 'post',
+                dataType: 'json',
+                url: base_url + 'member/Distribute',
+                data: data,
+                success:function(result){
+                    if(result.success == true){
+                        $('.content').find('.warning').html('<p class="request_success">'+ result.message +'</p>');
+                    }
+                    if(result.success == false){
+                        $('.content').find('.warning').html('<p class="request_failure">'+ result.message +'</p>');
+                    }
+                }
+            });
+        }
+    })
     //$('.nav a.admin').click(function(e){
     //    e.preventDefault();
     //
