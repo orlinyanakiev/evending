@@ -21,7 +21,8 @@ class Products extends CI_Model
     public function GetAllProducts($iLimit = 10, $iOffest = 0)
     {
         $this->db->where('IsDeleted','0');
-        return $this->db->get($this->sProductTable,$iLimit,$iOffest)->result();
+        $aProducts = $this->db->get($this->sProductTable,$iLimit,$iOffest)->result();
+        return $aProducts;
     }
 
     //Product Types

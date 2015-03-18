@@ -71,7 +71,7 @@ class Storages extends CI_Model
         $iQuantity = (int) $aStorageSupplyData['Quantity'];
 
         $aProductData = array(
-            'ProductType' => $oProductType->Id,
+            'Type' => $oProductType->Id,
             'ExpirationDate' => date('Y-m-d', time() + $oProductType->ExpirationTime * self::SECONDS_IN_A_DAY)
         );
 

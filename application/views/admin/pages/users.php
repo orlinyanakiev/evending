@@ -18,6 +18,12 @@
                 <div class="user_container container" style="background-color: #<?= $iCounter % 2 == 0 ? 'DDF5B7' : 'FFFF99' ?>">
                     <div class="column first_column"><?= $oUserData->FirstName?></div>
                     <div class="column"><?=$oUserData->LastName?></div>
+                    <?php if($oUser->Type > 2) : ?>
+                        <div class="manage_users last_column">
+                            <i class="arrow">√</i>
+                            <i>X</i>
+                        </div>
+                    <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         </div>

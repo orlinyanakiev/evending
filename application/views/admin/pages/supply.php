@@ -17,11 +17,14 @@
                                 <option value="<?=$oStorage->Id?>"><?=$oStorage->Name?></option>
                             <?php endforeach; ?>
                         </select>
+                        <select name="Category">
+                            <option value="0">Категория</option>
+                            <?php foreach($aProductCategories as $iCategoryId => $sCategory){
+                                echo "<option value='{$iCategoryId}'>{$sCategory}</option>";
+                            }?>
+                        </select>
                         <select name="ProductType">
                             <option value="0">Тип изделие</option>
-                            <?php foreach($aProductTypes as $oProductType) : ?>
-                                <option value="<?=$oProductType->Id?>"><?=$oProductType->Name?></option>
-                            <?php endforeach; ?>
                         </select>
                         <input type="text" name="Quantity" placeholder="Количество">
                         <button type="submit">Добави</button>
@@ -38,7 +41,6 @@
             </div>
         <?php endif; ?>
         <div class="warning">
-
         </div>
     </div>
 </div>

@@ -32,9 +32,9 @@ button {
     border-radius: 5px;
     font-size: 16px;
     background-color: #F0FDEA;
-    padding: 8px;
-    margin: 5px 5px 5px 50px;
-    min-width: 160px;
+    padding:8px;
+    margin: 5px 5px 5px 80px;
+    min-width: 210px;
 }
 
 .page_wrapper {
@@ -55,15 +55,15 @@ form input {
     border-radius: 5px;
     padding: 8px;
     margin: 5px;
-    min-width: 230px;
+    min-width: 330px;
 }
 
 .form {
     padding-top: 20px;
     padding-left: 50%;
-    margin-left: -125px;
+    margin-left: -175px;
     position: relative;
-    width: 250px;
+    width: 350px;
 }
 
 .register_form {
@@ -131,7 +131,7 @@ select {
     border-radius: 5px;
     padding: 8px;
     margin: 5px;
-    min-width: 250px;
+    min-width: 350px;
 }
 
 .list {

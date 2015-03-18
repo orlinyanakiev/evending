@@ -205,7 +205,7 @@ $( document ).ready(function() {
                         $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
                     }
                     if(result.success == false){
-                        $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Моля опитайте отново</p>');
+                        $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Опитайте отново</p>');
                     }
                 }
             });
@@ -246,10 +246,43 @@ $( document ).ready(function() {
                         $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
                     }
                     if(result.success == false){
-                        $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Моля опитайте отново</p>');
+                        $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Опитайте отново</p>');
                     }
                 }
             });
+        }
+    })
+
+    //Storage supply category filter
+    $('.supply_form select[name="Category"]').change(function(){
+        var selected_category_id = $(this).find('option:selected').val();
+
+        var products_html = '';
+        if(selected_category_id > 0){
+            $.ajax({
+                method: 'post',
+                dataType: 'json',
+                url: base_url + 'admin/GetProductTypesByCategoryId',
+                data: { "iCategoryId" : selected_category_id },
+                success:function(result){
+                    if(result.success == true){
+                        products_html += '<option value="0">Тип изделие</option>';
+                        $.each(result.aTypes,function(key,value){
+                            products_html += '<option value="'+ value.Id +'">'+ value.Name +'</option>'
+                        })
+
+                        $('.supply_form').find('select[name="ProductType"]').html(products_html);
+                        $('.content').find('.warning').html('');
+                    }
+                    if(result.success == false){
+                        $('.content').find('.warning').html('<p class="request_failure">'+ result.message +'</p>');
+                        $('.supply_form').find('select[name="ProductType"]').html('<option value="0">Тип изделие</option>');
+                    }
+                }
+            });
+        } else {
+            $('.content').find('.warning').html('');
+            $('.supply_form').find('select[name="ProductType"]').html('<option value="0">Тип изделие</option>');
         }
     })
 
@@ -305,7 +338,7 @@ $( document ).ready(function() {
             data: { "iSelectedStorageId" : iSelectedStorageId },
             success:function(result){
                 if(result.success == true){
-                    second_storage_html += '<option value="0">Към:</option>';
+                    second_storage_html += '<option value="0">Към</option>';
                     $.each(result.aRemainingStorages,function(index,value){
                         second_storage_html += '<option value="' + value.Id + '">' + value.Name + '</option>';
                     });
@@ -323,7 +356,7 @@ $( document ).ready(function() {
             data: { "StorageId" : iSelectedStorageId },
             success:function(result){
                 if(result.success == true){
-                    products_html += '<option value="0">Изделие:</option>';
+                    products_html += '<option value="0">Изделие</option>';
                     $.each(result.aStorageAvailability,function(index,value){
                         products_html += '<option value="' + value.oData.Id + '" product-quantity="'+ value.iQuantity +'">' + value.oType.Name + ' (' + value.oData.ExpirationDate + ')</option>';
                     });
@@ -382,7 +415,8 @@ $( document ).ready(function() {
                 }
             });
         }
-    })
+    });
+
     //$('.nav a.admin').click(function(e){
     //    e.preventDefault();
     //

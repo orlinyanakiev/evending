@@ -63,7 +63,7 @@ class admin extends My_AdminController
             if(is_array($aAvailability) && !empty($aAvailability)){
                 foreach ($aAvailability as $iProductId => $iQuantity){
                     $oProduct = $this->products->GetProductById((int)$iProductId);
-                    $oProductType = $this->products->GetProductTypeById((int)$oProduct->ProductType);
+                    $oProductType = $this->products->GetProductTypeById((int)$oProduct->Type);
                     $aStorageAvailability[]= array('oData' => $oProduct, 'oType' => $oProductType, 'iQuantity' => $iQuantity);
                 }
             } else {
@@ -114,6 +114,35 @@ class admin extends My_AdminController
         $this->load->view('admin/include/header',$this->aData);
         $this->load->view('admin/pages/products',$this->aData);
         $this->load->view('admin/include/footer',$this->aData);
+    }
+
+    public function GetProductTypesByCategoryId()
+    {
+        if(is_array($_POST) && !empty($_POST) && isset($_POST['iCategoryId'])){
+            $iCategoryId = (int) $_POST['iCategoryId'];
+            $aResponse = array();
+            $aSelectedProductTypes = array();
+
+            $aProductTypes = $this->products->GetAllProductTypes();
+            foreach($aProductTypes as $oProductType){
+                if($iCategoryId == (int) $oProductType->Category){
+                    $aSelectedProductTypes[] = $oProductType;
+                }
+            }
+
+            if(is_array($aSelectedProductTypes) && !empty($aSelectedProductTypes)){
+                $aResponse['success'] = true;
+                $aResponse['aTypes'] = $aSelectedProductTypes;
+            } else {
+                $aResponse = array(
+                    'success' => false,
+                    'message' => 'Няма изделия от тази категория'
+                );
+            }
+
+            echo json_encode($aResponse);
+            return;
+        }
     }
 
     public function AddProductType()
