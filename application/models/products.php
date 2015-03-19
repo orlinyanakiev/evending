@@ -18,7 +18,7 @@ class Products extends CI_Model
         return $aResult[0];
     }
 
-    public function GetAllProducts($iLimit = 10, $iOffest = 0)
+    public function GetAllProducts($iLimit = 100, $iOffest = 0)
     {
         $this->db->where('IsDeleted','0');
         $aProducts = $this->db->get($this->sProductTable,$iLimit,$iOffest)->result();
@@ -45,7 +45,7 @@ class Products extends CI_Model
         return $aResult[0];
     }
 
-    public function GetAllProductTypes($iLimit = 10, $iOffest = 0)
+    public function GetAllProductTypes($iLimit = 100, $iOffest = 0)
     {
         return $this->db->get($this->sTypeTable,$iLimit,$iOffest)->result();
     }

@@ -19,11 +19,36 @@ class admin extends My_AdminController
     public function Users()
     {
         $this->aData['sTitle'] = 'Потребители';
-        $this->aData['aUsers'] = $this->users->GetAllUsers();
+        $this->aData['aUsers'] = $this->users->GetAllUsers($this->aData['oUser']->Id);
 
         $this->load->view('admin/include/header',$this->aData);
         $this->load->view('admin/pages/users',$this->aData);
         $this->load->view('admin/include/footer',$this->aData);
+    }
+
+    public function DeleteUser()
+    {
+        if(is_array($_POST) && !empty($_POST) && isset($_POST['iUserId'])){
+            $iUserId = (int) $_POST['iUserId'];
+
+            $bResult = $this->users->deleteUserById($iUserId);
+            echo json_encode(array('success' => $bResult));
+        }
+    }
+
+    public function GetUser()
+    {
+        if(is_array($_POST) && !empty($_POST) && isset($_POST['iUserId'])){
+            $iUserId = (int) $_POST['iUserId'];
+
+            $oUser = $this->users->GetUser($iUserId);
+            if(is_object($oUser)){
+                echo json_encode(array('success' => true, 'oUser' => $oUser, 'aUserTypes' => $this->aData['aUserTypes']));
+                return;
+            }
+            echo json_encode(array('success' => false, 'message' => 'Възникна грешка! Опитайте отново.'));
+            return;
+        }
     }
 
     //Storages

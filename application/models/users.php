@@ -5,7 +5,7 @@ if (!defined('BASEPATH'))
 
 class Users extends CI_Model
 {
-    private $sTable = 'users';
+    private $sUsersTable = 'users';
     public function __construct()
     {
         parent::__construct();
@@ -20,23 +20,32 @@ class Users extends CI_Model
         );
 
         $this->db->where($aUserData);
-        $aUser = $this->db->get($this->sTable)->row();
+        $aUser = $this->db->get($this->sUsersTable)->row();
         if(isset($aUser->LoginName)){
             return $aUser;
         }
         
         return array();
     }
-    
-    public function GetUser($iId)
-    {
-        $iId = (int)$iId;
 
-        $this->db->where('Id', $iId);
+    public function DeleteUserById($iUserId)
+    {
+        $this->db->where('Id',$iUserId);
+        return $this->db->update($this->sUsersTable,array('Active' => '0'));
+    }
+    
+    public function GetUser($iUserId)
+    {
+        $iUserId = (int)$iUserId;
+
+        $this->db->where(array(
+            'Id' => $iUserId,
+            'Active' => '1',
+        ));
         
-        $aUser = $this->db->get($this->sTable)->row();
-        if(isset($aUser->LoginName)){
-            return $aUser;
+        $oUser = $this->db->get($this->sUsersTable)->row();
+        if(isset($oUser->LoginName)){
+            return $oUser;
         }
         
         return array();
@@ -45,7 +54,7 @@ class Users extends CI_Model
     public function CheckLoginName($sLoginName)
     {
         $this->db->where('LoginName',$sLoginName);
-        $iResult = $this->db->get($this->sTable)->num_rows();
+        $iResult = $this->db->get($this->sUsersTable)->num_rows();
         
         if($iResult > 0){
             return true;
@@ -75,7 +84,7 @@ class Users extends CI_Model
                         'Registered' => date('Y-m-d H:i:s'),
                     );
 
-                $bAddUser = $this->db->insert($this->sTable, $aUserData);
+                $bAddUser = $this->db->insert($this->sUsersTable, $aUserData);
                 
                 return json_encode(array('success' => $bAddUser));
             }
@@ -86,9 +95,11 @@ class Users extends CI_Model
         return json_encode(array('success' => $bAddUser));
     }
 
-    public function GetAllUsers($iLimit = 10, $iOffest = 0)
+    public function GetAllUsers($iCurrentUserId = 0, $iLimit = 100, $iOffest = 0)
     {
+//        $iCurrentUserId = (int) $iCurrentUserId;
         $this->db->where('Active','1');
-        return $this->db->get($this->sTable,$iLimit,$iOffest)->result();
+//        $this->db->where('Id !=', $iCurrentUserId);
+        return $this->db->get($this->sUsersTable,$iLimit,$iOffest)->result();
     }
 }

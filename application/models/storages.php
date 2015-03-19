@@ -7,7 +7,6 @@ class Storages extends CI_Model
 {
     private $sStoragesTable = 'storages';
     private $sProductTable = 'products';
-    private $sProductTypeTable = 'producttypes';
     const SECONDS_IN_A_DAY = 86400;
 
     public function __construct()
@@ -124,7 +123,7 @@ class Storages extends CI_Model
         }
     }
 
-    public function GetAllStorages($iLimit = 10, $iOffest = 0)
+    public function GetAllStorages($iLimit = 100, $iOffest = 0)
     {
         $this->db->where('Active','1');
         return $this->db->get($this->sStoragesTable,$iLimit,$iOffest)->result();

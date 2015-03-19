@@ -21,7 +21,7 @@ $( document ).ready(function() {
         return this.optional(element) || /^[0-9]+(\.|,)[0-9]{2}$/.test(value);
     },"Wrong!");
 
-    //Register
+    //Register user
     $('.register_form button').click(function(e){
         e.preventDefault();
 
@@ -70,6 +70,70 @@ $( document ).ready(function() {
             });
         }
     });
+
+    //delete user
+    $('.manage_users').off('click').on('click','.delete_user',function(e){
+        e.preventDefault();
+
+        if(confirm('Сигурни ли сте, че желаете да изтриете този потребител?')){
+            var user_id = $(this).closest('.user_container').attr('user-id');
+
+            $.ajax({
+                method: 'post',
+                dataType: 'json',
+                url: base_url + 'admin/DeleteUser',
+                data: { "iUserId" : user_id },
+                success:function(result){
+                    if(result.success == true){
+                        $('.content').find('.user_container').attr('user-id',user_id).remove();
+                    }
+                }
+            })
+        }
+    });
+
+    //Edit user
+    //$('.manage_users').off('click').on('click','.edit_user', function (e) {
+    //    e.preventDefault();
+    //    var user_id = $(this).closest('.user_container').attr('user-id');
+    //    var edit_form_start = '';
+    //    var edit_form_option = '';
+    //    var edit_form_end = '';
+    //    var edit_form = '';
+    //
+    //    $.ajax({
+    //        method: 'post',
+    //        dataType: 'json',
+    //        url: base_url + 'admin/GetUser',
+    //        data: { "iUserId" : user_id },
+    //        success:function(result){
+    //            if(result.success == true){
+    //                edit_form_start += '<div class="edit_user_form form"></div><form method="post" action="">';
+    //                edit_form_start += '<input type="hidden" name="iUserId" value="'+ result.oUser.Id +'" />'
+    //                edit_form_start += '<input type="text" name="Company" value="'+ result.oUser.Company +'"/>'
+    //                edit_form_start += '<input type="text" name="FirstName" value="'+ result.oUser.FirstName +'"/>'
+    //                edit_form_start += '<input type="text" name="LastName" value="'+ result.oUser.LastName +'"/>'
+    //                edit_form_start += '<input type="text" name="LoginName" value="'+ result.oUser.LoginName +'"/>'
+    //                edit_form_start += '<select name="Type"/>'
+    //
+    //                $.each(result.aUserTypes,function(index,value){
+    //                    edit_form_option += '<option value="'+ index +'">'+ value +'</option>';
+    //                });
+    //
+    //                edit_form_end += '</select>'
+    //                edit_form_end += '<button type="submit">Запази</button>'
+    //                edit_form_end += '</form></div>'
+    //
+    //                edit_form = edit_form_start + edit_form_end;
+    //                $('.content').html(edit_form);
+    //                $('.content .edit_user_form').find('select[name="Type"]').html(edit_form_option);
+    //            }
+    //            if(result.success == false){
+    //                $('.content').find('.warning').html('<p class="request_failure">'+ result.message +'</p>');
+    //            }
+    //        }
+    //    })
+    //});
 
     //Login
     $('.login_form button').click(function(e){

@@ -25,6 +25,20 @@ a {
     text-decoration: none;
 }
 
+.icon-pencil {
+    height: 14px;
+    width: 14px;
+    background: url("/assets/icons/Pencil.png") no-repeat;
+}
+
+.fa-pencil {
+    color: sandybrown;
+}
+
+.fa-times {
+    color: red;
+}
+
 button {
     display: block;
     letter-spacing: 0px;

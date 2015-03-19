@@ -15,17 +15,23 @@
             <?php $iCounter = 0; ?>
             <?php foreach($aUsers as $oUserData) : ?>
                 <?php $iCounter++ ;?>
-                <div class="user_container container" style="background-color: #<?= $iCounter % 2 == 0 ? 'DDF5B7' : 'FFFF99' ?>">
+                <div class="user_container container" user-id="<?=$oUserData->Id?>" style="background-color: #<?= $iCounter % 2 == 0 ? 'DDF5B7' : 'FFFF99' ?>">
                     <div class="column first_column"><?= $oUserData->FirstName?></div>
                     <div class="column"><?=$oUserData->LastName?></div>
                     <?php if($oUser->Type > 2) : ?>
                         <div class="manage_users last_column">
-                            <i class="arrow">√</i>
-                            <i>X</i>
+                            <a href="#" class="edit_user"><i class="fa fa-pencil"></i></a>
+                            <?php if($oUserData->Id != $oUser->Id) : ?>
+                            <a href="#" class="delete_user"><i class="fa fa-times"></i></a>
+                            <?php else: ?>
+                            <i style="color:grey" class="fa fa-times"></i>
+                            <?php endif; ?>
                         </div>
                     <?php endif; ?>
                 </div>
             <?php endforeach; ?>
+        </div>
+        <div class="warning">
         </div>
     </div>
 </div>
