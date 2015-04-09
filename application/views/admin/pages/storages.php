@@ -3,7 +3,6 @@
         <a class="nav_link" href="<?= base_url();?>admin/users">Потребители</a>
         <a class="nav_link active" href="<?= base_url();?>admin/storages">Хранилища</a>
         <a class="nav_link" href="<?= base_url();?>admin/products">Изделия</a>
-        <a class="nav_link" href="<?= base_url();?>admin/supply">Зареждане</a>
         <a class="logout" href="<?= base_url();?>member/">Обратно</a>
     </div>
     <div class="content">
@@ -29,7 +28,9 @@
                 <select name="Type">
                     <option value="0">Вид хранилище</option>
                     <?php foreach($aStorageTypes as $iKey => $sStorageType){
-                        echo "<option value='{$iKey}'>{$sStorageType}</option>";
+                        if($sStorageType != 'Дистрибутор'){
+                            echo "<option value='{$iKey}'>{$sStorageType}</option>";
+                        }
                     };?>
                 </select>
                 <button type="submit">Добави хранилище</button>

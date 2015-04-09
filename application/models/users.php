@@ -5,7 +5,16 @@ if (!defined('BASEPATH'))
 
 class Users extends CI_Model
 {
+    public $aUserTypes = array(
+        '0' => 'Потребител',
+        '1' => 'Дистрибутор',
+        '2' => 'Оператор',
+        '3' => 'Администратор'
+    );
+
+    private $sDistributorsTable = 'distributors';
     private $sUsersTable = 'users';
+
     public function __construct()
     {
         parent::__construct();
@@ -26,6 +35,25 @@ class Users extends CI_Model
         }
         
         return array();
+    }
+
+    public function EditUser($aUserData)
+    {
+        if(isset($aUserData['UserId'])){
+            $iUserId = intval($aUserData['UserId']);
+
+            $aNewUserData = array(
+                'FirstName' => $aUserData['FirstName'],
+                'LastName' => $aUserData['LastName'],
+                'LoginName' => $aUserData['LoginName'],
+                'Type' => $aUserData['Type']
+            );
+
+            $this->db->where('Id', $iUserId);
+            return $this->db->update($this->sUsersTable,$aNewUserData);
+        }
+
+        return false;
     }
 
     public function DeleteUserById($iUserId)
@@ -80,7 +108,6 @@ class Users extends CI_Model
                         'LastName' => $aUserData['LastName'],
                         'LoginName' => $aUserData['LoginName'],
                         'Password' => sha1($aUserData['Password']),
-                        'Company' => $aUserData['Company'],
                         'Registered' => date('Y-m-d H:i:s'),
                     );
 
@@ -95,11 +122,20 @@ class Users extends CI_Model
         return json_encode(array('success' => $bAddUser));
     }
 
-    public function GetAllUsers($iCurrentUserId = 0, $iLimit = 100, $iOffest = 0)
+    public function AddDistributor($aDistributorData)
     {
-//        $iCurrentUserId = (int) $iCurrentUserId;
+        return $this->db->insert($this->sDistributorsTable,$aDistributorData);
+    }
+
+    public function GetDistributor($iUserId)
+    {
+        $this->db->where('Id', $iUserId);
+        return $this->db->get($this->sDistributorsTable)->first_row();
+    }
+
+    public function GetAllUsers($iLimit = 10, $iOffest = 0)
+    {
         $this->db->where('Active','1');
-//        $this->db->where('Id !=', $iCurrentUserId);
         return $this->db->get($this->sUsersTable,$iLimit,$iOffest)->result();
     }
 }

@@ -3,7 +3,6 @@
         <a class="nav_link" href="<?= base_url();?>admin/users">Потребители</a>
         <a class="nav_link" href="<?= base_url();?>admin/storages">Хранилища</a>
         <a class="nav_link active" href="<?= base_url();?>admin/products">Изделия</a>
-        <a class="nav_link" href="<?= base_url();?>admin/supply">Зареждане</a>
         <a class="logout" href="<?= base_url();?>member/">Обратно</a>
     </div>
     <div class="content">
@@ -33,7 +32,7 @@
                         ?>
                     </select>
                     <input type="text" name="Price" placeholder="Цена" />
-                    <input type="text" name="ExpirationTime" placeholder="Време на валидност" />
+                    <input type="text" name="ProductionPrice" placeholder="Себестойност" />
                     <button type="submit">Добави тип изделие</button>
                 </form>
             <? endif; ?>

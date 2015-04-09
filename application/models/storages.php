@@ -7,7 +7,12 @@ class Storages extends CI_Model
 {
     private $sStoragesTable = 'storages';
     private $sProductTable = 'products';
-    const SECONDS_IN_A_DAY = 86400;
+
+    public $aStorageTypes = array(
+        '1' => 'Склад',
+        '2' => 'Дистрибутор',
+        '3' => 'Вендинг машина',
+    );
 
     public function __construct()
     {
@@ -22,7 +27,9 @@ class Storages extends CI_Model
             'Type' => $aStorageData['Type'],
         );
 
-        return $this->db->insert($this->sStoragesTable,$aInsertData);
+        $this->db->insert($this->sStoragesTable,$aInsertData);
+        $iStorageId = $this->db->insert_id();
+        return $iStorageId;
     }
 
     public function GetProductByTypeAndDate($aProductData)
@@ -68,10 +75,15 @@ class Storages extends CI_Model
     {
         $iStorageId = (int) $aStorageSupplyData['Storage'];
         $iQuantity = (int) $aStorageSupplyData['Quantity'];
+        $sExpirationDate = date('Y-m-d H:i:s');
+
+        if(isset($aStorageSupplyData['ExpirationDate'])){
+            $sExpirationDate = $aStorageSupplyData['ExpirationDate'];
+        }
 
         $aProductData = array(
             'Type' => $oProductType->Id,
-            'ExpirationDate' => date('Y-m-d', time() + $oProductType->ExpirationTime * self::SECONDS_IN_A_DAY)
+            'ExpirationDate' => $sExpirationDate
         );
 
         $aProductExists = $this->GetProductByTypeAndDate($aProductData);
@@ -117,13 +129,27 @@ class Storages extends CI_Model
     public function GetStorageById($iId)
     {
         $this->db->where('Id',$iId);
-        $aResult = $this->db->get($this->sStoragesTable)->result();
-        if(is_object($aResult[0])){
-            return $aResult[0];
-        }
+        $oResult = $this->db->get($this->sStoragesTable)->first_row();
+
+        return $oResult;
     }
 
-    public function GetAllStorages($iLimit = 100, $iOffest = 0)
+    public function UpdateStorage($iStorageId, $aStorageData)
+    {
+        $this->db->where('Id',$iStorageId);
+        return $this->db->update($this->sStoragesTable, $aStorageData);
+    }
+
+    public function DeleteStorage($iStorageId)
+    {
+        $aDeleteStorage['Active'] = '0';
+
+        $this->db->where('Id', $iStorageId);
+        $bResult = $this->db->update($this->sStoragesTable,$aDeleteStorage);
+        return $bResult;
+    }
+
+    public function GetAllStorages($iLimit = 10, $iOffest = 0)
     {
         $this->db->where('Active','1');
         return $this->db->get($this->sStoragesTable,$iLimit,$iOffest)->result();

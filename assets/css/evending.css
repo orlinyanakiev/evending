@@ -15,6 +15,18 @@ label {
     text-decoration: none;
 }
 
+.fake_input_field {
+    color: #512200;
+    font-size: 16px;
+    border: 2px solid green;
+    background-color: #F0FDEA;
+    border-radius: 5px;
+    padding: 8px;
+    margin: 5px;
+    min-width: 330px;
+    text-align: left;
+}
+
 p {
     margin: 0px;
     padding-top: 20px;
@@ -62,8 +74,9 @@ button {
 }
 
 form input {
+    color: #512200;
     display: block;
-    font-size: 18px;
+    font-size: 16px;
     border: 2px solid green;
     background-color: #F0FDEA;
     border-radius: 5px;
@@ -138,13 +151,13 @@ a.active {
 
 select {
     display: block;
-    font-size: 18px;
-    color: gray;
+    font-size: 16px;
+    color: #512200;
     border: 2px solid green;
     background-color: #F0FDEA;
     border-radius: 5px;
-    padding: 8px;
-    margin: 5px;
+    padding: 8px 0 8px 0;
+    margin: 5px 0 5px 5px;
     min-width: 350px;
 }
 
@@ -177,3 +190,5 @@ select {
     margin-right: 10px;
     float: right;
 }
+
+.edit_user_form { display: none; }

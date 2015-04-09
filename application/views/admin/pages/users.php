@@ -3,11 +3,10 @@
         <a class="nav_link active" href="<?= base_url();?>admin/users">Потребители</a>
         <a class="nav_link" href="<?= base_url();?>admin/storages">Хранилища</a>
         <a class="nav_link" href="<?= base_url();?>admin/products">Изделия</a>
-        <a class="nav_link" href="<?= base_url();?>admin/supply">Зареждане</a>
         <a class="logout" href="<?= base_url();?>member/distribution">Обратно</a>
     </div>
     <div class="content">
-        <div class="list" style="display:<?= is_array($aUsers) && !empty($aUsers) ? 'block' : 'none' ;?>;">
+        <div class="list" style="<?= is_array($aUsers) && !empty($aUsers) ? '' : 'display:none;' ;?>">
             <div>
                 <div class="column first_column">Име</div>
                 <div class="column">Фамилия</div>
@@ -30,6 +29,18 @@
                     <?php endif; ?>
                 </div>
             <?php endforeach; ?>
+        </div>
+        <div class="edit_user_form form">
+            <form method="post" action="">
+                <input type="hidden" name="UserId" value="">
+                <input type="text" name="FirstName" placeholder="Първо име" autocomplete="off"/>
+                <input type="text" name="LastName" placeholder="Фамилия" autocomplete="off"/>
+                <input type="text" name="LoginName" placeholder="Потребителско име" autocomplete="off"/>
+                <select name="Type">
+
+                </select>
+                <button type="submit">Запази</button>
+            </form>
         </div>
         <div class="warning">
         </div>

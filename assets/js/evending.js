@@ -9,7 +9,7 @@ $( document ).ready(function() {
         return this.optional(element) || /^[^\`\~\!\#\$\%\^\(\)\+\-\=\+\{\}\[\]\;\'\\\:\"\|\<\>\?\,\/\s]{4,32}$/.test(value);
     },"Wrong!");
 
-    jQuery.validator.addMethod("Company",function(value,element){
+    jQuery.validator.addMethod("Address",function(value,element){
         return this.optional(element) || /^[^\`\~\!\#\$\%\^\(\)\+\-\=\+\{\}\[\]\;\'\\\:\"\|\<\>\?\,\/]{2,64}$/.test(value);
     },"Wrong!");
 
@@ -18,7 +18,11 @@ $( document ).ready(function() {
     },"Wrong!");
 
     jQuery.validator.addMethod("Price",function(value,element){
-        return this.optional(element) || /^[0-9]+(\.|,)[0-9]{2}$/.test(value);
+        return this.optional(element) || /^[0-9]+\.[0-9]{2}$/.test(value);
+    },"Wrong!");
+
+    jQuery.validator.addMethod("ExpirationDate",function(value,element){
+        return this.optional(element) || /^[01-31]\.[01-31]\.[2015-9999]$/.test(value);
     },"Wrong!");
 
     //Register user
@@ -29,7 +33,6 @@ $( document ).ready(function() {
         
         this_form.validate({
             rules:{
-                Company: { required: true, Company: true },
                 FirstName: { required: true, Person: true },
                 LastName: { required: true, Person: true },
                 LoginName: { required: true, LogNamPass:true },
@@ -37,7 +40,6 @@ $( document ).ready(function() {
                 Password2:{ equalTo: "#pass" }
             },
             messages:{
-                Company: 'Въведете име на фирма',
                 FirstName: 'Въведете валидно име',
                 LastName: 'Въведете валидна фамилия',
                 LoginName: 'Въведете валидно потребителско име',
@@ -93,47 +95,87 @@ $( document ).ready(function() {
     });
 
     //Edit user
-    //$('.manage_users').off('click').on('click','.edit_user', function (e) {
-    //    e.preventDefault();
-    //    var user_id = $(this).closest('.user_container').attr('user-id');
-    //    var edit_form_start = '';
-    //    var edit_form_option = '';
-    //    var edit_form_end = '';
-    //    var edit_form = '';
-    //
-    //    $.ajax({
-    //        method: 'post',
-    //        dataType: 'json',
-    //        url: base_url + 'admin/GetUser',
-    //        data: { "iUserId" : user_id },
-    //        success:function(result){
-    //            if(result.success == true){
-    //                edit_form_start += '<div class="edit_user_form form"></div><form method="post" action="">';
-    //                edit_form_start += '<input type="hidden" name="iUserId" value="'+ result.oUser.Id +'" />'
-    //                edit_form_start += '<input type="text" name="Company" value="'+ result.oUser.Company +'"/>'
-    //                edit_form_start += '<input type="text" name="FirstName" value="'+ result.oUser.FirstName +'"/>'
-    //                edit_form_start += '<input type="text" name="LastName" value="'+ result.oUser.LastName +'"/>'
-    //                edit_form_start += '<input type="text" name="LoginName" value="'+ result.oUser.LoginName +'"/>'
-    //                edit_form_start += '<select name="Type"/>'
-    //
-    //                $.each(result.aUserTypes,function(index,value){
-    //                    edit_form_option += '<option value="'+ index +'">'+ value +'</option>';
-    //                });
-    //
-    //                edit_form_end += '</select>'
-    //                edit_form_end += '<button type="submit">Запази</button>'
-    //                edit_form_end += '</form></div>'
-    //
-    //                edit_form = edit_form_start + edit_form_end;
-    //                $('.content').html(edit_form);
-    //                $('.content .edit_user_form').find('select[name="Type"]').html(edit_form_option);
-    //            }
-    //            if(result.success == false){
-    //                $('.content').find('.warning').html('<p class="request_failure">'+ result.message +'</p>');
-    //            }
-    //        }
-    //    })
-    //});
+    $('.manage_users').off('click').on('click','.edit_user', function (e) {
+        e.preventDefault();
+        var user_id = $(this).closest('.user_container').attr('user-id');
+
+        $.ajax({
+            method: 'post',
+            dataType: 'json',
+            url: base_url + 'admin/GetUser',
+            data: { "iUserId" : user_id },
+            success:function(result){
+                if(result.success == true){
+                    var select_html = '';
+                    $('.edit_user_form').find('[name="UserId"]').val(result.oUser.Id);
+                    $('.edit_user_form').find('[name="FirstName"]').val(result.oUser.FirstName);
+                    $('.edit_user_form').find('[name="LastName"]').val(result.oUser.LastName);
+                    $('.edit_user_form').find('[name="LoginName"]').val(result.oUser.LoginName);
+
+                    $.each(result.aUserTypes,function(index,value){
+                        if(result.oUser.Type == index){
+                            select_html += '<option selected value="'+ index +'">'+ value +'</option>';
+                        } else {
+                            select_html += '<option value="'+ index +'">'+ value +'</option>';
+                        }
+                    });
+
+                    $('.edit_user_form').find('[name="Type"]').html(select_html);
+                    $('.list').hide();
+                    $('.edit_user_form').show();
+                }
+                if(result.success == false){
+                    $('.content').find('.warning').html('<p class="request_failure">'+ result.message +'</p>');
+                }
+            }
+        })
+    });
+
+    //Save edited user
+    $('.edit_user_form').off('click').on('click', 'button', function(e){
+        e.preventDefault();
+
+        var this_form = $(this).closest("form");
+
+        this_form.validate({
+            rules:{
+                UserId: { required: true, digits: true, GreaterThan: 0 },
+                FirstName: { required: true, Person: true },
+                LastName: { required: true, Person: true },
+                LoginName: { required: true, LogNamPass:true },
+                Type: { required: true, digits: true }
+            },
+            messages:{
+                FirstName: 'Въведете валидно име',
+                LastName: 'Въведете валидна фамилия',
+                LoginName: 'Въведете валидно потребителско име'
+            }
+        });
+
+        var form_valid = this_form.valid();
+
+        if(form_valid){
+            var data = this_form.serialize();
+
+            $.ajax({
+                dataType: 'json',
+                method: 'post',
+                url: base_url + 'admin/EditUser/',
+                data: data,
+                success:function(result){
+                    if(result.success == true){
+                        $('.content').find('.warning').html('<p class="request_success">Оперецията е успешна!</p>');
+                        setTimeout(function(){
+                            window.location.reload();
+                        },1000);
+                    }
+                    if(result.success == false){
+                        $('.content').find('.warning').html('<p class="request_failure">Опитайте отново!</p>');
+                    }
+                }
+            });
+        }
+    });
 
     //Login
     $('.login_form button').click(function(e){
@@ -191,8 +233,8 @@ $( document ).ready(function() {
 
         this_form.validate({
             rules:{
-                Name: { required: true, Company: true },
-                Address: { Company: true },
+                Name: { required: true, Address: true },
+                Address: { Address: true },
                 Type: { GreaterThan: 0 }
             },
             messages:{
@@ -215,6 +257,9 @@ $( document ).ready(function() {
                 success:function(result){
                     if(result.success == true){
                         $('.content').find('.warning').html('<p class="request_success">Хранилището беше добавено успешно!</p>');
+                        setTimeout(function(){
+                            window.location.reload();
+                        },1000);
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Опитайте отново.</p>')
@@ -241,16 +286,16 @@ $( document ).ready(function() {
 
         this_form.validate({
             rules:{
-                Name: { required: true, Company: true },
+                Name: { required: true, Address: true },
                 Category: { GreaterThan: 0 },
                 Price: { required: true, Price: true },
-                ExpirationTime: { required: true, digits: true }
+                ProductionPrice: { required: true, Price: true }
             },
             messages:{
                 Name: 'Въведеното име е некоректно',
                 Category: 'Изберете категория',
                 Price: 'Въведете валидна цена',
-                ExpirationTime: 'Въведете цяло число (дни)'
+                ProductionPrice: 'Въведете валидна цена'
             }
         });
 
@@ -267,6 +312,9 @@ $( document ).ready(function() {
                 success:function(result){
                     if(result.success == true){
                         $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
+                        setTimeout(function(){
+                            window.location.reload();
+                        },1000);
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Опитайте отново</p>');
@@ -286,12 +334,14 @@ $( document ).ready(function() {
             rules:{
                 Storage: { GreaterThan: 0 },
                 Product: { GreaterThan: 0 },
-                Quantity: { required: true, digits: true, GreaterThan: 0 }
+                Quantity: { required: true, digits: true, GreaterThan: 0 },
+                ExpirationDate: { required: true/*, ExpirationDate: true*/ }
             },
             messages:{
                 Storage: 'Изберете хранилище',
                 Product: 'Изберете продукт',
-                Quantity: 'Посочете количество'
+                Quantity: 'Посочете количество',
+                ExpirationDate: 'Въведете валидна дата'
             }
         });
 
@@ -303,11 +353,14 @@ $( document ).ready(function() {
             $.ajax({
                 method: 'post',
                 dataType: 'json',
-                url: base_url + 'admin/StorageSupply',
+                url: base_url + 'member/StorageSupply',
                 data: data,
                 success:function(result){
                     if(result.success == true){
                         $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
+                        setTimeout(function(){
+                            window.location.reload();
+                        },1000);
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Опитайте отново</p>');
@@ -360,8 +413,7 @@ $( document ).ready(function() {
         $.ajax({
             method: 'post',
             dataType: 'json',
-            url: base_url + 'admin/GetStorageAvailability',
-            data: { "StorageId": storage_id },
+            url: base_url + 'member/AjaxGetStorageAvailability/' + storage_id,
             success: function(result){
                 if(result.success == true){
                     var iCounter = 0;
@@ -391,44 +443,9 @@ $( document ).ready(function() {
     //distribution select options
     $('.distribution_form select[name="Storage1"]').change(function(){
         var iSelectedStorageId = $(this).val();
-        var second_storage_html = '';
-        var products_html = '';
 
-        //other storages
-        $.ajax({
-            method: 'post',
-            dataType: 'json',
-            url: base_url + 'member/GetRemainingStorages',
-            data: { "iSelectedStorageId" : iSelectedStorageId },
-            success:function(result){
-                if(result.success == true){
-                    second_storage_html += '<option value="0">Към</option>';
-                    $.each(result.aRemainingStorages,function(index,value){
-                        second_storage_html += '<option value="' + value.Id + '">' + value.Name + '</option>';
-                    });
-
-                    $('.distribution_form').find('select[name="Storage2"]').html(second_storage_html);
-                }
-            }
-        });
-
-        //products
-        $.ajax({
-            method: 'post',
-            dataType: 'json',
-            url: base_url + 'admin/GetStorageAvailability',
-            data: { "StorageId" : iSelectedStorageId },
-            success:function(result){
-                if(result.success == true){
-                    products_html += '<option value="0">Изделие</option>';
-                    $.each(result.aStorageAvailability,function(index,value){
-                        products_html += '<option value="' + value.oData.Id + '" product-quantity="'+ value.iQuantity +'">' + value.oType.Name + ' (' + value.oData.ExpirationDate + ')</option>';
-                    });
-
-                    $('.distribution_form').find('select[name="Product"]').html(products_html);
-                }
-            }
-        });
+        GetRemainingStorages(iSelectedStorageId);
+        GetStorageProducts(iSelectedStorageId);
     })
 
     //distribution quantities
@@ -471,7 +488,11 @@ $( document ).ready(function() {
                 data: data,
                 success:function(result){
                     if(result.success == true){
+                        $('.distribution_form').find('[name="Storage2"]').val(0);
+                        $('.distribution_form').find('[name="Product"]').val(0);
+                        $('.distribution_form').find('[name="Quantity"]').val('');
                         $('.content').find('.warning').html('<p class="request_success">'+ result.message +'</p>');
+                        window.location.reload();
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">'+ result.message +'</p>');
@@ -480,6 +501,49 @@ $( document ).ready(function() {
             });
         }
     });
+
+    //other storages
+    function GetRemainingStorages(iSelectedStorageId) {
+        var second_storage_html = '';
+
+        $.ajax({
+            method: 'post',
+            dataType: 'json',
+            url: base_url + 'member/GetRemainingStorages',
+            data: { "iSelectedStorageId" : iSelectedStorageId },
+            success:function(result){
+                if(result.success == true){
+                    second_storage_html += '<option value="0">Към</option>';
+                    $.each(result.aRemainingStorages,function(index,value){
+                        second_storage_html += '<option value="' + value.Id + '">' + value.Name + '</option>';
+                    });
+
+                    $('.distribution_form').find('select[name="Storage2"]').html(second_storage_html);
+                }
+            }
+        });
+    }
+
+    //products
+    function GetStorageProducts(iSelectedStorageId){
+        var products_html = '';
+
+        $.ajax({
+            method: 'post',
+            dataType: 'json',
+            url: base_url + 'member/AjaxGetStorageAvailability/' + iSelectedStorageId,
+            success:function(result){
+                if(result.success == true){
+                    products_html += '<option value="0">Изделие</option>';
+                    $.each(result.aStorageAvailability,function(index,value){
+                        products_html += '<option value="' + value.oData.Id + '" product-quantity="'+ value.iQuantity +'">' + value.oType.Name + ' (' + value.oData.ExpirationDate + ')</option>';
+                    });
+
+                    $('.distribution_form').find('select[name="Product"]').html(products_html);
+                }
+            }
+        });
+    }
 
     //$('.nav a.admin').click(function(e){
     //    e.preventDefault();

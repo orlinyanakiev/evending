@@ -19,11 +19,55 @@ class admin extends My_AdminController
     public function Users()
     {
         $this->aData['sTitle'] = 'Потребители';
-        $this->aData['aUsers'] = $this->users->GetAllUsers($this->aData['oUser']->Id);
+        $this->aData['aUsers'] = $this->users->GetAllUsers();
 
         $this->load->view('admin/include/header',$this->aData);
         $this->load->view('admin/pages/users',$this->aData);
         $this->load->view('admin/include/footer',$this->aData);
+    }
+
+    public function EditUser()
+    {
+        $bResult = false;
+        $bEditUser = false;
+
+        if(is_array($_POST) && !empty($_POST)){
+            $iUserId = $_POST['UserId'];
+
+            //check if distributor exists
+            $oDistributor = $this->users->GetDistributor($iUserId);
+            $bIsDistributor = is_object($oDistributor);
+
+            if($_POST['Type'] == 1 && !$bIsDistributor) {
+                $aStorageData = array(
+                    'Name' => $_POST['FirstName'].' '.$_POST['LastName'],
+                    'Address' => '',
+                    'Type' => '2',
+                );
+
+                $iStorageId = $this->storages->AddStorage($aStorageData);
+
+                $aDistributorData = array(
+                    'Id' => $_POST['UserId'],
+                    'StorageId' => $iStorageId,
+                );
+
+                $bResult = $this->users->AddDistributor($aDistributorData);
+            } elseif ($_POST['Type'] == 1 && $bIsDistributor) {
+                $aStorageData['Active'] = '1';
+
+                $bResult = $this->storages->UpdateStorage($oDistributor->StorageId,$aStorageData);
+            } elseif ($_POST['Type'] != 1 && $bIsDistributor) {
+                $bResult = $this->storages->DeleteStorage($oDistributor->StorageId);
+            }
+
+            $bEditUser = $this->users->EditUser($_POST);
+
+            if($bResult && $bEditUser){
+                $bResult = true;
+            }
+        }
+        echo json_encode(array('success' => $bResult));
     }
 
     public function DeleteUser()
@@ -64,68 +108,14 @@ class admin extends My_AdminController
 
     public function AddStorage()
     {
+        $bResult = false;
         if(is_array($_POST) && !empty($_POST)){
             $aStorageData = $_POST;
-            $bResult = $this->storages->AddStorage($aStorageData);
+            $iStorageId = $this->storages->AddStorage($aStorageData);
 
-            echo json_encode(array('success' => $bResult));
-        }
-    }
-
-    public function GetStorageAvailability()
-    {
-        if(is_array($_POST) && !empty($_POST) && isset($_POST['StorageId']) && $_POST['StorageId'] > 0){
-            $aStorages = $this->storages->GetAllStorages();
-            $iStorageId = (int) $_POST['StorageId'];
-            $aStorageAvailability = array();
-
-            foreach ($aStorages as $oStorage){
-                if((int)$oStorage->Id == $iStorageId){
-                    $aAvailability = json_decode($oStorage->Availability, true);
-                }
+            if(is_int($iStorageId)){
+                $bResult = true;
             }
-
-            if(is_array($aAvailability) && !empty($aAvailability)){
-                foreach ($aAvailability as $iProductId => $iQuantity){
-                    $oProduct = $this->products->GetProductById((int)$iProductId);
-                    $oProductType = $this->products->GetProductTypeById((int)$oProduct->Type);
-                    $aStorageAvailability[]= array('oData' => $oProduct, 'oType' => $oProductType, 'iQuantity' => $iQuantity);
-                }
-            } else {
-                echo json_encode(array('success' => false, 'message' => 'Хранилището е празно!'));
-                return;
-            }
-
-            if(is_array($aStorageAvailability) && !empty($aStorageAvailability)){
-                echo json_encode(array('success' => true, 'aStorageAvailability' => $aStorageAvailability));
-                return;
-            }
-            echo json_encode(array('success' => false, 'message' => 'Възникна грешка! Опитайте отново.'));
-            return;
-        }
-        echo json_encode(array('success' => false, 'message' => 'Възникна грешка! Опитайте отново.'));
-        return;
-    }
-
-    //Storage supply
-    public function Supply()
-    {
-        $this->aData['sTitle'] = 'Зареждане';
-        $this->aData['aStorages'] = $this->storages->GetAllStorages();
-        $this->aData['aProductTypes'] = $this->products->GetAllProductTypes();
-
-        $this->load->view('admin/include/header',$this->aData);
-        $this->load->view('admin/pages/supply',$this->aData);
-        $this->load->view('admin/include/footer',$this->aData);
-    }
-
-    public function StorageSupply()
-    {
-        if(is_array($_POST) && !empty($_POST)){
-            $aStorageSupplyData = $_POST;
-            $oProductType = $this->products->GetProductTypeById((int)$aStorageSupplyData['ProductType']);
-            $bResult = $this->storages->StorageSupply($aStorageSupplyData, $oProductType);
-
             echo json_encode(array('success' => $bResult));
         }
     }

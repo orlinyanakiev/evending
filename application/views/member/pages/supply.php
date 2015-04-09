@@ -1,10 +1,11 @@
 <div class="page_wrapper">
     <div class="nav">
-        <a class="nav_link" href="<?= base_url();?>admin/users">Потребители</a>
-        <a class="nav_link" href="<?= base_url();?>admin/storages">Хранилища</a>
-        <a class="nav_link" href="<?= base_url();?>admin/products">Изделия</a>
-        <a class="nav_link active" href="<?= base_url();?>admin/supply">Зареждане</a>
-        <a class="logout" href="<?= base_url();?>member/">Обратно</a>
+        <a class="nav_link" href="<?= base_url();?>member/distribution">Дистрибуция</a>
+        <a class="nav_link active" href="<?= base_url();?>member/supply">Зареждане</a>
+        <a class="nav_link logout" href="<?= base_url();?>member/logout">Изход</a>
+        <?php if($oUser->Type > 1) : ?>
+            <a class="nav_link logout" href="<?= base_url();?>admin/users">Администрация</a>
+        <?php endif; ?>
     </div>
     <div class="content">
         <?php if(is_array($aStorages) && !empty($aStorages)) : ?>
@@ -27,6 +28,7 @@
                             <option value="0">Тип изделие</option>
                         </select>
                         <input type="text" name="Quantity" placeholder="Количество">
+                        <input type="text" name="ExpirationDate" placeholder="Валидност">
                         <button type="submit">Добави</button>
                     </form>
                 </div>

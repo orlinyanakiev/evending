@@ -4,18 +4,11 @@ require_once (APPPATH . 'core/My_MemberController.php');
 
 class My_AdminController extends My_MemberController
 {
-    private $aUserTypes = array(
-        '0' => 'Потребител',
-        '1' => 'Дистрибутор',
-        '2' => 'Оператор',
-        '3' => 'Администратор'
-    );
-
     public function __construct()
     {
         parent::__construct();
 
-        $this->aData['aUserTypes'] = $this->aUserTypes;
+        $this->aData['aUserTypes'] = $this->users->aUserTypes;
         $this->CheckRole(true);
     }
 
