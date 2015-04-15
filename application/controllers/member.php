@@ -16,9 +16,12 @@ class Member extends My_MemberController
 
     public function Distribution()
     {
+        $aStoragesData = $this->storages->ListStorages();
+        $aProductsData = $this->products->ListProducts();
+
         $this->aData['sTitle'] = 'Дистрибуция';
-        $this->aData['aProducts'] = $this->products->GetAllProducts();
-        $this->aData['aStorages'] = $this->storages->GetAllStorages();
+        $this->aData['aProducts'] = $aProductsData['aProducts'];
+        $this->aData['aStorages'] = $aStoragesData['aStorages'];
         if(is_object($this->aData['oDistributor'])){
             $this->aData['aStorageAvailability'] = $this->GetStorageAvailability($this->aData['oDistributor']->StorageId);
         }
@@ -31,7 +34,8 @@ class Member extends My_MemberController
     public function GetRemainingStorages()
     {
         if(is_array($_POST) && !empty($_POST) && isset($_POST['iSelectedStorageId'])){
-            $aAllStorages = $this->storages->GetAllStorages();
+            $aStoragesData = $this->storages->ListStorages();
+            $aAllStorages = $aStoragesData['aStorages'];
             $aRemainingStorages = array();
 
             $iSelectedStorageId = (int) $_POST['iSelectedStorageId'];
@@ -67,8 +71,15 @@ class Member extends My_MemberController
     //Storage supply
     public function Supply()
     {
+        if($this->aData['oUser']->Type == 0){
+            redirect(base_url().'member');
+        }
+
+        $aStoragesData = $this->storages->ListStorages();
+
         $this->aData['sTitle'] = 'Зареждане';
-        $this->aData['aStorages'] = $this->storages->GetAllStorages();
+        $this->aData['aStorages'] = $aStoragesData['aStorages'];
+        $this->aData['sStoragesPagination'] = $aStoragesData['sPagination'];
         $this->aData['aProductTypes'] = $this->products->GetAllProductTypes();
 
         $this->load->view('member/include/header',$this->aData);
@@ -76,9 +87,39 @@ class Member extends My_MemberController
         $this->load->view('member/include/footer',$this->aData);
     }
 
+    public function GetProductTypesByCategoryId()
+    {
+        if(is_array($_POST) && !empty($_POST) && isset($_POST['iCategoryId'])){
+            $iCategoryId = (int) $_POST['iCategoryId'];
+            $aResponse = array();
+            $aSelectedProductTypes = array();
+
+            $aProductTypes = $this->products->GetAllProductTypes();
+            foreach($aProductTypes as $oProductType){
+                if($iCategoryId == (int) $oProductType->Category){
+                    $aSelectedProductTypes[] = $oProductType;
+                }
+            }
+
+            if(is_array($aSelectedProductTypes) && !empty($aSelectedProductTypes)){
+                $aResponse['success'] = true;
+                $aResponse['aTypes'] = $aSelectedProductTypes;
+            } else {
+                $aResponse = array(
+                    'success' => false,
+                    'message' => 'Няма изделия от тази категория'
+                );
+            }
+
+            echo json_encode($aResponse);
+            return;
+        }
+    }
+
     public function GetStorageAvailability($iStorageId)
     {
-        $aStorages = $this->storages->GetAllStorages();
+        $aStoragesData = $this->storages->ListStorages();
+        $aStorages = $aStoragesData['aStorages'];
         $iStorageId = (int) $iStorageId;
         $aStorageAvailability = array();
 
@@ -101,7 +142,8 @@ class Member extends My_MemberController
 
     public function AjaxGetStorageAvailability($iStorageId)
     {
-        $aStorages = $this->storages->GetAllStorages();
+        $aStoragesData = $this->storages->ListStorages();
+        $aStorages = $aStoragesData['aStorages'];
         $iStorageId = (int) $iStorageId;
         $aStorageAvailability = array();
 
@@ -139,6 +181,25 @@ class Member extends My_MemberController
 
             echo json_encode(array('success' => $bResult));
         }
+    }
+
+    //Sales
+    public function Sales()
+    {
+        if($this->aData['oUser']->Type == 0){
+            redirect(base_url().'member');
+        }
+
+        $aStoragesData = $this->storages->ListStorages();
+
+        $this->aData['sTitle'] = 'Зареждане';
+        $this->aData['aStorages'] = $aStoragesData['aStorages'];
+        $this->aData['sStoragesPagination'] = $aStoragesData['sPagination'];
+        $this->aData['aProductTypes'] = $this->products->GetAllProductTypes();
+
+        $this->load->view('member/include/header',$this->aData);
+        $this->load->view('member/pages/sales',$this->aData);
+        $this->load->view('member/include/footer',$this->aData);
     }
 
     public function Logout()

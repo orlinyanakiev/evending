@@ -18,7 +18,8 @@ class My_MemberController extends My_BaseController
             if($this->aData['oUser']->Type == 1){
                 $this->aData['oDistributor'] = $this->GetDistributorStorage($this->aData['oUser']->Id);
 
-                $aStorages = $this->storages->GetAllStorages();
+                $aStoragesData = $this->storages->ListStorages();
+                $aStorages = $aStoragesData['aStorages'];
                 foreach ($aStorages as $oStorage){
                     if($oStorage->Id == $this->aData['oDistributor']->StorageId){
                         $this->aData['oDistributorStorage'] = $oStorage;

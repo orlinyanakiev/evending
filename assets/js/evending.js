@@ -21,8 +21,8 @@ $( document ).ready(function() {
         return this.optional(element) || /^[0-9]+\.[0-9]{2}$/.test(value);
     },"Wrong!");
 
-    jQuery.validator.addMethod("ExpirationDate",function(value,element){
-        return this.optional(element) || /^[01-31]\.[01-31]\.[2015-9999]$/.test(value);
+    jQuery.validator.addMethod("DateValidation",function(value,element){
+        return this.optional(element) || /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/.test(value);
     },"Wrong!");
 
     //Register user
@@ -74,7 +74,7 @@ $( document ).ready(function() {
     });
 
     //delete user
-    $('.manage_users').off('click').on('click','.delete_user',function(e){
+    $('.users_content').off('click').on('click', '.delete_user i', function ( e ) {
         e.preventDefault();
 
         if(confirm('Сигурни ли сте, че желаете да изтриете този потребител?')){
@@ -87,7 +87,7 @@ $( document ).ready(function() {
                 data: { "iUserId" : user_id },
                 success:function(result){
                     if(result.success == true){
-                        $('.content').find('.user_container').attr('user-id',user_id).remove();
+                        $('.content').find('.user_container[user-id="' + user_id + '"]').remove();
                     }
                 }
             })
@@ -95,7 +95,7 @@ $( document ).ready(function() {
     });
 
     //Edit user
-    $('.manage_users').off('click').on('click','.edit_user', function (e) {
+    $('.users_content .list').off('click').on('click','.edit_user i', function (e) {
         e.preventDefault();
         var user_id = $(this).closest('.user_container').attr('user-id');
 
@@ -131,7 +131,7 @@ $( document ).ready(function() {
         })
     });
 
-    //Save edited user
+    //Update user
     $('.edit_user_form').off('click').on('click', 'button', function(e){
         e.preventDefault();
 
@@ -177,6 +177,47 @@ $( document ).ready(function() {
         }
     });
 
+    //Users pagination
+    $('.users_content').on('click', '.pagination_list a', function(e){
+        e.preventDefault();
+        var page_id = $(this).attr('page-number');
+
+        $.ajax({
+            method: 'post',
+            dataType: 'json',
+            url: base_url + 'admin/UsersPagination',
+            data: { "iPageId": page_id },
+            success: function (result) {
+                var listing_html = '';
+                var colour = '';
+
+                $.each(result.aUsers, function( index , value ){
+                    if(index % 2 == 0){
+                        colour = 'DDF5B7';
+                    } else {
+                        colour = 'FFFF99'
+                    }
+
+                    listing_html += '<div class="user_container container" user-id="' + value.Id + '" style="background-color: #' + colour + '">';
+                    listing_html += '<div class="column first_column">' + value.FirstName + '</div>';
+                    listing_html += '<div class="column">' + value.LastName + '</div>';
+                    listing_html += '<div class="manage_users last_column">';
+                    listing_html += '<a href="#" class="edit_user"><i class="fa fa-pencil"></i></a> ';
+                    if(result.oUser.Id == value.Id){
+                        listing_html += '<i style="color:grey" class="fa fa-times"></i>';
+                    } else {
+                        listing_html += '<a href="#" class="delete_user"><i class="fa fa-times"></i></a>';
+                    }
+                    listing_html += '</div></div>';
+                });
+
+                listing_html += result.sPagination;
+
+                $('.users_content').find('.list').html(listing_html);
+            }
+        });
+    });
+
     //Login
     $('.login_form button').click(function(e){
         e.preventDefault();
@@ -216,6 +257,49 @@ $( document ).ready(function() {
         }
     });
 
+    //admin option navigation
+    $( '.admin_options' ).off( 'click' ).on( 'click' , 'a.section' , function( e ) {
+        e.preventDefault();
+
+        var section = $(this).attr('section');
+
+        $('.admin_options').hide();
+        $("." + section).show();
+    });
+
+    //Storages pagination
+    $('.storages_content').on('click', '.pagination_list a', function(e){
+        e.preventDefault();
+        var page_id = $(this).attr('page-number');
+
+        $.ajax({
+            method: 'post',
+            dataType: 'json',
+            url: base_url + 'admin/StoragesPagination',
+            data: { "iPageId": page_id },
+            success: function (result) {
+                var listing_html = '';
+                var colour = '';
+
+                $.each(result.aStorages, function( index , value ){
+                    if(index % 2 == 0){
+                        colour = 'DDF5B7';
+                    } else {
+                        colour = 'FFFF99'
+                    }
+                    listing_html += '<div class="storage_container container" style="background-color: #' + colour + '">';
+                    listing_html += '<div class="column first_column"><a href="#" class="storage_availability" storage-id="' + value.Id + '">' + value.Name + '</a></div>';
+                    listing_html += '<div class="column last_column">' + value.Address + '</div>';
+                    listing_html += '</div>';
+                });
+
+                listing_html += result.sPagination;
+
+                $('.storages_content').find('.list').html(listing_html);
+            }
+        });
+    });
+
     //Show add storage form
     $('.content a.add_storage').click(function(e){
         e.preventDefault();
@@ -241,7 +325,7 @@ $( document ).ready(function() {
                 Name: 'Името не е валидно',
                 Address: 'Некоректно въведен адрес',
                 Type: 'Изберете вид'
-            },
+            }
         })
 
         var form_valid = this_form.valid();
@@ -287,15 +371,11 @@ $( document ).ready(function() {
         this_form.validate({
             rules:{
                 Name: { required: true, Address: true },
-                Category: { GreaterThan: 0 },
-                Price: { required: true, Price: true },
-                ProductionPrice: { required: true, Price: true }
+                Category: { GreaterThan: 0 }
             },
             messages:{
                 Name: 'Въведеното име е некоректно',
-                Category: 'Изберете категория',
-                Price: 'Въведете валидна цена',
-                ProductionPrice: 'Въведете валидна цена'
+                Category: 'Изберете категория'
             }
         });
 
@@ -309,7 +389,7 @@ $( document ).ready(function() {
                 dataType: 'json',
                 url: base_url + 'admin/AddProductType',
                 data: data,
-                success:function(result){
+                success: function (result) {
                     if(result.success == true){
                         $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
                         setTimeout(function(){
@@ -322,7 +402,105 @@ $( document ).ready(function() {
                 }
             });
         }
-    })
+    });
+
+    //Edit product type
+    $('.manage_product_types .edit_pt').off('click').on('click','i',function(e){
+        e.preventDefault();
+
+        var pt_id = $(this).closest('.product_type_container').attr('product-id');
+
+        $.ajax({
+            dataType: 'json',
+            method: 'post',
+            url: base_url + 'admin/GetProductTypeById',
+            data: { "iProductTypeId" : pt_id },
+            success: function (result) {
+                if(result.success == true){
+                    $('.add_product_type').hide();
+                    $('.list').hide();
+                    $('.edit_product_type_form').show();
+
+                    var select_html = '<option value="0">Категория</option>';
+                    $.each ( result.aCategories , function ( index , value ) {
+                        if ( result.oProductType.Category == index ){
+                            select_html += '<option selected="selected" value="' + index + '">' + value + '</option>';
+                        } else {
+                            select_html += '<option value="' + index + '">' + value + '</option>';
+                        }
+                    });
+
+                    $('.edit_product_type_form').find('[name="Id"]').val( result.oProductType.Id );
+                    $('.edit_product_type_form').find('[name="Category"]').html( select_html );
+                    $('.edit_product_type_form').find('[name="Name"]').val( result.oProductType.Name );
+                }
+            }
+        })
+    });
+
+    //Update product type
+    $('.edit_product_type_form').off('click').on('click','button',function(e){
+        e.preventDefault();
+
+        var this_form = $(this).closest("form");
+
+        this_form.validate({
+            rules:{
+                Id: { required: true, digits: true, GreaterThan: 0 },
+                Name: { required: true, Address: true },
+                Category: { required: true, digits: true, GreaterThan: 0 }
+            },
+            messages:{
+                Name: 'Въведете валидно име',
+                Category: 'Изберете категория'
+            }
+        });
+
+        var form_valid = this_form.valid();
+
+        if(form_valid){
+            var data = this_form.serialize();
+
+            $.ajax({
+                dataType: 'json',
+                method: 'post',
+                url: base_url + 'admin/EditProductType/',
+                data: data,
+                success:function(result){
+                    if(result.success == true){
+                        $('.content').find('.warning').html('<p class="request_success">Оперецията е успешна!</p>');
+                        setTimeout(function(){
+                            window.location.reload();
+                        },1000);
+                    }
+                    if(result.success == false){
+                        $('.content').find('.warning').html('<p class="request_failure">Опитайте отново!</p>');
+                    }
+                }
+            });
+        }
+    });
+
+    //Delete product type
+    $('.manage_product_types .delete_pt').off('click').on('click','i',function(e){
+        e.preventDefault();
+
+        if(confirm('Сигурни ли сте, че желаете да изтриете този тип продукти?')){
+            var pt_id = $(this).closest('.product_type_container').attr('product-id');
+
+            $.ajax({
+                method: 'post',
+                dataType: 'json',
+                url: base_url + 'admin/DeleteProductType',
+                data: { "iProductTypeId" : pt_id },
+                success:function(result){
+                    if(result.success == true){
+                        $('.product_type_container[product-id="' + pt_id + '"]').remove();
+                    }
+                }
+            })
+        }
+    });
 
     //Storage supply
     $('.supply_form button').click(function(e){
@@ -335,13 +513,17 @@ $( document ).ready(function() {
                 Storage: { GreaterThan: 0 },
                 Product: { GreaterThan: 0 },
                 Quantity: { required: true, digits: true, GreaterThan: 0 },
-                ExpirationDate: { required: true/*, ExpirationDate: true*/ }
+                ExpirationDate: { required: true, DateValidation: true },
+                Price: { required: true, Price: true },
+                Value: { Price: true }
             },
             messages:{
                 Storage: 'Изберете хранилище',
                 Product: 'Изберете продукт',
                 Quantity: 'Посочете количество',
-                ExpirationDate: 'Въведете валидна дата'
+                ExpirationDate: 'Въведете валидна дата',
+                Price: 'Въведете валидна цена',
+                Value: 'Въведете валидна цена'
             }
         });
 
@@ -355,9 +537,17 @@ $( document ).ready(function() {
                 dataType: 'json',
                 url: base_url + 'member/StorageSupply',
                 data: data,
-                success:function(result){
+                success: function (result) {
                     if(result.success == true){
                         $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
+                        $('.supply_form').find('[name="Storage"]').val(0);
+                        $('.supply_form').find('[name="Category"]').val(0);
+                        $('.supply_form').find('[name="ProductType"]').val(0);
+                        $('.supply_form').find('[name="Quantity"]').val('');
+                        $('.supply_form').find('[name="ExpirationDate"]').val('');
+                        $('.supply_form').find('[name="Price"]').val('');
+                        $('.supply_form').find('[name="Value"]').val('');
+
                         setTimeout(function(){
                             window.location.reload();
                         },1000);
@@ -379,9 +569,9 @@ $( document ).ready(function() {
             $.ajax({
                 method: 'post',
                 dataType: 'json',
-                url: base_url + 'admin/GetProductTypesByCategoryId',
+                url: base_url + 'member/GetProductTypesByCategoryId',
                 data: { "iCategoryId" : selected_category_id },
-                success:function(result){
+                success: function (result) {
                     if(result.success == true){
                         products_html += '<option value="0">Тип изделие</option>';
                         $.each(result.aTypes,function(key,value){
@@ -404,7 +594,7 @@ $( document ).ready(function() {
     })
 
     //storage availability
-    $('.storage_container a.storage_availability').click(function(e){
+    $('.storages_content .list').on('click', '.storage_availability', function(e){
         e.preventDefault();
 
         var storage_id = $(this).attr('storage-id');
@@ -438,7 +628,7 @@ $( document ).ready(function() {
                 }
             }
         })
-    })
+    });
 
     //distribution select options
     $('.distribution_form select[name="Storage1"]').change(function(){
@@ -488,11 +678,14 @@ $( document ).ready(function() {
                 data: data,
                 success:function(result){
                     if(result.success == true){
+                        $('.distribution_form').find('select[name="Storage1"]').val(0);
                         $('.distribution_form').find('[name="Storage2"]').val(0);
                         $('.distribution_form').find('[name="Product"]').val(0);
                         $('.distribution_form').find('[name="Quantity"]').val('');
                         $('.content').find('.warning').html('<p class="request_success">'+ result.message +'</p>');
-                        window.location.reload();
+                        setTimeout(function(){
+                            window.location.reload();
+                        },500);
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">'+ result.message +'</p>');
@@ -540,19 +733,15 @@ $( document ).ready(function() {
                     });
 
                     $('.distribution_form').find('select[name="Product"]').html(products_html);
+                    $('.content').find('.warning').html('');
+                }
+                if(result.success == false ){
+                    $('.distribution_form').find('select[name="Product"]').html('<option value="0" selected="selected">Изделие</option>');
+
+                    $('.content').find('.warning').html('<p class="request_failure">'+ result.message +'</p>');
                 }
             }
         });
     }
-
-    //$('.nav a.admin').click(function(e){
-    //    e.preventDefault();
-    //
-    //    if(!$(this).hasClass('active')){
-    //        $(this).parent('.nav').find('.active').removeClass('active');
-    //        var page_name = $(this).attr('page-name');
-    //        $(this).addClass('active');
-    //    }
-    //})
 
 });

@@ -12,20 +12,30 @@ class admin extends My_AdminController
     public function index()
     {
         //check user type
-        $this->Users();
+        $this->AdminOptions();
     }
 
-    //Users
-    public function Users()
+    public function AdminOptions()
     {
-        $this->aData['sTitle'] = 'Потребители';
-        $this->aData['aUsers'] = $this->users->GetAllUsers();
+        $aStoragesData = $this->storages->ListStorages(1, $this->storages->getLimit());
+        $aUsersData = $this->users->ListUsers(1, $this->users->getLimit());
+        $aProductsData = $this->products->ListProducts(1, $this->products->getLimit());
+
+        $this->aData['sTitle'] = 'Администрация';
+        $this->aData['aUsers'] = $aUsersData['aUsers'];
+        $this->aData['sUsersPagination'] = $aUsersData['sPagination'];
+        $this->aData['aStorages'] = $aStoragesData['aStorages'];
+        $this->aData['sStoragesPagination'] = $aStoragesData['sPagination'];
+        $this->aData['aProducts'] = $aProductsData['aProducts'];
+        $this->aData['sProductsPagination'] = $aProductsData['sPagination'];
+        $this->aData['aProductTypes'] = $this->products->GetAllProductTypes();
 
         $this->load->view('admin/include/header',$this->aData);
-        $this->load->view('admin/pages/users',$this->aData);
+        $this->load->view('admin/pages/main_page',$this->aData);
         $this->load->view('admin/include/footer',$this->aData);
     }
 
+    //Users
     public function EditUser()
     {
         $bResult = false;
@@ -62,11 +72,14 @@ class admin extends My_AdminController
             }
 
             $bEditUser = $this->users->EditUser($_POST);
-
-            if($bResult && $bEditUser){
-                $bResult = true;
-            }
         }
+
+        if($bResult && $bEditUser){
+            $bResult = true;
+        } else {
+            $bResult = false;
+        }
+
         echo json_encode(array('success' => $bResult));
     }
 
@@ -95,17 +108,24 @@ class admin extends My_AdminController
         }
     }
 
-    //Storages
-    public function Storages()
+    public function UsersPagination()
     {
-        $this->aData['sTitle'] = 'Хранилища';
-        $this->aData['aStorages'] = $this->storages->GetAllStorages();
+        if(is_array($_POST) && array_key_exists('iPageId',$_POST)){
+            $iPageId = intval($_POST['iPageId']);
 
-        $this->load->view('admin/include/header',$this->aData);
-        $this->load->view('admin/pages/storages',$this->aData);
-        $this->load->view('admin/include/footer',$this->aData);
+            $aUsersData = $this->users->ListUsers($iPageId, $this->users->getLimit());
+
+            $aUsers = $aUsersData['aUsers'];
+            $sPagination = $aUsersData['sPagination'];
+
+            echo json_encode(array('success' => true, 'oUser' => $this->aData['oUser'], 'aUsers' => $aUsers, 'sPagination' => $sPagination));
+            return;
+        }
+        echo json_encode(array('success' => false));
+        return;
     }
 
+    //Storages
     public function AddStorage()
     {
         $bResult = false;
@@ -120,44 +140,54 @@ class admin extends My_AdminController
         }
     }
 
-    //Products
-    public function Products()
+    public function StoragesPagination()
     {
-        $this->aData['sTitle'] = 'Изделия';
-        $this->aData['aProductTypes'] = $this->products->GetAllProductTypes();
+        if(is_array($_POST) && array_key_exists('iPageId',$_POST)){
+            $iPageId = intval($_POST['iPageId']);
 
-        $this->load->view('admin/include/header',$this->aData);
-        $this->load->view('admin/pages/products',$this->aData);
-        $this->load->view('admin/include/footer',$this->aData);
-    }
+            $aStoragesData = $this->storages->ListStorages($iPageId, $this->storages->getLimit());
 
-    public function GetProductTypesByCategoryId()
-    {
-        if(is_array($_POST) && !empty($_POST) && isset($_POST['iCategoryId'])){
-            $iCategoryId = (int) $_POST['iCategoryId'];
-            $aResponse = array();
-            $aSelectedProductTypes = array();
+            $aStorages = $aStoragesData['aStorages'];
+            $sPagination = $aStoragesData['sPagination'];
 
-            $aProductTypes = $this->products->GetAllProductTypes();
-            foreach($aProductTypes as $oProductType){
-                if($iCategoryId == (int) $oProductType->Category){
-                    $aSelectedProductTypes[] = $oProductType;
-                }
-            }
-
-            if(is_array($aSelectedProductTypes) && !empty($aSelectedProductTypes)){
-                $aResponse['success'] = true;
-                $aResponse['aTypes'] = $aSelectedProductTypes;
-            } else {
-                $aResponse = array(
-                    'success' => false,
-                    'message' => 'Няма изделия от тази категория'
-                );
-            }
-
-            echo json_encode($aResponse);
+            echo json_encode(array('success' => true, 'aStorages' => $aStorages, 'sPagination' => $sPagination));
             return;
         }
+        echo json_encode(array('success' => false));
+        return;
+    }
+
+    //Products
+    public function ProductsPagination()
+    {
+        if(is_array($_POST) && array_key_exists('iPageId',$_POST)){
+            $iPageId = intval($_POST['iPageId']);
+
+            $aProductsData = $this->products->ListProducts($iPageId, $this->products->getLimit());
+
+            $aProducts = $aProductsData['aProducts'];
+            $sPagination = $aProductsData['sPagination'];
+
+            echo json_encode(array('success' => true, 'aProducts' => $aProducts, 'sPagination' => $sPagination));
+            return;
+        }
+        echo json_encode(array('success' => false));
+        return;
+    }
+
+    //Product types
+    public function GetProductTypeById()
+    {
+        if(is_array($_POST) && !empty($_POST) && array_key_exists('iProductTypeId',$_POST)){
+            $iPTId = intval($_POST['iProductTypeId']);
+            $oProductType = $this->products->GetProductTypeById($iPTId);
+            $aCategories = $this->products->aProductCategories;
+
+            echo json_encode(array('success' => true, 'oProductType' => $oProductType, 'aCategories' => $aCategories));
+            return;
+        }
+
+        echo json_encode(array('success' => false));
     }
 
     public function AddProductType()
@@ -168,5 +198,19 @@ class admin extends My_AdminController
 
             echo json_encode(array('success' => $bResult));
         }
+    }
+
+    public function EditProductType()
+    {
+        $bResult = $this->products->EditProductType($_POST);
+        echo json_encode(array('success' => $bResult));
+    }
+
+    public function DeleteProductType()
+    {
+        $iProductTypeId = $_POST['iProductTypeId'];
+
+        $bResult = $this->products->DeleteProductType($iProductTypeId);
+        echo json_encode(array('success' => $bResult));
     }
 }

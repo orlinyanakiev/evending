@@ -2,9 +2,10 @@
     <div class="nav">
         <a class="nav_link" href="<?= base_url();?>member/distribution">Дистрибуция</a>
         <a class="nav_link active" href="<?= base_url();?>member/supply">Зареждане</a>
+        <a class="nav_link" href="<?= base_url();?>member/sales">Продажба</a>
         <a class="nav_link logout" href="<?= base_url();?>member/logout">Изход</a>
         <?php if($oUser->Type > 1) : ?>
-            <a class="nav_link logout" href="<?= base_url();?>admin/users">Администрация</a>
+            <a class="nav_link logout" href="<?= base_url();?>admin/">Администрация</a>
         <?php endif; ?>
     </div>
     <div class="content">
@@ -12,12 +13,18 @@
             <?php if(is_array($aProductTypes) && !empty($aProductTypes)) : ?>
                 <div class="supply_form form">
                     <form>
-                        <select name="Storage">
-                            <option value="0">Хранилище</option>
-                            <?php foreach($aStorages as $oStorage) : ?>
-                                <option value="<?=$oStorage->Id?>"><?=$oStorage->Name?></option>
-                            <?php endforeach; ?>
-                        </select>
+                        <?php if(!is_object($oDistributor)) : ?>
+                            <select name="Storage">
+                                <option value="0">Хранилище</option>
+                                <?php foreach($aStorages as $oStorage) : ?>
+                                    <option value="<?=$oStorage->Id?>"><?=$oStorage->Name?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        <?php else : ?>
+                            <input type="hidden" name="Storage" value="<?= $oDistributor->StorageId; ?>" />
+                            <div class="fake_input_field"><?= $oDistributorStorage->Name ?></div>
+                        <?php endif; ?>
+
                         <select name="Category">
                             <option value="0">Категория</option>
                             <?php foreach($aProductCategories as $iCategoryId => $sCategory){
@@ -29,6 +36,10 @@
                         </select>
                         <input type="text" name="Quantity" placeholder="Количество">
                         <input type="text" name="ExpirationDate" placeholder="Валидност">
+                        <input type="text" name="Price" placeholder="Цена" />
+                        <?php if(!is_object($oDistributor)) : ?>
+                            <input type="text" name="Value" placeholder="Себестойност" />
+                        <?php endif; ?>
                         <button type="submit">Добави</button>
                     </form>
                 </div>

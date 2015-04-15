@@ -1,15 +1,16 @@
 <div class="page_wrapper start">
-    <div class="nav">
-        <a class="nav_link active" href="<?= base_url();?>member/distribution">Дистрибуция</a>
-        <a class="nav_link" href="<?= base_url();?>member/supply">Зареждане</a>
-        <a class="nav_link logout" href="<?= base_url();?>member/logout">Изход</a>
-        <?php if($oUser->Type > 1) : ?>
-            <a class="nav_link logout" href="<?= base_url();?>admin/users">Администрация</a>
-        <?php endif; ?>
-    </div>
-    <div class="content">
-        <?php if(is_array($aStorages) && !empty($aStorages)) : ?>
-            <?php if(is_array($aProducts) && !empty($aProducts)) : ?>
+    <?php if($oUser->Type != 0) : ?>
+        <div class="nav">
+            <a class="nav_link active" href="<?= base_url();?>member/distribution">Дистрибуция</a>
+            <a class="nav_link" href="<?= base_url();?>member/supply">Зареждане</a>
+            <a class="nav_link" href="<?= base_url();?>member/sales">Продажба</a>
+            <a class="nav_link logout" href="<?= base_url();?>member/logout">Изход</a>
+            <?php if($oUser->Type > 1) : ?>
+                <a class="nav_link logout" href="<?= base_url();?>admin/">Администрация</a>
+            <?php endif; ?>
+        </div>
+        <div class="content">
+            <?php if(is_array($aStorages) && !empty($aStorages)) : ?>
                 <div class="distribution_form form">
                     <form method="post" action="">
                         <?php if(!is_object($oDistributor)) : ?>
@@ -46,12 +47,15 @@
                     </form>
                 </div>
             <?php else: ?>
-                <div class="no_products">Добавете продукт през "Администрация"</div>
+                <div class="no_storages">Няма въведени хранилища!</div>
             <?php endif; ?>
-        <?php else: ?>
-            <div class="no_storages">Добавете хранилище през "Администрация"</div>
-        <?php endif; ?>
-        <div class="warning">
+            <div class="warning">
+            </div>
         </div>
-    </div>
+    <?php else : ?>
+        <div class="warning">
+            <p class="request_failure">Обърнете се към администратор за права!</p>
+            <p><a href="<?= base_url();?>member/logout">Изход</a></p>
+        </div>
+    <?php endif; ?>
 </div>
