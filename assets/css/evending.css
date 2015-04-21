@@ -1,180 +1,55 @@
-body {
-    color: #512200;
-    background-color: aliceblue;
-    letter-spacing: 0px;
-    font-family: Verdana, Arial ;
-    font-size: 20px;
-    margin: auto;
-    padding: 0px;
-    text-align: center;
-}
+body {color: #512200;background-color: aliceblue;letter-spacing: 0px;font-family: Verdana, Arial ;font-size: 20px;margin: auto;padding: 0px;text-align: center;}
 
-label {
-    color:red;
-    font-size:12px;
-    text-decoration: none;
-}
+p {margin: 0px;padding-top: 20px;}
+a {color: green;text-decoration: none;}
 
-.fake_input_field {
-    color: #512200;
-    font-size: 16px;
-    border: 2px solid green;
-    background-color: #F0FDEA;
-    border-radius: 5px;
-    padding: 8px;
-    margin: 5px;
-    min-width: 330px;
-    text-align: left;
-}
+.icon-pencil {height: 14px;width: 14px;background: url("/assets/icons/Pencil.png") no-repeat;}
+.fa-pencil {color: sandybrown;}
+.fa-times {color: red;}
 
-p {
-    margin: 0px;
-    padding-top: 20px;
-}
+.page_wrapper {border: 1px solid black;border-radius: 8px;margin:auto;padding:0;min-height: 480px;width: 720px;background-color: #FFE4B7;}
 
-a {
-    color: green;
-    text-decoration: none;
-}
+.form {padding-top: 20px;padding-left: 50%;margin-left: -175px;position: relative;width: 350px;}
+form input[type="text"],input[type="password"] {color: #512200;display: block;font-size: 16px;border: 2px solid green;background-color: #F0FDEA;border-radius: 5px;padding: 8px;margin: 10px 5px -6px 5px;min-width: 330px;}
+.fake_input_field {color: #512200;font-size: 16px;border: 2px solid green;background-color: #F0FDEA;border-radius: 5px;padding: 8px;margin: 10px 5px -5px 5px;min-width: 330px;text-align: left;}
+button {display: block;letter-spacing: 0px;border: 2px solid green;border-radius: 5px;font-size: 16px;background-color: #F0FDEA;padding:8px;margin: 10px 5px -6px 80px;min-width: 210px;}
 
-.icon-pencil {
-    height: 14px;
-    width: 14px;
-    background: url("/assets/icons/Pencil.png") no-repeat;
-}
+input[type="text"].error, input[type="password"].error { border:2px solid red;}
+select.error { border:2px solid red;}
 
-.fa-pencil {
-    color: sandybrown;
-}
+.register_form {padding-top: 20px;}
 
-.fa-times {
-    color: red;
-}
+.directions {text-align: right;margin-bottom: 20px;margin-right: 5%;}
 
-button {
-    display: block;
-    letter-spacing: 0px;
-    border: 2px solid green;
-    border-radius: 5px;
-    font-size: 16px;
-    background-color: #F0FDEA;
-    padding:8px;
-    margin: 5px 5px 5px 80px;
-    min-width: 210px;
-}
+.wrong_login {color: #FC1800;padding-top: 50px;min-height: 32px;}
 
-.page_wrapper {
-    border: 1px solid black;
-    border-radius: 8px;
-    margin:auto;
-    padding:0;
-    min-height: 480px;
-    width: 720px;
-    background-color: #FFE4B7;
-}
+.nav {margin: 4px 0px -2px 8px;padding-top: 15px;text-align: left;height: 35px;}
+.nav a {background-color: #E2B977;display: inline;border: 1.5px solid green;margin:auto;border-radius: 15px 30px 0 0;padding: 8px 8px 8px 8px;}
+.nav a.logout {float:right;margin: -9px 8px 0 0;}
+.nav a.active {background-color: #FFE4B7; border-bottom: 2px solid #FFE4B7;}
 
-form input {
-    color: #512200;
-    display: block;
-    font-size: 16px;
-    border: 2px solid green;
-    background-color: #F0FDEA;
-    border-radius: 5px;
-    padding: 8px;
-    margin: 5px;
-    min-width: 330px;
-}
+.content {display: block;min-height: 420px;padding: 8px 8px 8px 8px;margin: 0px 8px 6px 8px;background-color: #FFE4B7;border: 1.5px solid black;border-radius: 0 0 4px 4px;}
 
-.form {
-    padding-top: 20px;
-    padding-left: 50%;
-    margin-left: -175px;
-    position: relative;
-    width: 350px;
-}
+select {display: block;font-size: 16px;color: #512200;border: 2px solid green;background-color: #F0FDEA;border-radius: 5px;padding: 8px 0 8px 0;margin: 10px 5px -6px 5px;min-width: 350px;}
 
-.register_form {
-    padding-top: 20px;
-}
+.warning p.request_failure {color: #FC1800;}
+.warning p.request_success {color: green;}
 
-.directions {
-    text-align: right;
-    margin-bottom: 20px;
-    margin-right: 5%;
-}
-
-.wrong_login {
-    color: #FC1800;
-    padding-top: 50px;
-    min-height: 32px;
-}
-
-.nav {
-    margin: 4px 0px 0px 8px;
-    padding-top: 15px;
-    text-align: left;
-    height: 33.5px;
-}
-
-.nav a {
-    background-color: #E2B977;
-    display: inline;
-    border: 1.5px solid green;
-    border-radius: 15px 30px 0 0;
-    padding: 8px 8px 8px 8px;
-}
-
-.nav a.logout {
-    display: inline;
-    float:right;
-    margin: -9.5px 8px 0 0;
-}
-
-a.active {
-    background-color: #FFE4B7;
-    border-bottom: 2px solid #FFE4B7;
-}
-
-.content {
-    display: block;
-    min-height: 420px;
-    padding: 8px 8px 8px 8px;
-    margin: 0px 8px 6px 8px;
-    background-color: #FFE4B7;
-    border: 1.5px solid black;
-    border-radius: 0 0 4px 4px;
-}
-
-select {
-    display: block;
-    font-size: 16px;
-    color: #512200;
-    border: 2px solid green;
-    background-color: #F0FDEA;
-    border-radius: 5px;
-    padding: 8px 0 8px 0;
-    margin: 5px 0 5px 5px;
-    min-width: 350px;
-}
-
-.warning p.request_failure {
-    color: #FC1800;
-}
-
-.warning p.request_success {
-    color: green;
-}
-
-.list {position:relative; min-height: 330px; text-align: left; margin: 8px;}
+.list {text-align: left; margin: 8px;}
 .list .column {display: inline;}
-.list .first_column {padding-left: 10px;}
-.list .last_column {margin-right: 10px; float: right;}
+.list .first_column {padding:0 0 0 10px;}
+.list .last_column {margin: 0 10px 0 30px; float: right;}
 
-.pagination_list { position: absolute; bottom: 0; padding: 8px 8px 0 8px; }
-.pagination_list a { margin: 4px 4px 4px 4px; }
+.pagination_list {margin: 4px 0 0 0;width: 670px; text-align: center;}
+.pagination_list a { margin: 0 4px 0 4px; }
 .pagination_list a.active { color: #512200; cursor: default; }
 
 .option { font-size: 22px; text-align: left; margin: 8px }
 
 .edit_user_form, .edit_product_type_form, .add_product_type_form, .add_storage_form, .users_content, .storages_content,
-.product_types_content, .products_content, .edit_product_form { display: none; }
+.product_types_content, .products_content, .edit_product_form, .sales_content { display: none; }
+
+.sales_results{ text-align: left;}
+
+.vending_machines_list { margin: 10px 0 0 0; text-align: left; }
+input[type="checkbox"] { margin:4px 12px 4px 4px; -ms-transform: scale(2); -moz-transform: scale(2); -webkit-transform: scale(2); -o-transform: scale(2); padding: 10px; }

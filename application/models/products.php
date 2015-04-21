@@ -8,7 +8,7 @@ class Products extends CI_Model
     private $sProductTable = 'products';
     private $sTypeTable = 'producttypes';
 
-    const iLimit = 10;
+    const iLimit = 12;
     const iAdjacent = 6.5;
 
     public function getLimit()
@@ -43,7 +43,18 @@ class Products extends CI_Model
     }
 
     public function GetProductById($iProductId){
-        return $this->db->get_where($this->sProductTable,array('Id' => $iProductId))->first_row();
+        $oProduct = $this->db->get_where($this->sProductTable,array('Id' => $iProductId))->first_row();
+        if(is_object($oProduct)){
+            $oProduct->Type = $this->GetProductTypeById($oProduct->Type);
+        }
+
+        return $oProduct;
+    }
+
+    public function EditProduct($iProductId, $sValue)
+    {
+        $this->db->where('Id',$iProductId);
+        return $this->db->update($this->sProductTable,array('Value' => $sValue));
     }
 
     public function ListProducts($iPage = 1, $iLimit = 0, $iType = 0)
@@ -61,7 +72,7 @@ class Products extends CI_Model
                 $iLimit = self::iLimit;
                 $iOffest = ($iPage - 1) * $iLimit;
 
-                $this->db->where('Active','1');
+                $this->db->where('IsDeleted','0');
                 if($iType != 0){
                     $this->db->where('Type', $iType);
                 }
@@ -210,9 +221,40 @@ class Products extends CI_Model
         return $this->db->get_where($this->sTypeTable,array('Id' => $iId))->first_row();
     }
 
-    public function GetAllProductTypes($iLimit = 10, $iOffest = 0)
+    public function ListProductTypes($iPage = 1, $iLimit = 0, $iType = 0)
     {
-        $this->db->where('IsDeleted','0');
-        return $this->db->get($this->sTypeTable,$iLimit,$iOffest)->result();
+        $this->db->where('IsDeleted', '0');
+        if($iType != 0){
+            $this->db->where('Type', $iType);
+        }
+        $this->db->order_by("Id","asc");
+        $oQuery = $this->db->get($this->sTypeTable);
+        $iCount = $oQuery->num_rows();
+
+        if($iCount > 0){
+            if($iCount > $iLimit && $iLimit != 0){
+                $iLimit = self::iLimit;
+                $iOffest = ($iPage - 1) * $iLimit;
+
+                $this->db->where('IsDeleted','0');
+                if($iType != 0){
+                    $this->db->where('Type', $iType);
+                }
+                $this->db->order_by("Id","asc");
+                $this->db->limit($iLimit, $iOffest);
+
+                $aProducts = $this->db->get($this->sTypeTable)->result();
+                $sPagination = $this->GetPagination($iPage, $iCount, $iLimit);
+
+                return $aData = array(
+                    'aProductTypes' => $aProducts,
+                    'sPagination' => $sPagination,
+                );
+            }
+
+            $aProducts = $oQuery->result();
+
+            return $aData = array('aProductTypes' => $aProducts, 'sPagination' => '');
+        }
     }
 }

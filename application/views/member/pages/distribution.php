@@ -39,10 +39,10 @@
                         <select name="Product">
                             <option value="0" selected="selected">Изделие</option>
                             <?php foreach ($aStorageAvailability as $aStorageProduct): ?>
-                                <option value="<?= $aStorageProduct['oData']->Id;?>" product-quantity="<?= $aStorageProduct['iQuantity']?>"><?= $aStorageProduct['oType']->Name.' ('.$aStorageProduct['oData']->ExpirationDate.')'?></option>
+                                <option value="<?= $aStorageProduct['oProduct']->Id;?>" product-quantity="<?= $aStorageProduct['iQuantity']?>"><?= $aStorageProduct['oProduct']->Type->Name.' ('.$aStorageProduct['oProduct']->ExpirationDate.')'?></option>
                             <?php endforeach; ?>
                         </select>
-                        <input type="text" name="Quantity" placeholder="Количество" />
+                        <input type="text" name="Quantity" placeholder="Количество" autocomplete="off" />
                         <button type="submit">Прехвърли</button>
                     </form>
                 </div>

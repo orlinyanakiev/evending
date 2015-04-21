@@ -17,18 +17,28 @@ class admin extends My_AdminController
 
     public function AdminOptions()
     {
-        $aStoragesData = $this->storages->ListStorages(1, $this->storages->getLimit());
+        $aStoragesData = $this->storages->ListStorages(1, $this->storages->getStorageLimit());
+        $aVendingMachinesData = $this->storages->ListStorages( 1 , 0 , '3');
+        $aDistributors = $this->users->ListUsers(1,0,'1');
         $aUsersData = $this->users->ListUsers(1, $this->users->getLimit());
         $aProductsData = $this->products->ListProducts(1, $this->products->getLimit());
+        $aProductTypesData = $this->products->ListProductTypes(1, $this->products->getLimit());
+        $aSalesData = $this->storages->ListSales(1, $this->storages->getSalesLimit());
 
         $this->aData['sTitle'] = 'Администрация';
         $this->aData['aUsers'] = $aUsersData['aUsers'];
+        $this->aData['aDistributors'] = $aDistributors['aUsers'];
+        $this->aData['aVendingMachines'] = $aVendingMachinesData['aStorages'];
         $this->aData['sUsersPagination'] = $aUsersData['sPagination'];
         $this->aData['aStorages'] = $aStoragesData['aStorages'];
         $this->aData['sStoragesPagination'] = $aStoragesData['sPagination'];
         $this->aData['aProducts'] = $aProductsData['aProducts'];
         $this->aData['sProductsPagination'] = $aProductsData['sPagination'];
-        $this->aData['aProductTypes'] = $this->products->GetAllProductTypes();
+        $this->aData['aProductTypes'] = $aProductTypesData['aProductTypes'];
+        $this->aData['sProductTypesPagination'] = $aProductTypesData['sPagination'];
+        $this->aData['aSales'] = $aSalesData['aSales'];
+        $this->aData['sSalesPagination'] = $aSalesData['sPagination'];
+        $this->aData['aSales'] = $this->storages->GetSales();
 
         $this->load->view('admin/include/header',$this->aData);
         $this->load->view('admin/pages/main_page',$this->aData);
@@ -40,6 +50,7 @@ class admin extends My_AdminController
     {
         $bResult = false;
         $bEditUser = false;
+        $bIsDistributor = false;
 
         if(is_array($_POST) && !empty($_POST)){
             $iUserId = $_POST['UserId'];
@@ -60,24 +71,33 @@ class admin extends My_AdminController
                 $aDistributorData = array(
                     'Id' => $_POST['UserId'],
                     'StorageId' => $iStorageId,
+                    'Storages' => array_key_exists('vending_machine',$_POST) ? json_encode($_POST['vending_machine']) : '',
                 );
 
                 $bResult = $this->users->AddDistributor($aDistributorData);
             } elseif ($_POST['Type'] == 1 && $bIsDistributor) {
-                $aStorageData['Active'] = '1';
+                $aStorageData = array(
+                    'Active' => '1',
+                );
 
-                $bResult = $this->storages->UpdateStorage($oDistributor->StorageId,$aStorageData);
+                $aDistributorData = array('Storages' => array_key_exists('vending_machine',$_POST) ? json_encode($_POST['vending_machine']) : '');
+
+                $this->users->EditDistributor($_POST['UserId'],$aDistributorData);
+                $bResult = $this->storages->EditStorage($oDistributor->StorageId,$aStorageData);
             } elseif ($_POST['Type'] != 1 && $bIsDistributor) {
                 $bResult = $this->storages->DeleteStorage($oDistributor->StorageId);
             }
 
             $bEditUser = $this->users->EditUser($_POST);
         }
-
-        if($bResult && $bEditUser){
-            $bResult = true;
+        if($bIsDistributor){
+            if($bResult && $bEditUser){
+                $bResult = true;
+            } else {
+                $bResult = false;
+            }
         } else {
-            $bResult = false;
+            $bResult = $bEditUser;
         }
 
         echo json_encode(array('success' => $bResult));
@@ -140,17 +160,67 @@ class admin extends My_AdminController
         }
     }
 
+    public function GetDistributorVendingMachines()
+    {
+        if(is_array($_POST) && !empty($_POST)){
+            $iUserId = intval($_POST['iUserId']);
+
+            $aStoragesData = $this->storages->ListStorages(1, 0, 3);
+            $aDistributorStorages = $this->storages->GetDistributorStorages($iUserId);
+
+            if(is_array($aStoragesData) && !empty($aStoragesData)){
+                echo json_encode(array('success' => true, 'aStorages' => $aStoragesData['aStorages'], 'aDistributorStorages' => $aDistributorStorages));
+                return;
+            }
+        }
+        echo json_encode(array('success' => false));
+        return;
+    }
+
+    public function GetDistributorStorages($iUserId)
+    {
+        $iUserId = intval($iUserId);
+        if($iUserId != 0){
+            $aDistributorStorages = $this->storages->GetDistributorStorages($iUserId);
+            $aVendingMachinesData = $this->storages->ListStorages( 1 , 0 , '3');
+            $aVendingMachines = $aVendingMachinesData['aStorages'];
+
+            if(!empty($aDistributorStorages)){
+                foreach($aDistributorStorages as $iKey => $iStorageId){
+                    foreach($aVendingMachines as $oVendingMachine){
+                        if($iStorageId == $oVendingMachine->Id){
+                            $aDistributorStorages[$iKey] = $oVendingMachine;
+                        }
+                    }
+                }
+
+                echo json_encode(array('success' => true, 'aDistributorStorages' => $aDistributorStorages));
+                return;
+            }
+            echo json_encode(array('success' => false));
+            return;
+        } else {
+            $aVendingMachinesData = $this->storages->ListStorages( 1 , 0 , '3');
+            $aVendingMachines = $aVendingMachinesData['aStorages'];
+
+            echo json_encode(array('success' => true, 'aDistributorStorages' => $aVendingMachines));
+            return;
+        }
+    }
+
     public function StoragesPagination()
     {
         if(is_array($_POST) && array_key_exists('iPageId',$_POST)){
             $iPageId = intval($_POST['iPageId']);
+            $iType = 0;
 
-            $aStoragesData = $this->storages->ListStorages($iPageId, $this->storages->getLimit());
+            if(array_key_exists('iType',$_POST)){
+                $iType = intval($_POST['iType']);
+            }
 
-            $aStorages = $aStoragesData['aStorages'];
-            $sPagination = $aStoragesData['sPagination'];
+            $aStoragesData = $this->storages->ListStorages($iPageId, $this->storages->getStorageLimit(), $iType);
 
-            echo json_encode(array('success' => true, 'aStorages' => $aStorages, 'sPagination' => $sPagination));
+            echo json_encode(array('success' => true, 'aStorages' => $aStoragesData['aStorages'], 'sPagination' => $aStoragesData['sPagination']));
             return;
         }
         echo json_encode(array('success' => false));
@@ -165,14 +235,37 @@ class admin extends My_AdminController
 
             $aProductsData = $this->products->ListProducts($iPageId, $this->products->getLimit());
 
-            $aProducts = $aProductsData['aProducts'];
-            $sPagination = $aProductsData['sPagination'];
+            $aProductsData['success'] = true;
 
-            echo json_encode(array('success' => true, 'aProducts' => $aProducts, 'sPagination' => $sPagination));
+            echo json_encode($aProductsData);
             return;
         }
         echo json_encode(array('success' => false));
         return;
+    }
+
+    public function GetProductById()
+    {
+        if(is_array($_POST) && !empty($_POST) && array_key_exists('iProductId',$_POST)){
+            $iProductId = intval($_POST['iProductId']);
+            $oProduct = $this->products->GetProductById($iProductId);
+
+            echo json_encode(array('success' => true, 'oProduct' => $oProduct));
+            return;
+        }
+
+        echo json_encode(array('success' => false));
+    }
+
+    public function EditProduct()
+    {
+        if(is_array($_POST) && !empty($_POST)){
+            $iProductId = intval($_POST['Id']);
+            $sNewValue = $_POST['Value'];
+            $bEditProduct = $this->products->EditProduct($iProductId, $sNewValue);
+
+            echo json_encode(array('success' => $bEditProduct));
+        }
     }
 
     //Product types
@@ -212,5 +305,16 @@ class admin extends My_AdminController
 
         $bResult = $this->products->DeleteProductType($iProductTypeId);
         echo json_encode(array('success' => $bResult));
+    }
+
+    //Sales
+    public function GetSales()
+    {
+        $iUserId = intval($_POST['iUserId']);
+        $iStorageId = intval($_POST['iStorageId']);
+        $sPeriod = $_POST['sPeriod'];
+
+        $aSalesData = $this->storages->GetSales($iUserId, $iStorageId, $sPeriod);
+        echo json_encode(array('success' => true, 'aSalesData' => $aSalesData));
     }
 }

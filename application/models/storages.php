@@ -7,7 +7,10 @@ class Storages extends CI_Model
 {
     private $sStoragesTable = 'storages';
     private $sProductTable = 'products';
-    const iLimit = 12;
+    private $sSalesTable = 'sales';
+    private $sDistributorsTable = 'distributors';
+    const iSalesLimit = 12;
+    const iStorageLimit = 12;
     const iAdjacent = 6.5;
 
     public $aStorageTypes = array(
@@ -19,11 +22,17 @@ class Storages extends CI_Model
     public function __construct()
     {
         parent::__construct();
+        $this->load->model('products');
     }
 
-    public function getLimit()
+    public function getStorageLimit()
     {
-        return self::iLimit;
+        return self::iStorageLimit;
+    }
+
+    public function getSalesLimit()
+    {
+        return self::iSalesLimit;
     }
 
     public function AddStorage($aStorageData)
@@ -70,8 +79,8 @@ class Storages extends CI_Model
             $aStorageTwoAvailability[$iProductId] = $iQuantity;
         }
 
-        $bStorageOne = $this->UpdateStorageAvailability((int)$oStorageOne->Id, $aStorageOneAvailability);
-        $bStorageTwo = $this->UpdateStorageAvailability((int)$oStorageTwo->Id, $aStorageTwoAvailability);
+        $bStorageOne = $this->EditStorageAvailability((int)$oStorageOne->Id, $aStorageOneAvailability);
+        $bStorageTwo = $this->EditStorageAvailability((int)$oStorageTwo->Id, $aStorageTwoAvailability);
 
         if($bStorageOne && $bStorageTwo){
             return true;
@@ -127,7 +136,7 @@ class Storages extends CI_Model
         return false;
     }
 
-    public function UpdateStorageAvailability($iStorageId, array $aAvailability)
+    public function EditStorageAvailability($iStorageId, array $aAvailability)
     {
         foreach($aAvailability as $iKey => $iQuantity){
             if($iQuantity == 0){
@@ -150,7 +159,7 @@ class Storages extends CI_Model
         return $oResult;
     }
 
-    public function UpdateStorage($iStorageId, $aStorageData)
+    public function EditStorage($iStorageId, $aStorageData)
     {
         $this->db->where('Id',$iStorageId);
         return $this->db->update($this->sStoragesTable, $aStorageData);
@@ -176,7 +185,7 @@ class Storages extends CI_Model
         $iCount = $oQuery->num_rows();
 
         if($iCount > $iLimit && $iLimit != 0){
-            $iLimit = self::iLimit;
+            $iLimit = self::iStorageLimit;
             $iOffest = ($iPage - 1) * $iLimit;
             $this->db->where('Active','1');
             $this->db->order_by("Id","asc");
@@ -256,5 +265,109 @@ class Storages extends CI_Model
         }
 
         return $sPagination;
+    }
+
+    //Sales
+    public function Sale($aData)
+    {
+        $iProductId = (int)$aData['Product'];
+        $iQuantity = (int)$aData['Quantity'];
+        $iStorageId = (int)$aData['Storage'];
+        $oStorage = $this->GetStorageById($iStorageId);
+
+        $aStorageAvailability = json_decode($oStorage->Availability, true);
+        if(is_array($aStorageAvailability)){
+            if($aStorageAvailability[$iProductId] >= $iQuantity){
+                $aStorageAvailability[$iProductId] -= $iQuantity;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+        $oProduct = $this->products->GetProductById($iProductId);
+
+        $aSaleData = array(
+            'StorageId' => $iStorageId,
+            'ProductId' => $iProductId,
+            'Quantity' => $iQuantity,
+            'Price' => $oProduct->Price,
+            'Value' => $oProduct->Value,
+            'Date' => date('Y-m-d'),
+        );
+
+        $bSale = $this->db->insert($this->sSalesTable,$aSaleData);
+
+        $bStorage = $this->EditStorageAvailability((int)$oStorage->Id, $aStorageAvailability);
+
+        if($bSale && $bStorage){
+            return true;
+        }
+
+        return false;
+    }
+
+    public function GetDistributorStorages($iUserId)
+    {
+        $oDistributor = $this->db->get_where($this->sDistributorsTable, array('Id' => $iUserId))->first_row();
+
+        if(isset($oDistributor->Storages)){
+            $aDistributorStorages = json_decode($oDistributor->Storages, true);
+            if(is_array($aDistributorStorages) && !empty($aDistributorStorages)){
+                return $aDistributorStorages;
+            } else {
+                return array();
+            }
+        } else {
+            return array();
+        }
+    }
+
+    public function ListSales($iPage = 1, $iLimit = 0, $iStorageId = 0, $iProductId = 0, $sDate = '')
+    {
+
+    }
+
+    public function GetSales($iUserId = 0, $iStorageId = 0, $sPeriod = '')
+    {
+        $aData = array(
+            'Expense' => 0,
+            'Income' => 0,
+            'Profit' => 0,
+        );
+
+        if($iUserId != 0 ){
+            $oDistributor = $this->db->get_where($this->sDistributorsTable,array('Id' => $iUserId))->first_row();
+            $aStorages = json_decode($oDistributor->Storages, true);
+            if(is_array($aStorages) && !empty($aStorages)){
+                $this->db->where_in('StorageId', $aStorages);
+            } else {
+                return array(
+                    'Income' => '0.00',
+                    'Expense' => '0.00',
+                    'Profit' => '0.00',
+                );
+            }
+        }
+
+        if($iStorageId != 0){
+            $this->db->where('StorageId', $iStorageId);
+        }
+
+        if($sPeriod != ''){
+
+        }
+
+        $aSales = $this->db->get($this->sSalesTable)->result();
+
+        if(is_array($aSales) && !empty($aSales)){
+            foreach($aSales as $oSale){
+                $aData['Expense'] += $oSale->Value * $oSale->Quantity;
+                $aData['Income'] += $oSale->Price * $oSale->Quantity;
+            }
+            $aData['Profit'] += $aData['Income'] - $aData['Expense'];
+        }
+        return $aData;
     }
 }

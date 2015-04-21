@@ -6,14 +6,14 @@ if (!defined('BASEPATH'))
 class Users extends CI_Model
 {
     public $aUserTypes = array(
-        '0' => 'Потребител',
+        '0' => 'Посетител',
         '1' => 'Дистрибутор',
         '2' => 'Оператор',
         '3' => 'Администратор'
     );
 
-    const iLimit = 10;
-    const iAdjacent = 6.5;
+    const iLimit = 12;
+    const iAdjacent = 5.5;
 
     private $sDistributorsTable = 'distributors';
     private $sUsersTable = 'users';
@@ -135,15 +135,24 @@ class Users extends CI_Model
         return $this->db->insert($this->sDistributorsTable,$aDistributorData);
     }
 
+    public function EditDistributor($iUserId,$aDistributorData)
+    {
+        $this->db->where('Id' , $iUserId);
+        $this->db->update($this->sDistributorsTable,$aDistributorData);
+    }
+
     public function GetDistributor($iUserId)
     {
         $this->db->where('Id', $iUserId);
         return $this->db->get($this->sDistributorsTable)->first_row();
     }
 
-    public function ListUsers($iPage = 1, $iLimit = 0)
+    public function ListUsers($iPage = 1, $iLimit = 0, $iType = 0)
     {
         $this->db->where('Active','1');
+        if($iType != 0){
+            $this->db->where('Type',$iType);
+        }
         $this->db->order_by("Id","asc");
         $oQuery = $this->db->get($this->sUsersTable);
         $iCount = $oQuery->num_rows();
@@ -152,6 +161,9 @@ class Users extends CI_Model
             $iLimit = self::iLimit;
             $iOffest = ($iPage - 1) * $iLimit;
             $this->db->where('Active','1');
+            if($iType != 0){
+                $this->db->where('Type',$iType);
+            }
             $this->db->order_by("Id","asc");
             $this->db->limit($iLimit, $iOffest);
 

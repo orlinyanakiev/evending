@@ -24,7 +24,6 @@
             <div class="list" style="<?= is_array($aUsers) && !empty($aUsers) ? '' : 'display:none;' ;?>">
                 <?php $iCounter = 0; ?>
                 <?php foreach($aUsers as $oUserData) : ?>
-                    <?php $iCounter++ ;?>
                     <div class="user_container container" user-id="<?=$oUserData->Id?>" style="background-color: #<?= $iCounter % 2 == 0 ? 'DDF5B7' : 'FFFF99' ?>">
                         <div class="column first_column"><?= $oUserData->FirstName?></div>
                         <div class="column"><?=$oUserData->LastName?></div>
@@ -37,6 +36,7 @@
                             <?php endif; ?>
                         </div>
                     </div>
+                    <?php $iCounter++; ?>
                 <?php endforeach; ?>
                 <?= $sUsersPagination ?>
             </div>
@@ -49,6 +49,9 @@
                     <select name="Type">
                     </select>
                     <button type="submit">Запази</button>
+                    <div class="vending_machines_list">
+
+                    </div>
                 </form>
             </div>
         </div>
@@ -59,18 +62,22 @@
             <div class="list" style="display:<?= is_array($aStorages) && !empty($aStorages) ? 'block' : 'none';?>;">
                 <?php $iCounter = 0; ?>
                 <?php foreach($aStorages as $oStorage) :?>
-                    <?php $iCounter++; ?>
                     <div class="storage_container container" style="background-color: #<?= $iCounter % 2 == 0 ? 'DDF5B7' : 'FFFF99' ?>">
                         <div class="column first_column"><a href="#" class="storage_availability" storage-id="<?=$oStorage->Id?>"><?= $oStorage->Name?></a></div>
+                        <div class="manage_storage last_column">
+                            <a href="#" class="edit_pt"><i class="fa fa-pencil"></i></a>
+                            <a href="#" class="delete_pt"><i class="fa fa-times"></i></a>
+                        </div>
                         <div class="column last_column"><?=$oStorage->Address?></div>
                     </div>
+                    <?php $iCounter++; ?>
                 <?php endforeach; ?>
                 <?= $sStoragesPagination ?>
             </div>
             <div class="add_storage_form form">
                 <form method="post" action="">
-                    <input type="text" name="Name" placeholder="Наименование" />
-                    <input type="text" name="Address" placeholder="Адрес" />
+                    <input type="text" name="Name" placeholder="Наименование" autocomplete="off" />
+                    <input type="text" name="Address" placeholder="Адрес" autocomplete="off" />
                     <select name="Type">
                         <option value="0">Вид хранилище</option>
                         <?php foreach($aStorageTypes as $iKey => $sStorageType){
@@ -90,7 +97,6 @@
             <div class="list" style="display:<?= is_array($aProductTypes) && !empty($aProductTypes) ? 'block' : 'none' ;?>;">
                 <?php $iCounter = 0; ?>
                 <?php foreach ($aProductTypes as $oProductType) : ?>
-                    <?php $iCounter++; ?>
                     <div class="product_type_container container" product-id="<?=$oProductType->Id;?>" style="background-color: #<?= $iCounter % 2 == 0 ? 'DDF5B7' : 'FFFF99' ?>">
                         <div class="column first_column"><?= $oProductType->Name?></div>
                         <div class="manage_product_types last_column">
@@ -98,12 +104,14 @@
                             <a href="#" class="delete_pt"><i class="fa fa-times"></i></a>
                         </div>
                     </div>
+                    <?php $iCounter++; ?>
                 <?php endforeach; ?>
+                <?= $sProductTypesPagination ?>
             </div>
             <div class="add_product_type_form form">
                 <? if(is_array($aProductCategories) && !empty($aProductCategories)) : ?>
                     <form method="post" action="">
-                        <input type="text" name="Name" placeholder="Име" />
+                        <input type="text" name="Name" placeholder="Име" autocomplete="off" />
                         <select name="Category">
                             <option value="0">Категория</option>
                             <?php foreach($aProductCategories as $iKey => $sCategory){
@@ -117,7 +125,7 @@
             <div class="edit_product_type_form form">
                 <form method="post" action="">
                     <input type="hidden" name="Id" value="" />
-                    <input type="text" name="Name" placeholder="Име" />
+                    <input type="text" name="Name" placeholder="Име" autocomplete="off" />
                     <select name="Category">
                     </select>
                     <button type="submit">Запази</button>
@@ -125,28 +133,58 @@
             </div>
         </div>
 
+        <!--products-->
         <div class="products_content">
             <div class="list" style="<?= is_array($aProducts) && !empty($aProducts) ? '' : 'display:none;' ?>;">
                 <?php $iCounter = 0; ?>
                 <?php foreach ($aProducts as $oProduct) : ?>
-                    <?php $iCounter++; ?>
-                    <div class="product_type_container container" product-id="<?=$oProduct->Id;?>" style="background-color: #<?= $iCounter % 2 == 0 ? 'DDF5B7' : 'FFFF99' ?>">
-                        <div class="column first_column"><?= $oProduct->Type->Name?></div>
-                        <div class="column first_column"><?= $oProduct->ExpirationDate?></div>
-                        <div class="manage_products last_column">
-                            <a href="#" class="edit_pt"><i class="fa fa-pencil"></i></a>
-                        </div>
+                    <div class="product_container container" product-id="<?=$oProduct->Id;?>" style="background-color: #<?= $iCounter % 2 == 0 ? 'DDF5B7' : 'FFFF99' ?>">
+                        <div class="column first_column"><a class="show_product_details" href="#"><?= $oProduct->Type->Name?></a></div>
+                        <div class="column last_column"><?= $oProduct->ExpirationDate?></div>
                     </div>
+                    <?php $iCounter++; ?>
                 <?php endforeach; ?>
+                <?= $sProductsPagination ?>
             </div>
             <div class="edit_product_form form">
                 <form method="post" action="">
                     <input type="hidden" name="Id" value="" />
-                    <input type="text" name="Name" placeholder="Име" />
-                    <select name="Category">
-                    </select>
+                    <div class="fake_input_field" name="Name"></div>
+                    <div class="fake_input_field" name="Price"></div>
+                    <input type="text" name="Value" placeholder="Себестойност" value="" autocomplete="off" />
                     <button type="submit">Запази</button>
                 </form>
+            </div>
+        </div>
+
+        <div class="sales_content">
+            <div class="filter">
+                <select name="User">
+                    <option value="0">Всички потребители</option>
+                    <?php if(is_array($aDistributors) && !empty($aDistributors)){
+                        foreach($aDistributors as $oDistributor){
+                            echo "<option value='{$oDistributor->Id}'>{$oDistributor->FirstName} {$oDistributor->LastName}</option>";
+                        }
+                    };?>
+                </select>
+                <select name="Storage">
+                    <option value="0">Всички вендинг автомати</option>
+                    <?php if(is_array($aVendingMachines) && !empty($aVendingMachines)){
+                        foreach($aVendingMachines as $oVendingMachine){
+                            echo "<option value='{$oVendingMachine->Id}'>{$oVendingMachine->Name} {$oVendingMachine->Address}</option>";
+                        }
+                    };?>
+                </select>
+                <select name="Period" style="display: none;">
+                    <option value="">Неограничен период</option>
+                </select>
+            </div>
+            <div class="sales_results">
+                <div class="labels">
+                    <p><span>Приходи: </span><span id="income"><?= isset($aSales['Income'])? $aSales['Income'] : '0.00'; ?></span> лв.</p>
+                    <p><span>Разходи: </span><span id="expense"><?= isset($aSales['Expense'])? $aSales['Expense'] : '0.00'; ?></span> лв.</p>
+                    <p><span>Печалба: </span><span id="profit"><?= isset($aSales['Profit'])? $aSales['Profit'] : '0.00'; ?></span> лв.</p>
+                </div>
             </div>
         </div>
 

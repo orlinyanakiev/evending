@@ -23,7 +23,7 @@ class Member extends My_MemberController
         $this->aData['aProducts'] = $aProductsData['aProducts'];
         $this->aData['aStorages'] = $aStoragesData['aStorages'];
         if(is_object($this->aData['oDistributor'])){
-            $this->aData['aStorageAvailability'] = $this->GetStorageAvailability($this->aData['oDistributor']->StorageId);
+            $this->aData['aStorageAvailability'] = $this->GetStorageAvailability(intval($this->aData['oDistributor']->StorageId));
         }
 
         $this->load->view('member/include/header',$this->aData);
@@ -76,11 +76,12 @@ class Member extends My_MemberController
         }
 
         $aStoragesData = $this->storages->ListStorages();
+        $aProductTypesData = $this->products->ListProductTypes();
 
         $this->aData['sTitle'] = 'Зареждане';
         $this->aData['aStorages'] = $aStoragesData['aStorages'];
         $this->aData['sStoragesPagination'] = $aStoragesData['sPagination'];
-        $this->aData['aProductTypes'] = $this->products->GetAllProductTypes();
+        $this->aData['aProductTypes'] = $aProductTypesData['aProductTypes'];
 
         $this->load->view('member/include/header',$this->aData);
         $this->load->view('member/pages/supply',$this->aData);
@@ -93,8 +94,9 @@ class Member extends My_MemberController
             $iCategoryId = (int) $_POST['iCategoryId'];
             $aResponse = array();
             $aSelectedProductTypes = array();
+            $aProductTypesData = $this->products->ListProductTypes();
 
-            $aProductTypes = $this->products->GetAllProductTypes();
+            $aProductTypes = $aProductTypesData['aProductTypes'];
             foreach($aProductTypes as $oProductType){
                 if($iCategoryId == (int) $oProductType->Category){
                     $aSelectedProductTypes[] = $oProductType;
@@ -132,8 +134,7 @@ class Member extends My_MemberController
         if(is_array($aAvailability) && !empty($aAvailability)){
             foreach ($aAvailability as $iProductId => $iQuantity){
                 $oProduct = $this->products->GetProductById((int)$iProductId);
-                $oProductType = $this->products->GetProductTypeById((int)$oProduct->Type);
-                $aStorageAvailability[]= array('oData' => $oProduct, 'oType' => $oProductType, 'iQuantity' => $iQuantity);
+                $aStorageAvailability[]= array('oProduct' => $oProduct, 'iQuantity' => $iQuantity);
             }
         }
 
@@ -156,8 +157,7 @@ class Member extends My_MemberController
         if(is_array($aAvailability) && !empty($aAvailability)){
             foreach ($aAvailability as $iProductId => $iQuantity){
                 $oProduct = $this->products->GetProductById((int)$iProductId);
-                $oProductType = $this->products->GetProductTypeById((int)$oProduct->Type);
-                $aStorageAvailability[]= array('oData' => $oProduct, 'oType' => $oProductType, 'iQuantity' => $iQuantity);
+                $aStorageAvailability[]= array('oProduct' => $oProduct, 'iQuantity' => $iQuantity);
             }
         } else {
             echo json_encode(array('success' => false, 'message' => 'Хранилището е празно!'));
@@ -190,16 +190,31 @@ class Member extends My_MemberController
             redirect(base_url().'member');
         }
 
-        $aStoragesData = $this->storages->ListStorages();
+        $aStoragesData = $this->storages->ListStorages(1, 0, 3);
 
-        $this->aData['sTitle'] = 'Зареждане';
+        $this->aData['sTitle'] = 'Продажба';
         $this->aData['aStorages'] = $aStoragesData['aStorages'];
         $this->aData['sStoragesPagination'] = $aStoragesData['sPagination'];
-        $this->aData['aProductTypes'] = $this->products->GetAllProductTypes();
 
         $this->load->view('member/include/header',$this->aData);
         $this->load->view('member/pages/sales',$this->aData);
         $this->load->view('member/include/footer',$this->aData);
+    }
+
+    public function Sale()
+    {
+        $bSale = false;
+        if(is_array($_POST) && !empty($_POST)){
+            $aData = $_POST;
+
+            $bSale = $this->storages->Sale($aData);
+            if($bSale){
+                echo json_encode(array('success' => $bSale, 'message' => 'Успешна операция!'));
+                return;
+            }
+        }
+        echo json_encode(array('success' => $bSale, 'message' => 'Некоректна информация!'));
+        return;
     }
 
     public function Logout()

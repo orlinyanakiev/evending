@@ -40,11 +40,11 @@ $( document ).ready(function() {
                 Password2:{ equalTo: "#pass" }
             },
             messages:{
-                FirstName: 'Въведете валидно име',
-                LastName: 'Въведете валидна фамилия',
-                LoginName: 'Въведете валидно потребителско име',
-                Password: 'Въведете валидна парола',
-                Password2: 'Потвърдете паролата'
+                FirstName: '',
+                LastName: '',
+                LoginName: '',
+                Password: '',
+                Password2: ''
             },
         });
 
@@ -60,7 +60,7 @@ $( document ).ready(function() {
                 data: data,
                 success:function(result){
                     if(result.success == true){
-                        $('.public').find('.warning').html('<strong>Регистрацията премина успешно!</strong><p class="request_success">Можете да влезнете от <a href="'+ base_url +'">началната страница</a>.</p>');
+                        $('.public').find('.warning').html('<strong>Регистрацията премина успешно!</strong><p class="request_success">Можете да влезнете от <a href="'+ base_url +'"><strong>началната страница</strong></a>.</p>');
                         $('.public').find('.directions').html('');
                     }
                     if(result.success == false){
@@ -98,6 +98,7 @@ $( document ).ready(function() {
     $('.users_content .list').off('click').on('click','.edit_user i', function (e) {
         e.preventDefault();
         var user_id = $(this).closest('.user_container').attr('user-id');
+        var errorTimeout;
 
         $.ajax({
             method: 'post',
@@ -120,22 +121,43 @@ $( document ).ready(function() {
                         }
                     });
 
+                    if(result.oUser.Type == 1){
+                        GetDistributorVendingMachines(user_id);
+                    }
+
                     $('.edit_user_form').find('[name="Type"]').html(select_html);
                     $('.list').hide();
                     $('.edit_user_form').show();
                 }
                 if(result.success == false){
                     $('.content').find('.warning').html('<p class="request_failure">'+ result.message +'</p>');
+                    clearTimeout(errorTimeout);
+                    errorTimeout = setTimeout(function(){
+                        $('.content').find('.warning').html('');
+                    }, 1500);
                 }
             }
         })
     });
+
+    //Distributors storage
+    $('.users_content [name="Type"]').change(function(e){
+        e.preventDefault();
+        var iUserId = $('input[name="UserId"]').val();
+
+        if($(this).val() == 1){
+            GetDistributorVendingMachines(iUserId);
+        } else {
+            $('.vending_machines_list').html('');
+        }
+    })
 
     //Update user
     $('.edit_user_form').off('click').on('click', 'button', function(e){
         e.preventDefault();
 
         var this_form = $(this).closest("form");
+        var errorTimeout;
 
         this_form.validate({
             rules:{
@@ -146,9 +168,9 @@ $( document ).ready(function() {
                 Type: { required: true, digits: true }
             },
             messages:{
-                FirstName: 'Въведете валидно име',
-                LastName: 'Въведете валидна фамилия',
-                LoginName: 'Въведете валидно потребителско име'
+                FirstName: '',
+                LastName: '',
+                LoginName: ''
             }
         });
 
@@ -171,6 +193,10 @@ $( document ).ready(function() {
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Опитайте отново!</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 1500);
                     }
                 }
             });
@@ -185,7 +211,7 @@ $( document ).ready(function() {
         $.ajax({
             method: 'post',
             dataType: 'json',
-            url: base_url + 'admin/UsersPagination',
+            url: base_url + 'admin/UsersPagination/',
             data: { "iPageId": page_id },
             success: function (result) {
                 var listing_html = '';
@@ -230,8 +256,8 @@ $( document ).ready(function() {
                 Password: { required: true, LogNamPass:true }
             },
             messages:{
-                LoginName: 'Въведете валидно потребителско име',
-                Password: 'Въведете валидна парола'
+                LoginName: '',
+                Password: ''
             },
         });
 
@@ -275,7 +301,7 @@ $( document ).ready(function() {
         $.ajax({
             method: 'post',
             dataType: 'json',
-            url: base_url + 'admin/StoragesPagination',
+            url: base_url + 'admin/StoragesPagination/',
             data: { "iPageId": page_id },
             success: function (result) {
                 var listing_html = '';
@@ -314,6 +340,7 @@ $( document ).ready(function() {
         e.preventDefault();
 
         var this_form = $(this).closest('form');
+        var errorTimeout;
 
         this_form.validate({
             rules:{
@@ -322,9 +349,9 @@ $( document ).ready(function() {
                 Type: { GreaterThan: 0 }
             },
             messages:{
-                Name: 'Името не е валидно',
-                Address: 'Некоректно въведен адрес',
-                Type: 'Изберете вид'
+                Name: '',
+                Address: '',
+                Type: ''
             }
         })
 
@@ -336,7 +363,7 @@ $( document ).ready(function() {
             $.ajax({
                 dataType: 'json',
                 method: 'post',
-                url: base_url + 'admin/AddStorage',
+                url: base_url + 'admin/AddStorage/',
                 data: data,
                 success:function(result){
                     if(result.success == true){
@@ -346,7 +373,11 @@ $( document ).ready(function() {
                         },1000);
                     }
                     if(result.success == false){
-                        $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Опитайте отново.</p>')
+                        $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Опитайте отново.</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 1500);
                     }
                 }
             });
@@ -367,6 +398,7 @@ $( document ).ready(function() {
         e.preventDefault();
 
         var this_form = $(this).closest("form");
+        var errorTimeout;
 
         this_form.validate({
             rules:{
@@ -374,8 +406,8 @@ $( document ).ready(function() {
                 Category: { GreaterThan: 0 }
             },
             messages:{
-                Name: 'Въведеното име е некоректно',
-                Category: 'Изберете категория'
+                Name: '',
+                Category: ''
             }
         });
 
@@ -387,17 +419,24 @@ $( document ).ready(function() {
             $.ajax({
                 method: 'post',
                 dataType: 'json',
-                url: base_url + 'admin/AddProductType',
+                url: base_url + 'admin/AddProductType/',
                 data: data,
                 success: function (result) {
                     if(result.success == true){
                         $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
+                        this_form.find('[name="Name"]').val('');
+                        this_form.find('[name="Category"]').val(0);
+
                         setTimeout(function(){
                             window.location.reload();
                         },1000);
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Опитайте отново</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 1500);
                     }
                 }
             });
@@ -413,7 +452,7 @@ $( document ).ready(function() {
         $.ajax({
             dataType: 'json',
             method: 'post',
-            url: base_url + 'admin/GetProductTypeById',
+            url: base_url + 'admin/GetProductTypeById/',
             data: { "iProductTypeId" : pt_id },
             success: function (result) {
                 if(result.success == true){
@@ -443,6 +482,7 @@ $( document ).ready(function() {
         e.preventDefault();
 
         var this_form = $(this).closest("form");
+        var errorTimeout;
 
         this_form.validate({
             rules:{
@@ -451,8 +491,8 @@ $( document ).ready(function() {
                 Category: { required: true, digits: true, GreaterThan: 0 }
             },
             messages:{
-                Name: 'Въведете валидно име',
-                Category: 'Изберете категория'
+                Name: '',
+                Category: ''
             }
         });
 
@@ -475,6 +515,10 @@ $( document ).ready(function() {
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Опитайте отново!</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 1500);
                     }
                 }
             });
@@ -485,13 +529,13 @@ $( document ).ready(function() {
     $('.manage_product_types .delete_pt').off('click').on('click','i',function(e){
         e.preventDefault();
 
-        if(confirm('Сигурни ли сте, че желаете да изтриете този тип продукти?')){
+        if(confirm('Сигурни ли сте, че желаете да изтриете този тип изделие?')){
             var pt_id = $(this).closest('.product_type_container').attr('product-id');
 
             $.ajax({
                 method: 'post',
                 dataType: 'json',
-                url: base_url + 'admin/DeleteProductType',
+                url: base_url + 'admin/DeleteProductType/',
                 data: { "iProductTypeId" : pt_id },
                 success:function(result){
                     if(result.success == true){
@@ -502,28 +546,137 @@ $( document ).ready(function() {
         }
     });
 
+    //Products pagination
+    $('.products_content').on('click', '.pagination_list a', function(e){
+        e.preventDefault();
+        var page_id = $(this).attr('page-number');
+
+        $.ajax({
+            method: 'post',
+            dataType: 'json',
+            url: base_url + 'admin/ProductsPagination/',
+            data: { "iPageId": page_id },
+            success: function (result) {
+                var listing_html = '';
+                var colour = '';
+
+                $.each(result.aProducts, function( index , value ){
+                    if(index % 2 == 0){
+                        colour = 'DDF5B7';
+                    } else {
+                        colour = 'FFFF99'
+                    }
+                    listing_html += '<div class="product_container container" product-id="' + value.Id + '" style="background-color: #' + colour + '">';
+                    listing_html += '<div class="column first_column"><a class="show_product_details" href="#">' + value.Type.Name + '</a></div>';
+                    listing_html += '<div class="column last_column">' + value.ExpirationDate + '</div>';
+                    listing_html += '</div>';
+                });
+
+                listing_html += result.sPagination;
+
+                $('.products_content').find('.list').html(listing_html);
+            }
+        });
+    });
+
+    //Edit product
+    $('.product_container').off('click').on('click', '.show_product_details', function(e){
+        e.preventDefault();
+        var product_id = $(this).closest('.product_container').attr('product-id');
+
+        $.ajax({
+            method: 'post',
+            dataType: 'json',
+            url: base_url + 'admin/GetProductById/',
+            data: { "iProductId": product_id },
+            success:function( result ){
+                if(result.success == true){
+                    $('.edit_product_form').find('[name="Id"]').val(result.oProduct.Id);
+                    $('.edit_product_form').find('[name="Name"]').text(result.oProduct.Type.Name);
+                    $('.edit_product_form').find('[name="Price"]').text(result.oProduct.Price);
+                    $('.edit_product_form').find('[name="Value"]').val(result.oProduct.Value);
+
+                    $('.products_content .list').hide();
+                    $('.products_content .edit_product_form').show();
+                }
+            }
+        });
+    });
+
+    //Update product
+    $('.edit_product_form').off('click').on('click', 'button', function(e){
+        e.preventDefault();
+
+        var this_form = $(this).closest("form");
+        var errorTimeout;
+
+        this_form.validate({
+            rules:{
+                Id: { required: true, digits: true, GreaterThan: 0 },
+                Value: { Price: true }
+            },
+            messages:{
+                Id: '',
+                Value: ''
+            }
+        });
+
+        var form_valid = this_form.valid();
+
+        if(form_valid){
+            var data = this_form.serialize();
+
+            $.ajax({
+                dataType: 'json',
+                method: 'post',
+                url: base_url + 'admin/EditProduct/',
+                data: data,
+                success:function(result){
+                    if(result.success == true){
+                        $('.content').find('.warning').html('<p class="request_success">Оперецията е успешна!</p>');
+                        setTimeout(function(){
+                            window.location.reload();
+                        },1000);
+                    }
+                    if(result.success == false){
+                        $('.content').find('.warning').html('<p class="request_failure">Опитайте отново!</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 1500);
+                    }
+                }
+            });
+        }
+    });
+
+    //$('#datepicker').datepicker({});
+
     //Storage supply
     $('.supply_form button').click(function(e){
         e.preventDefault();
 
         var this_form = $(this).closest("form");
+        var errorTimeout;
 
         this_form.validate({
             rules:{
                 Storage: { GreaterThan: 0 },
-                Product: { GreaterThan: 0 },
+                Category: { GreaterThan: 0 },
+                ProductType: { GreaterThan: 0 },
                 Quantity: { required: true, digits: true, GreaterThan: 0 },
                 ExpirationDate: { required: true, DateValidation: true },
                 Price: { required: true, Price: true },
                 Value: { Price: true }
             },
             messages:{
-                Storage: 'Изберете хранилище',
-                Product: 'Изберете продукт',
-                Quantity: 'Посочете количество',
-                ExpirationDate: 'Въведете валидна дата',
-                Price: 'Въведете валидна цена',
-                Value: 'Въведете валидна цена'
+                Storage: '',
+                Category: '',
+                ProductType: '',
+                Quantity: '',
+                ExpirationDate: '',
+                Price: '',
+                Value: ''
             }
         });
 
@@ -535,7 +688,7 @@ $( document ).ready(function() {
             $.ajax({
                 method: 'post',
                 dataType: 'json',
-                url: base_url + 'member/StorageSupply',
+                url: base_url + 'member/StorageSupply/',
                 data: data,
                 success: function (result) {
                     if(result.success == true){
@@ -554,22 +707,27 @@ $( document ).ready(function() {
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Опитайте отново</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 1500);
                     }
                 }
             });
         }
-    })
+    });
 
     //Storage supply category filter
     $('.supply_form select[name="Category"]').change(function(){
         var selected_category_id = $(this).find('option:selected').val();
+        var errorTimeout;
 
         var products_html = '';
         if(selected_category_id > 0){
             $.ajax({
                 method: 'post',
                 dataType: 'json',
-                url: base_url + 'member/GetProductTypesByCategoryId',
+                url: base_url + 'member/GetProductTypesByCategoryId/',
                 data: { "iCategoryId" : selected_category_id },
                 success: function (result) {
                     if(result.success == true){
@@ -584,6 +742,10 @@ $( document ).ready(function() {
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">'+ result.message +'</p>');
                         $('.supply_form').find('select[name="ProductType"]').html('<option value="0">Тип изделие</option>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 1500);
                     }
                 }
             });
@@ -599,6 +761,7 @@ $( document ).ready(function() {
 
         var storage_id = $(this).attr('storage-id');
         var html = '';
+        var errorTimeout;
 
         $.ajax({
             method: 'post',
@@ -609,7 +772,7 @@ $( document ).ready(function() {
                     var iCounter = 0;
                     var sColor = '';
                     html += '<div class="list" style="display: block">';
-                    html += '<div class="container"><div class="column first_column">Продукт (срок на годност)</div><div class="column last_column">Количество</div></div>';
+                    html += '<div class="container"><div class="column first_column">Изделие</div><div class="column last_column">Количество</div></div>';
                     $.each(result.aStorageAvailability,function(index,value){
                         if(iCounter % 2 == 0){
                             sColor = 'DDF5B7';
@@ -617,14 +780,18 @@ $( document ).ready(function() {
                             sColor = 'FFFF99';
                         }
                         iCounter += 1;
-                        html += '<div class="container" style="background-color: #' + sColor + ';"><div class="column first_column" product-id="' + value.oData.Id + '">' + value.oType.Name + ' (' +value.oData.ExpirationDate + ')</div><div class="column last_column">' + value.iQuantity + '</div></div>';
+                        html += '<div class="container" style="background-color: #' + sColor + ';"><div class="column first_column" product-id="' + value.oProduct.Id + '">' + value.oProduct.Type.Name + ' (' +value.oProduct.ExpirationDate + ')</div><div class="column last_column">' + value.iQuantity + '</div></div>';
                     })
-                    html += '<div class="directions"><a href="">Обратно</a></div></div>';
+                    //html += '<div class="directions"><a href="">Обратно</a></div></div>';
 
                     $('.content').html(html);
                 }
                 if(result.success == false){
                     $('.content').find('.warning').html('<p class="request_failure">'+ result.message +'</p>');
+                    clearTimeout(errorTimeout);
+                    errorTimeout = setTimeout(function(){
+                        $('.content').find('.warning').html('');
+                    }, 1500);
                 }
             }
         })
@@ -634,9 +801,54 @@ $( document ).ready(function() {
     $('.distribution_form select[name="Storage1"]').change(function(){
         var iSelectedStorageId = $(this).val();
 
-        GetRemainingStorages(iSelectedStorageId);
-        GetStorageProducts(iSelectedStorageId);
-    })
+        var second_storage_html = '';
+
+        $.ajax({
+            method: 'post',
+            dataType: 'json',
+            url: base_url + 'member/GetRemainingStorages/',
+            data: { "iSelectedStorageId" : iSelectedStorageId },
+            success:function(result){
+                if(result.success == true){
+                    second_storage_html += '<option value="0">Към</option>';
+                    $.each(result.aRemainingStorages,function(index,value){
+                        second_storage_html += '<option value="' + value.Id + '">' + value.Name + '</option>';
+                    });
+
+                    $('.distribution_form').find('select[name="Storage2"]').html(second_storage_html);
+                }
+            }
+        });
+
+        var products_html = '';
+        var errorTimeout;
+
+        $.ajax({
+            method: 'post',
+            dataType: 'json',
+            url: base_url + 'member/AjaxGetStorageAvailability/' + iSelectedStorageId,
+            success:function(result){
+                if(result.success == true){
+                    products_html += '<option value="0">Изделие</option>';
+                    $.each(result.aStorageAvailability,function(index,value){
+                        products_html += '<option value="' + value.oProduct.Id + '" product-quantity="'+ value.iQuantity +'">' + value.oProduct.Type.Name + ' (' + value.oProduct.ExpirationDate + ')</option>';
+                    });
+
+                    $('.distribution_form').find('select[name="Product"]').html(products_html);
+                    $('.content').find('.warning').html('');
+                }
+                if(result.success == false ){
+                    $('.distribution_form').find('select[name="Product"]').html('<option value="0" selected="selected">Изделие</option>');
+
+                    $('.content').find('.warning').html('<p class="request_failure">'+ result.message +'</p>');
+                    clearTimeout(errorTimeout);
+                    errorTimeout = setTimeout(function(){
+                        $('.content').find('.warning').html('');
+                    }, 1500);
+                }
+            }
+        });
+    });
 
     //distribution quantities
     $('.distribution_form select[name="Product"]').change(function(){
@@ -650,6 +862,7 @@ $( document ).ready(function() {
         e.preventDefault();
 
         var this_form = $(this).closest('form');
+        var errorTimeout;
 
         this_form.validate({
             rules:{
@@ -659,10 +872,10 @@ $( document ).ready(function() {
                 Quantity: { required: true, digits: true, GreaterThan: 0 }
             },
             messages:{
-                Storage1: 'Изберете хранилище',
-                Storage2: 'Изберете хранилище',
-                Product: 'Изберете продукт',
-                Quantity: 'Посочете количество'
+                Storage1: '',
+                Storage2: '',
+                Product: '',
+                Quantity: ''
             }
         });
 
@@ -674,7 +887,7 @@ $( document ).ready(function() {
             $.ajax({
                 method: 'post',
                 dataType: 'json',
-                url: base_url + 'member/Distribute',
+                url: base_url + 'member/Distribute/',
                 data: data,
                 success:function(result){
                     if(result.success == true){
@@ -689,37 +902,22 @@ $( document ).ready(function() {
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">'+ result.message +'</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 1500);
                     }
                 }
             });
         }
     });
 
-    //other storages
-    function GetRemainingStorages(iSelectedStorageId) {
-        var second_storage_html = '';
+    //sales select options
+    $('.sales_form select[name="Storage"]').change(function(){
+        var iSelectedStorageId = $(this).val();
 
-        $.ajax({
-            method: 'post',
-            dataType: 'json',
-            url: base_url + 'member/GetRemainingStorages',
-            data: { "iSelectedStorageId" : iSelectedStorageId },
-            success:function(result){
-                if(result.success == true){
-                    second_storage_html += '<option value="0">Към</option>';
-                    $.each(result.aRemainingStorages,function(index,value){
-                        second_storage_html += '<option value="' + value.Id + '">' + value.Name + '</option>';
-                    });
-
-                    $('.distribution_form').find('select[name="Storage2"]').html(second_storage_html);
-                }
-            }
-        });
-    }
-
-    //products
-    function GetStorageProducts(iSelectedStorageId){
         var products_html = '';
+        var errorTimeout;
 
         $.ajax({
             method: 'post',
@@ -729,19 +927,159 @@ $( document ).ready(function() {
                 if(result.success == true){
                     products_html += '<option value="0">Изделие</option>';
                     $.each(result.aStorageAvailability,function(index,value){
-                        products_html += '<option value="' + value.oData.Id + '" product-quantity="'+ value.iQuantity +'">' + value.oType.Name + ' (' + value.oData.ExpirationDate + ')</option>';
+                        products_html += '<option value="' + value.oProduct.Id + '" product-quantity="'+ value.iQuantity +'">' + value.oProduct.Type.Name + ' (' + value.oProduct.ExpirationDate + ')</option>';
                     });
 
-                    $('.distribution_form').find('select[name="Product"]').html(products_html);
+                    $('.sales_form').find('select[name="Product"]').html(products_html);
                     $('.content').find('.warning').html('');
                 }
                 if(result.success == false ){
                     $('.distribution_form').find('select[name="Product"]').html('<option value="0" selected="selected">Изделие</option>');
 
                     $('.content').find('.warning').html('<p class="request_failure">'+ result.message +'</p>');
+                    clearTimeout(errorTimeout);
+                    errorTimeout = setTimeout(function(){
+                        $('.content').find('.warning').html('');
+                    }, 1500);
+                }
+            }
+        });
+    });
+
+    //sales quantities
+    $('.sales_form select[name="Product"]').change(function(){
+        var iQuantity = $(this).find('option:selected').attr('product-quantity');
+
+        $('.sales_form').find('input[name="Quantity"]').val(iQuantity);
+    })
+
+    //sales submit
+    $('.sales_form button').click(function(e){
+        e.preventDefault();
+
+        var this_form = $(this).closest('form');
+        var errorTimeout;
+
+        this_form.validate({
+            rules:{
+                Storage: { GreaterThan: 0 },
+                Product: { GreaterThan: 0 },
+                Quantity: { required: true, digits: true, GreaterThan: 0 }
+            },
+            messages:{
+                Storage: '',
+                Product: '',
+                Quantity: ''
+            }
+        });
+
+        var form_valid = this_form.valid();
+
+        if(form_valid){
+            var data = this_form.serialize();
+
+            $.ajax({
+                method: 'post',
+                dataType: 'json',
+                url: base_url + 'member/Sale/',
+                data: data,
+                success:function(result){
+                    if(result.success == true){
+                        $('.sales_form').find('select[name="Storage"]').val(0);
+                        $('.sales_form').find('[name="Product"]').val(0);
+                        $('.sales_form').find('[name="Quantity"]').val('');
+                        $('.content').find('.warning').html('<p class="request_success">'+ result.message +'</p>');
+                        setTimeout(function(){
+                            window.location.reload();
+                        },500);
+                    }
+                    if(result.success == false){
+                        $('.content').find('.warning').html('<p class="request_failure">'+ result.message +'</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 1500);
+                    }
+                }
+            });
+        }
+    });
+
+    //sales statistics
+    $('.sales_content [name="Storage"], .sales_content [name="Period"]').on('change', function(e){
+        e.preventDefault();
+
+        var user_id = $('.sales_content [name="User"]').val();
+        var storage_id = $('.sales_content [name="Storage"]').val();
+        var period = $('.sales_content [name="Period"]').val();
+
+        GetSales(user_id,storage_id,period);
+    });
+
+    //update statistics and storages
+    $('.sales_content [name="User"]').on('change', function(e){
+        e.preventDefault();
+
+        var user_id = $('.sales_content [name="User"]').val();
+        var storage_id = $('.sales_content [name="Storage"]').val();
+        var period = $('.sales_content [name="Period"]').val();
+
+        $.ajax({
+            method: 'post',
+            dataType: 'json',
+            url: base_url + 'admin/GetDistributorStorages/' + user_id,
+            success:function (result) {
+                if(result.success == true){
+                    var html = '<option value="0">Всички вендинг автомати</option>';
+
+                    $.each(result.aDistributorStorages, function ( index , value ){
+                        html += '<option value="' + value.Id + '">' + value.Name + '</option>';
+                    });
+
+                    $('.sales_content [name="Storage"]').html(html);
+                } else {
+                    $('.sales_content [name="Storage"]').html('<option value=""> --- </option>');
+                }
+                GetSales (user_id , storage_id , period);
+            }
+        });
+    });
+
+    var GetSales = function (iUserId, iStorageId, sPeriod) {
+        $.ajax({
+            method: 'post',
+            dataType: 'json',
+            url: base_url + 'admin/GetSales/',
+            data: { "iUserId": iUserId, "iStorageId": iStorageId, "sPeriod": sPeriod },
+            success:function(result){
+                if(result.success == true){
+                    $('#profit').html(result.aSalesData.Profit);
+                    $('#expense').html(result.aSalesData.Expense);
+                    $('#income').html(result.aSalesData.Income);
                 }
             }
         });
     }
 
+    var GetDistributorVendingMachines = function (iUserId){
+        $.ajax({
+            method: 'post',
+            dataType: 'json',
+            url: base_url + 'admin/GetDistributorVendingMachines/',
+            data: { "iUserId": iUserId },
+            success:function (result) {
+                var html = '';
+
+                $.each(result.aStorages, function(index,value){
+                    if(jQuery.inArray(value.Id, result.aDistributorStorages) > -1){
+                        html += '<div><input type="checkbox" name="vending_machine[]" checked="checked" value="' + value.Id + '" />' + value.Name + ' ' + value.Address + '</div>';
+                    } else {
+                        html += '<div><input type="checkbox" name="vending_machine[]" value="' + value.Id + '" />' + value.Name + ' ' + value.Address + '</div>';
+                    }
+                });
+
+                $('.vending_machines_list').html(html);
+            }
+        });
+    }
 });

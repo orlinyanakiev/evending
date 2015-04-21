@@ -34,11 +34,11 @@
                         <select name="ProductType">
                             <option value="0">Тип изделие</option>
                         </select>
-                        <input type="text" name="Quantity" placeholder="Количество">
-                        <input type="text" name="ExpirationDate" placeholder="Валидност">
-                        <input type="text" name="Price" placeholder="Цена" />
+                        <input type="text" name="Quantity" placeholder="Количество" autocomplete="off" />
+                        <input id="datepicker" type="text" name="ExpirationDate" placeholder="Валидност" autocomplete="off" />
+                        <input type="text" name="Price" placeholder="Цена" autocomplete="off" />
                         <?php if(!is_object($oDistributor)) : ?>
-                            <input type="text" name="Value" placeholder="Себестойност" />
+                            <input type="text" name="Value" placeholder="Себестойност" autocomplete="off" />
                         <?php endif; ?>
                         <button type="submit">Добави</button>
                     </form>
