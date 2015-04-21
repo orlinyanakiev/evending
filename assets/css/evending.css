@@ -1,5 +1,7 @@
 body {color: #512200;background-color: aliceblue;letter-spacing: 0px;font-family: Verdana, Arial ;font-size: 20px;margin: auto;padding: 0px;text-align: center;}
 
+div.ui-datepicker{font-size:20px;}
+
 p {margin: 0px;padding-top: 20px;}
 a {color: green;text-decoration: none;}
 
@@ -14,8 +16,8 @@ form input[type="text"],input[type="password"] {color: #512200;display: block;fo
 .fake_input_field {color: #512200;font-size: 16px;border: 2px solid green;background-color: #F0FDEA;border-radius: 5px;padding: 8px;margin: 10px 5px -5px 5px;min-width: 330px;text-align: left;}
 button {display: block;letter-spacing: 0px;border: 2px solid green;border-radius: 5px;font-size: 16px;background-color: #F0FDEA;padding:8px;margin: 10px 5px -6px 80px;min-width: 210px;}
 
-input[type="text"].error, input[type="password"].error { border:2px solid red;}
-select.error { border:2px solid red;}
+input[type="text"].error, input[type="password"].error {border:2px solid red;}
+select.error {border:2px solid red;}
 
 .register_form {padding-top: 20px;}
 
@@ -32,8 +34,8 @@ select.error { border:2px solid red;}
 
 select {display: block;font-size: 16px;color: #512200;border: 2px solid green;background-color: #F0FDEA;border-radius: 5px;padding: 8px 0 8px 0;margin: 10px 5px -6px 5px;min-width: 350px;}
 
-.warning p.request_failure {color: #FC1800;}
-.warning p.request_success {color: green;}
+p.request_failure {color: #FC1800;}
+p.request_success {color: green;}
 
 .list {text-align: left; margin: 8px;}
 .list .column {display: inline;}
@@ -41,15 +43,15 @@ select {display: block;font-size: 16px;color: #512200;border: 2px solid green;ba
 .list .last_column {margin: 0 10px 0 30px; float: right;}
 
 .pagination_list {margin: 4px 0 0 0;width: 670px; text-align: center;}
-.pagination_list a { margin: 0 4px 0 4px; }
-.pagination_list a.active { color: #512200; cursor: default; }
+.pagination_list a {margin: 0 4px 0 4px;}
+.pagination_list a.active {color: #512200; cursor: default;}
 
-.option { font-size: 22px; text-align: left; margin: 8px }
+.option {font-size: 22px; text-align: left; margin: 8px;}
 
 .edit_user_form, .edit_product_type_form, .add_product_type_form, .add_storage_form, .users_content, .storages_content,
-.product_types_content, .products_content, .edit_product_form, .sales_content { display: none; }
+.product_types_content, .products_content, .edit_product_form, .sales_content, .vending_machines_list {display: none;}
 
-.sales_results{ text-align: left;}
+.sales_results{text-align: left;}
 
-.vending_machines_list { margin: 10px 0 0 0; text-align: left; }
-input[type="checkbox"] { margin:4px 12px 4px 4px; -ms-transform: scale(2); -moz-transform: scale(2); -webkit-transform: scale(2); -o-transform: scale(2); padding: 10px; }
+.vending_machines_list {margin: 10px 0 0 0; text-align: left;}
+input[type="checkbox"] {margin:4px 12px 4px 4px; -ms-transform: scale(2); -moz-transform: scale(2); -webkit-transform: scale(2); -o-transform: scale(2); padding: 10px;}

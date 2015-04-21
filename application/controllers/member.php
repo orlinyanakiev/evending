@@ -19,11 +19,13 @@ class Member extends My_MemberController
         $aStoragesData = $this->storages->ListStorages();
         $aProductsData = $this->products->ListProducts();
 
+        $this->aData['aExpiringProducts'] = $this->products->GetProductByExpirationDate();
         $this->aData['sTitle'] = 'Дистрибуция';
         $this->aData['aProducts'] = $aProductsData['aProducts'];
         $this->aData['aStorages'] = $aStoragesData['aStorages'];
         if(is_object($this->aData['oDistributor'])){
-            $this->aData['aStorageAvailability'] = $this->GetStorageAvailability(intval($this->aData['oDistributor']->StorageId));
+            $aDistributorStorages = $this->GetRemainingDistributorStorages();
+            $this->aData['aStorages'] = $aDistributorStorages;
         }
 
         $this->load->view('member/include/header',$this->aData);
@@ -52,6 +54,27 @@ class Member extends My_MemberController
         return;
     }
 
+    public function AjaxGetRemainingDistributorStorages($iTakenStorageId = 0)
+    {
+        $aDistributorStorages = $this->GetRemainingDistributorStorages($iTakenStorageId);
+        echo json_encode(array('success' => true, 'aRemainingStorages' => $aDistributorStorages));
+    }
+
+    public function GetRemainingDistributorStorages($iTakenStorageId = 0)
+    {
+        $aDistributorStorages = $this->storages->GetDistributorVendingMachines($this->aData['oDistributor']->Id);
+        $iDistributorStorageId = intval($this->aData['oDistributor']->StorageId);
+        $aDistributorStorages[] = $this->storages->GetStorageById($iDistributorStorageId);
+
+        foreach($aDistributorStorages as $iKey => $oStorage){
+            if($oStorage->Id == $iTakenStorageId){
+                unset($aDistributorStorages[$iKey]);
+            }
+        }
+
+        return $aDistributorStorages;
+    }
+
     public function Distribute()
     {
         $bDistribute = false;
@@ -60,11 +83,11 @@ class Member extends My_MemberController
 
             $bDistribute = $this->storages->Distribute($aData);
             if($bDistribute){
-                echo json_encode(array('success' => $bDistribute, 'message' => 'Успешна операция!'));
+                echo json_encode(array('success' => $bDistribute));
                 return;
             }
         }
-        echo json_encode(array('success' => $bDistribute, 'message' => 'Некоректна информация!'));
+        echo json_encode(array('success' => $bDistribute));
         return;
     }
 
@@ -107,15 +130,23 @@ class Member extends My_MemberController
                 $aResponse['success'] = true;
                 $aResponse['aTypes'] = $aSelectedProductTypes;
             } else {
-                $aResponse = array(
-                    'success' => false,
-                    'message' => 'Няма изделия от тази категория'
-                );
+                $aResponse = array('success' => false);
             }
 
             echo json_encode($aResponse);
             return;
         }
+    }
+
+    public function AjaxGetStorageAvailability($iStorageId)
+    {
+        $aStorageAvailability = $this->GetStorageAvailability($iStorageId);
+        if(is_array($aStorageAvailability) && !empty($aStorageAvailability)){
+            echo json_encode(array('success' => true, 'aStorageAvailability' => $aStorageAvailability));
+            return;
+        }
+
+        echo json_encode(array('success' => false));
     }
 
     public function GetStorageAvailability($iStorageId)
@@ -139,37 +170,6 @@ class Member extends My_MemberController
         }
 
         return $aStorageAvailability;
-    }
-
-    public function AjaxGetStorageAvailability($iStorageId)
-    {
-        $aStoragesData = $this->storages->ListStorages();
-        $aStorages = $aStoragesData['aStorages'];
-        $iStorageId = (int) $iStorageId;
-        $aStorageAvailability = array();
-
-        foreach ($aStorages as $oStorage){
-            if((int)$oStorage->Id == $iStorageId){
-                $aAvailability = json_decode($oStorage->Availability, true);
-            }
-        }
-
-        if(is_array($aAvailability) && !empty($aAvailability)){
-            foreach ($aAvailability as $iProductId => $iQuantity){
-                $oProduct = $this->products->GetProductById((int)$iProductId);
-                $aStorageAvailability[]= array('oProduct' => $oProduct, 'iQuantity' => $iQuantity);
-            }
-        } else {
-            echo json_encode(array('success' => false, 'message' => 'Хранилището е празно!'));
-            return;
-        }
-
-        if(is_array($aStorageAvailability) && !empty($aStorageAvailability)){
-            echo json_encode(array('success' => true, 'aStorageAvailability' => $aStorageAvailability));
-            return;
-        }
-        echo json_encode(array('success' => false, 'message' => 'Възникна грешка! Опитайте отново.'));
-        return;
     }
 
     public function StorageSupply()
@@ -196,6 +196,10 @@ class Member extends My_MemberController
         $this->aData['aStorages'] = $aStoragesData['aStorages'];
         $this->aData['sStoragesPagination'] = $aStoragesData['sPagination'];
 
+        if(is_object($this->aData['oDistributor'])){
+            $this->aData['aStorages'] = $this->storages->GetDistributorVendingMachines(intval($this->aData['oDistributor']->Id));
+        }
+
         $this->load->view('member/include/header',$this->aData);
         $this->load->view('member/pages/sales',$this->aData);
         $this->load->view('member/include/footer',$this->aData);
@@ -209,11 +213,11 @@ class Member extends My_MemberController
 
             $bSale = $this->storages->Sale($aData);
             if($bSale){
-                echo json_encode(array('success' => $bSale, 'message' => 'Успешна операция!'));
+                echo json_encode(array('success' => $bSale));
                 return;
             }
         }
-        echo json_encode(array('success' => $bSale, 'message' => 'Некоректна информация!'));
+        echo json_encode(array('success' => $bSale));
         return;
     }
 

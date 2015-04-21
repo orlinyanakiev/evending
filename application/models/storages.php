@@ -95,7 +95,7 @@ class Storages extends CI_Model
         $sValue = isset($aStorageSupplyData['Value']) ? $aStorageSupplyData['Value'] : '';
 
         if(isset($aStorageSupplyData['ExpirationDate'])){
-            $sExpirationDate = date('d.m.Y',strtotime(str_replace('.','-',$_POST['ExpirationDate']).' 00:00:00'));
+            $sExpirationDate = date('Y-m-d',strtotime(str_replace('.','-',$_POST['ExpirationDate']).' 00:00:00'));
         }
 
         $aProductData = array(
@@ -308,13 +308,16 @@ class Storages extends CI_Model
         return false;
     }
 
-    public function GetDistributorStorages($iUserId)
+    public function GetDistributorVendingMachines($iUserId)
     {
         $oDistributor = $this->db->get_where($this->sDistributorsTable, array('Id' => $iUserId))->first_row();
 
         if(isset($oDistributor->Storages)){
             $aDistributorStorages = json_decode($oDistributor->Storages, true);
             if(is_array($aDistributorStorages) && !empty($aDistributorStorages)){
+                foreach($aDistributorStorages as $iKey => $iStorageId){
+                    $aDistributorStorages[$iKey] = $this->GetStorageById($iStorageId);
+                }
                 return $aDistributorStorages;
             } else {
                 return array();

@@ -8,10 +8,16 @@ class Products extends CI_Model
     private $sProductTable = 'products';
     private $sTypeTable = 'producttypes';
 
+    const iTypesLimit = 12;
     const iLimit = 12;
     const iAdjacent = 6.5;
 
     public function getLimit()
+    {
+        return self::iLimit;
+    }
+
+    public function getTypesLimit()
     {
         return self::iLimit;
     }
@@ -102,6 +108,20 @@ class Products extends CI_Model
 
             return $aData = array('aProducts' => $aProducts, 'sPagination' => '');
         }
+    }
+
+    public function GetProductByExpirationDate()
+    {
+        $this->db->where('ExpirationDate <', date('Y-m-d',(time() + 3*86400)));
+        $aExpiringProducts =  $this->db->get($this->sProductTable)->result();
+
+        if(is_array($aExpiringProducts) && !empty($aExpiringProducts)){
+            foreach($aExpiringProducts as $iKey => $oExpiringProduct){
+                $aExpiringProducts[$iKey]->Type = $this->GetProductTypeById($oExpiringProduct->Type);
+            }
+        }
+
+        return $aExpiringProducts;
     }
 
     public function GetPagination($iPage, $iCount, $iLimit, $iAdjacent = self::iAdjacent)

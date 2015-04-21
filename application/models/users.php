@@ -141,7 +141,7 @@ class Users extends CI_Model
         $this->db->update($this->sDistributorsTable,$aDistributorData);
     }
 
-    public function GetDistributor($iUserId)
+    public function GetDistributorInfo($iUserId)
     {
         $this->db->where('Id', $iUserId);
         return $this->db->get($this->sDistributorsTable)->first_row();

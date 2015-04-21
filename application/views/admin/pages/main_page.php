@@ -50,7 +50,11 @@
                     </select>
                     <button type="submit">Запази</button>
                     <div class="vending_machines_list">
-
+                        <?php if(is_array($aVendingMachines) && !empty($aVendingMachines)) : ?>
+                            <?php foreach($aVendingMachines as $oVendingMachine){
+                                echo "<div><input type='checkbox' name='vending_machine[]' value='{$oVendingMachine->Id}'>{$oVendingMachine->Name} {$oVendingMachine->Address}</div>";
+                            }?>
+                        <?php endif; ?>
                     </div>
                 </form>
             </div>
@@ -59,15 +63,15 @@
         <!--storage-->
         <div class="storages_content">
             <a class="add_storage" href="#">Добави хранилище</a>
-            <div class="list" style="display:<?= is_array($aStorages) && !empty($aStorages) ? 'block' : 'none';?>;">
+            <div class="list" <?= is_array($aStorages) && !empty($aStorages) ? '' : 'style="display:none;"';?> >
                 <?php $iCounter = 0; ?>
                 <?php foreach($aStorages as $oStorage) :?>
                     <div class="storage_container container" style="background-color: #<?= $iCounter % 2 == 0 ? 'DDF5B7' : 'FFFF99' ?>">
                         <div class="column first_column"><a href="#" class="storage_availability" storage-id="<?=$oStorage->Id?>"><?= $oStorage->Name?></a></div>
-                        <div class="manage_storage last_column">
-                            <a href="#" class="edit_pt"><i class="fa fa-pencil"></i></a>
-                            <a href="#" class="delete_pt"><i class="fa fa-times"></i></a>
-                        </div>
+<!--                        <div class="manage_storage last_column">-->
+<!--                            <a href="#" class="edit_pt"><i class="fa fa-pencil"></i></a>-->
+<!--                            <a href="#" class="delete_pt"><i class="fa fa-times"></i></a>-->
+<!--                        </div>-->
                         <div class="column last_column"><?=$oStorage->Address?></div>
                     </div>
                     <?php $iCounter++; ?>
