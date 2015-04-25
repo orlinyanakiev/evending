@@ -13,3 +13,12 @@
         <script type="text/javascript" src="<?= base_url(); ?>assets/js/evending.js"></script>
     </head>
     <body>
+    <div class="page_wrapper">
+        <div class="nav">
+            <a class="nav_link" href="<?= base_url();?>member/homepage">Начало</a>
+            <a class="nav_link" href="<?= base_url();?>member/actions">Действия</a>
+            <a class="nav_link active" href="<?= base_url();?>admin/manage">Управление</a>
+            <a class="nav_link logout" href="<?= base_url();?>member/logout">Изход</a>
+        </div>
+        <div class="content">
+

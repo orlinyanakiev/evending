@@ -1,12 +1,11 @@
 <div class="page_wrapper">
     <div class="nav">
-        <a class="nav_link" href="<?= base_url();?>member/distribution">Дистрибуция</a>
-        <a class="nav_link active" href="<?= base_url();?>member/supply">Зареждане</a>
-        <a class="nav_link" href="<?= base_url();?>member/sales">Продажба</a>
-        <a class="nav_link logout" href="<?= base_url();?>member/logout">Изход</a>
+        <a class="nav_link" href="<?= base_url();?>member/homepage">Начало</a>
+        <a class="nav_link active" href="<?= base_url();?>member/actions">Действия</a>
         <?php if($oUser->Type > 1) : ?>
-            <a class="nav_link logout" href="<?= base_url();?>admin/">Администрация</a>
+            <a class="nav_link" href="<?= base_url();?>admin/">Управление</a>
         <?php endif; ?>
+        <a class="nav_link logout" href="<?= base_url();?>member/logout">Изход</a>
     </div>
     <div class="content">
         <?php if(is_array($aStorages) && !empty($aStorages)) : ?>
@@ -15,7 +14,7 @@
                     <form>
                         <?php if(!is_object($oDistributor)) : ?>
                             <select name="Storage">
-                                <option value="0">Хранилище</option>
+                                <option value="0">Склад</option>
                                 <?php foreach($aStorages as $oStorage) : ?>
                                     <option value="<?=$oStorage->Id?>"><?=$oStorage->Name?></option>
                                 <?php endforeach; ?>
@@ -50,10 +49,13 @@
             <?php endif; ?>
         <?php else : ?>
             <div>
-                Няма въведени хранилища!
+                Няма въведени складове!
             </div>
         <?php endif; ?>
         <div class="warning">
+        </div>
+        <div class="directions">
+            <a href="<?= base_url();?>member/actions">Обратно</a>
         </div>
     </div>
 </div>

@@ -12,40 +12,36 @@ class admin extends My_AdminController
     public function index()
     {
         //check user type
-        $this->AdminOptions();
+        $this->Manage();
     }
 
-    public function AdminOptions()
+    public function Manage()
     {
-        $aStoragesData = $this->storages->ListStorages(1, $this->storages->getStorageLimit());
-        $aVendingMachinesData = $this->storages->ListStorages( 1 , 0 , '3');
-        $aDistributors = $this->users->ListUsers(1,0,'1');
-        $aUsersData = $this->users->ListUsers(1, $this->users->getLimit());
-        $aProductsData = $this->products->ListProducts(1, $this->products->getLimit());
-        $aProductTypesData = $this->products->ListProductTypes(1, $this->products->getLimit());
-        $aSalesData = $this->storages->ListSales(1, $this->storages->getSalesLimit());
-
         $this->aData['sTitle'] = 'Администрация';
-        $this->aData['aUsers'] = $aUsersData['aUsers'];
-        $this->aData['aDistributors'] = $aDistributors['aUsers'];
-        $this->aData['aVendingMachines'] = $aVendingMachinesData['aStorages'];
-        $this->aData['sUsersPagination'] = $aUsersData['sPagination'];
-        $this->aData['aStorages'] = $aStoragesData['aStorages'];
-        $this->aData['sStoragesPagination'] = $aStoragesData['sPagination'];
-        $this->aData['aProducts'] = $aProductsData['aProducts'];
-        $this->aData['sProductsPagination'] = $aProductsData['sPagination'];
-        $this->aData['aProductTypes'] = $aProductTypesData['aProductTypes'];
-        $this->aData['sProductTypesPagination'] = $aProductTypesData['sPagination'];
-        $this->aData['aSales'] = $aSalesData['aSales'];
-        $this->aData['sSalesPagination'] = $aSalesData['sPagination'];
-        $this->aData['aSales'] = $this->storages->GetSales();
 
         $this->load->view('admin/include/header',$this->aData);
-        $this->load->view('admin/pages/main_page',$this->aData);
+        $this->load->view('admin/pages/manage',$this->aData);
         $this->load->view('admin/include/footer',$this->aData);
     }
 
     //Users
+    public function Users()
+    {
+        $aStoragesData = $this->storages->ListStorages(1, $this->storages->getStorageLimit());
+        $aVendingMachinesData = $this->storages->ListStorages( 1 , 0 , '3');
+        $aUsersData = $this->users->ListUsers(1, $this->users->getLimit());
+
+        $this->aData['sTitle'] = 'Потребители';
+        $this->aData['aUsers'] = $aUsersData['aUsers'];
+        $this->aData['aVendingMachines'] = $aVendingMachinesData['aStorages'];
+        $this->aData['sUsersPagination'] = $aUsersData['sPagination'];
+        $this->aData['aStorages'] = $aStoragesData['aStorages'];
+
+        $this->load->view('admin/include/header',$this->aData);
+        $this->load->view('admin/pages/users',$this->aData);
+        $this->load->view('admin/include/footer',$this->aData);
+    }
+
     public function EditUser()
     {
         $bResult = false;
@@ -146,6 +142,19 @@ class admin extends My_AdminController
     }
 
     //Storages
+    public function Storages()
+    {
+        $aStoragesData = $this->storages->ListStorages(1, $this->storages->getStorageLimit());
+
+        $this->aData['sTitle'] = 'Складове';
+        $this->aData['aStorages'] = $aStoragesData['aStorages'];
+        $this->aData['sStoragesPagination'] = $aStoragesData['sPagination'];
+
+        $this->load->view('admin/include/header',$this->aData);
+        $this->load->view('admin/pages/storages',$this->aData);
+        $this->load->view('admin/include/footer',$this->aData);
+    }
+
     public function AddStorage()
     {
         $bResult = false;
@@ -165,10 +174,12 @@ class admin extends My_AdminController
         $iUserId = intval($iUserId);
         if($iUserId != 0){
             $aDistributorStorages = $this->storages->GetDistributorVendingMachines($iUserId);
-
-            if(is_array($aDistributorStorages) && !empty($aDistributorStorages)){
+            if(is_array($aDistributorStorages)){
 
                 echo json_encode(array('success' => true, 'aDistributorStorages' => $aDistributorStorages));
+                return;
+            } else {
+                echo json_encode(array('success' => false));
                 return;
             }
         } else {
@@ -176,6 +187,7 @@ class admin extends My_AdminController
             $aVendingMachines = $aVendingMachinesData['aStorages'];
 
             echo json_encode(array('success' => true, 'aDistributorStorages' => $aVendingMachines));
+            return;
         }
     }
 
@@ -199,6 +211,19 @@ class admin extends My_AdminController
     }
 
     //Products
+    public function Products()
+    {
+        $aProductsData = $this->products->ListProducts(1, $this->products->getLimit());
+
+        $this->aData['sTitle'] = 'Изделия';
+        $this->aData['aProducts'] = $aProductsData['aProducts'];
+        $this->aData['sProductsPagination'] = $aProductsData['sPagination'];
+
+        $this->load->view('admin/include/header',$this->aData);
+        $this->load->view('admin/pages/products',$this->aData);
+        $this->load->view('admin/include/footer',$this->aData);
+    }
+
     public function ProductsPagination()
     {
         if(is_array($_POST) && array_key_exists('iPageId',$_POST)){
@@ -240,6 +265,19 @@ class admin extends My_AdminController
     }
 
     //Product types
+    public function ProductTypes()
+    {
+        $aProductTypesData = $this->products->ListProductTypes(1, $this->products->getLimit());
+
+        $this->aData['sTitle'] = 'Типове изделия';
+        $this->aData['aProductTypes'] = $aProductTypesData['aProductTypes'];
+        $this->aData['sProductTypesPagination'] = $aProductTypesData['sPagination'];
+
+        $this->load->view('admin/include/header',$this->aData);
+        $this->load->view('admin/pages/producttypes',$this->aData);
+        $this->load->view('admin/include/footer',$this->aData);
+    }
+
     public function GetProductTypeById()
     {
         if(is_array($_POST) && !empty($_POST) && array_key_exists('iProductTypeId',$_POST)){
@@ -295,6 +333,20 @@ class admin extends My_AdminController
     }
 
     //Sales
+    public function Sales()
+    {
+        $aVendingMachinesData = $this->storages->ListStorages( 1 , 0 , '3');
+        $aDistributors = $this->users->ListUsers(1,0,'1');
+
+        $this->aData['sTitle'] = 'Продажби';
+        $this->aData['aDistributors'] = $aDistributors['aUsers'];
+        $this->aData['aVendingMachines'] = $aVendingMachinesData['aStorages'];
+        $this->aData['aSales'] = $this->storages->GetSales();
+
+        $this->load->view('admin/include/header',$this->aData);
+        $this->load->view('admin/pages/sales',$this->aData);
+        $this->load->view('admin/include/footer',$this->aData);
+    }
     public function GetSales()
     {
         $iUserId = intval($_POST['iUserId']);

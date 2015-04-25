@@ -327,10 +327,10 @@ class Storages extends CI_Model
         }
     }
 
-    public function ListSales($iPage = 1, $iLimit = 0, $iStorageId = 0, $iProductId = 0, $sDate = '')
-    {
-
-    }
+//    public function ListSales($iPage = 1, $iLimit = 0, $iStorageId = 0, $iProductId = 0, $sDate = '')
+//    {
+//
+//    }
 
     public function GetSales($iUserId = 0, $iStorageId = 0, $sPeriod = '')
     {

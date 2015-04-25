@@ -9,7 +9,7 @@
     </div>
     <div class="content">
         <?php if(is_array($aStorages) && !empty($aStorages)) : ?>
-            <div class="sales_form form">
+            <div class="income_form form">
                 <form method="post" action="">
                     <select name="Storage">
                         <option value="0" selected="selected">От</option>
@@ -17,11 +17,8 @@
                             <option value="<?=$oStorage->Id?>"><?=$oStorage->Name?></option>
                         <?php endforeach; ?>
                     </select>
-                    <select name="Product">
-                        <option value="0" selected="selected">Изделие</option>
-                    </select>
-                    <input type="text" name="Quantity" placeholder="Количество" autocomplete="off" />
-                    <button type="submit">Продажба</button>
+                    <input type="text" name="Value" placeholder="Сума" autocomplete="off" />
+                    <button type="submit">Заприходяване</button>
                 </form>
             </div>
         <?php else: ?>

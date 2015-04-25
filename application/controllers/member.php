@@ -11,16 +11,64 @@ class Member extends My_MemberController
     
     public function index()
     {
-        $this->Distribution();
+        $this->Homepage();
+    }
+
+    public function Homepage()
+    {
+        $this->aData['aExpiringProducts'] = $this->products->GetProductByExpirationDate();
+        $this->aData['sTitle'] = 'Начало';
+
+        $this->load->view('member/include/header',$this->aData);
+        $this->load->view('member/pages/homepage',$this->aData);
+        $this->load->view('member/include/footer',$this->aData);
+    }
+
+    public function Actions()
+    {
+        if($this->aData['oUser']->Type == 0){
+            redirect(base_url().'member');
+        }
+
+        $this->aData['sTitle'] = 'Действия';
+
+        $this->load->view('member/include/header',$this->aData);
+        $this->load->view('member/pages/actions',$this->aData);
+        $this->load->view('member/include/footer',$this->aData);
+    }
+
+    public function Obsolete()
+    {
+        if($this->aData['oUser']->Type == 0){
+            redirect(base_url().'member');
+        }
+
+        $aStoragesData = $this->storages->ListStorages();
+        $aProductsData = $this->products->ListProducts();
+
+        $this->aData['sTitle'] = 'Операции/Бракуване';
+        $this->aData['aProducts'] = $aProductsData['aProducts'];
+        $this->aData['aStorages'] = $aStoragesData['aStorages'];
+        if(is_object($this->aData['oDistributor'])){
+            $aDistributorStorages = $this->GetRemainingDistributorStorages();
+            $this->aData['aStorages'] = $aDistributorStorages;
+        }
+
+        $this->load->view('member/include/header',$this->aData);
+        $this->load->view('member/pages/obsolete',$this->aData);
+        $this->load->view('member/include/footer',$this->aData);
     }
 
     public function Distribution()
     {
+        if($this->aData['oUser']->Type == 0){
+            redirect(base_url().'member');
+        }
+
         $aStoragesData = $this->storages->ListStorages();
         $aProductsData = $this->products->ListProducts();
 
-        $this->aData['aExpiringProducts'] = $this->products->GetProductByExpirationDate();
-        $this->aData['sTitle'] = 'Дистрибуция';
+        $this->aData['sTitle'] = 'Операции/Дистрибуция';
         $this->aData['aProducts'] = $aProductsData['aProducts'];
         $this->aData['aStorages'] = $aStoragesData['aStorages'];
         if(is_object($this->aData['oDistributor'])){
@@ -101,7 +149,7 @@ class Member extends My_MemberController
         $aStoragesData = $this->storages->ListStorages();
         $aProductTypesData = $this->products->ListProductTypes();
 
-        $this->aData['sTitle'] = 'Зареждане';
+        $this->aData['sTitle'] = 'Операции/Зареждане';
         $this->aData['aStorages'] = $aStoragesData['aStorages'];
         $this->aData['sStoragesPagination'] = $aStoragesData['sPagination'];
         $this->aData['aProductTypes'] = $aProductTypesData['aProductTypes'];
@@ -181,6 +229,28 @@ class Member extends My_MemberController
 
             echo json_encode(array('success' => $bResult));
         }
+    }
+
+    //Income
+    public function Income()
+    {
+        if($this->aData['oUser']->Type == 0){
+            redirect(base_url().'member');
+        }
+
+        $aStoragesData = $this->storages->ListStorages(1, 0, 3);
+
+        $this->aData['sTitle'] = 'Приходи';
+        $this->aData['aStorages'] = $aStoragesData['aStorages'];
+        $this->aData['sStoragesPagination'] = $aStoragesData['sPagination'];
+
+        if(is_object($this->aData['oDistributor'])){
+            $this->aData['aStorages'] = $this->storages->GetDistributorVendingMachines(intval($this->aData['oDistributor']->Id));
+        }
+
+        $this->load->view('member/include/header',$this->aData);
+        $this->load->view('member/pages/income',$this->aData);
+        $this->load->view('member/include/footer',$this->aData);
     }
 
     //Sales

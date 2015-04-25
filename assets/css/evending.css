@@ -25,14 +25,14 @@ select.error {border:2px solid red;}
 
 .wrong_login {color: #FC1800;padding-top: 50px;min-height: 32px;}
 
-.nav {margin: 4px 0px -2px 8px;padding-top: 15px;text-align: left;height: 35px;}
-.nav a {background-color: #E2B977;display: inline;border: 1.5px solid green;margin:auto;border-radius: 15px 30px 0 0;padding: 8px 8px 8px 8px;}
-.nav a.logout {float:right;margin: -9px 8px 0 0;}
+.nav {margin: 0 0px -2px 8px;padding-top: 15px;text-align: justify;height: 43.5px;width: 100%;}
+.nav a.nav_link {float: left;background-color: #E2B977;display: inline;border: 0.06em solid black;margin:0 1.5% 0 0;border-radius: 12px 26px 0 0;padding: 8px 0 8px 0;width: 23%;text-align: center;}
+.nav a.logout {float:right;margin: 0 16px 0 0;}
 .nav a.active {background-color: #FFE4B7; border-bottom: 2px solid #FFE4B7;}
 
-.content {display: block;min-height: 420px;padding: 8px 8px 8px 8px;margin: 0px 8px 6px 8px;background-color: #FFE4B7;border: 1.5px solid black;border-radius: 0 0 4px 4px;}
+.content {min-height: 420px;padding: 8px 8px 8px 8px;margin: 0px 8px 6px 8px;background-color: #FFE4B7;border: 1.5px solid black;border-radius: 0 0 4px 4px;}
 
-select {display: block;font-size: 16px;color: #512200;border: 2px solid green;background-color: #F0FDEA;border-radius: 5px;padding: 8px 0 8px 0;margin: 10px 5px -6px 5px;min-width: 350px;}
+select {font-size: 16px;color: #512200;border: 2px solid green;background-color: #F0FDEA;border-radius: 5px;padding: 8px 0 8px 0;margin: 10px 5px -6px 5px;min-width: 350px;height: 40px;}
 
 p.request_failure {color: #FC1800;}
 p.request_success {color: green;}
@@ -48,10 +48,9 @@ p.request_success {color: green;}
 
 .option {font-size: 22px; text-align: left; margin: 8px;}
 
-.edit_user_form, .edit_product_type_form, .add_product_type_form, .add_storage_form, .users_content, .storages_content,
-.product_types_content, .products_content, .edit_product_form, .sales_content, .vending_machines_list {display: none;}
+.edit_user_form, .edit_product_type_form, .add_product_type_form, .add_storage_form, .edit_product_form, .vending_machines_list {display: none;}
 
 .sales_results{text-align: left;}
 
 .vending_machines_list {margin: 10px 0 0 0; text-align: left;}
-input[type="checkbox"] {margin:4px 12px 4px 4px; -ms-transform: scale(2); -moz-transform: scale(2); -webkit-transform: scale(2); -o-transform: scale(2); padding: 10px;}
+input[type="checkbox"] {margin:0 10px 4px 4px; -ms-transform: scale(1.5); -moz-transform: scale(1.5); -webkit-transform: scale(1.5); -o-transform: scale(1.5); padding: 5px;}

@@ -73,7 +73,7 @@ $( document ).ready(function() {
                         RegisterTimeout = setTimeout(function(){
                             $('.public').find('.warning').html('');
                             $('.public').find('.directions').html('<a href="' + base_url + '">Обратно</a>');
-                        }, 1500);
+                        }, 3000);
                     }
                     if(result.success == false){
                         if(result.warning == "username"){
@@ -146,7 +146,7 @@ $( document ).ready(function() {
                     clearTimeout(errorTimeout);
                     errorTimeout = setTimeout(function(){
                         $('.content').find('.warning').html('');
-                    }, 1500);
+                    }, 3000);
                 }
             }
         })
@@ -199,16 +199,13 @@ $( document ).ready(function() {
                 success:function(result){
                     if(result.success == true){
                         $('.content').find('.warning').html('<p class="request_success">Оперецията е успешна!</p>');
-                        setTimeout(function(){
-                            window.location.reload();
-                        },1000);
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Опитайте отново!</p>');
                         clearTimeout(errorTimeout);
                         errorTimeout = setTimeout(function(){
                             $('.content').find('.warning').html('');
-                        }, 1500);
+                        }, 3000);
                     }
                 }
             });
@@ -295,16 +292,6 @@ $( document ).ready(function() {
         }
     });
 
-    //admin option navigation
-    $( '.admin_options' ).off( 'click' ).on( 'click' , 'a.section' , function( e ) {
-        e.preventDefault();
-
-        var section = $(this).attr('section');
-
-        $('.admin_options').hide();
-        $("." + section).show();
-    });
-
     //Storages pagination
     $('.storages_content').on('click', '.pagination_list a', function(e){
         e.preventDefault();
@@ -383,17 +370,14 @@ $( document ).ready(function() {
                         $('.add_storage_form [name="Address"]').val('');
                         $('.add_storage_form [name="Type"]').val(0);
 
-                        $('.content').find('.warning').html('<p class="request_success">Хранилището беше добавено успешно!</p>');
-                        setTimeout(function(){
-                            window.location.reload();
-                        },1000);
+                        $('.content').find('.warning').html('<p class="request_success">Складът беше добавен успешно!</p>');
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Опитайте отново.</p>');
                         clearTimeout(errorTimeout);
                         errorTimeout = setTimeout(function(){
                             $('.content').find('.warning').html('');
-                        }, 1500);
+                        }, 3000);
                     }
                 }
             });
@@ -486,7 +470,7 @@ $( document ).ready(function() {
                         clearTimeout(errorTimeout);
                         errorTimeout = setTimeout(function(){
                             $('.content').find('.warning').html('');
-                        }, 1500);
+                        }, 3000);
                     }
                 }
             });
@@ -559,16 +543,13 @@ $( document ).ready(function() {
                 success:function(result){
                     if(result.success == true){
                         $('.content').find('.warning').html('<p class="request_success">Оперецията е успешна!</p>');
-                        setTimeout(function(){
-                            window.location.reload();
-                        },1000);
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Опитайте отново!</p>');
                         clearTimeout(errorTimeout);
                         errorTimeout = setTimeout(function(){
                             $('.content').find('.warning').html('');
-                        }, 1500);
+                        }, 3000);
                     }
                 }
             });
@@ -614,7 +595,7 @@ $( document ).ready(function() {
                     if(index % 2 == 0){
                         colour = 'DDF5B7';
                     } else {
-                        colour = 'FFFF99'
+                        colour = 'FFFF99';
                     }
 
                     listing_html += '<div class="product_container container" product-id="' + value.Id + '" style="background-color: #' + colour + '">';
@@ -686,16 +667,13 @@ $( document ).ready(function() {
                 success:function(result){
                     if(result.success == true){
                         $('.content').find('.warning').html('<p class="request_success">Оперецията е успешна!</p>');
-                        setTimeout(function(){
-                            window.location.reload();
-                        },1000);
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Опитайте отново!</p>');
                         clearTimeout(errorTimeout);
                         errorTimeout = setTimeout(function(){
                             $('.content').find('.warning').html('');
-                        }, 1500);
+                        }, 3000);
                     }
                 }
             });
@@ -750,24 +728,19 @@ $( document ).ready(function() {
                 success: function (result) {
                     if(result.success == true){
                         $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
-                        $('.supply_form').find('[name="Storage"]').val(0);
                         $('.supply_form').find('[name="Category"]').val(0);
                         $('.supply_form').find('[name="ProductType"]').val(0);
                         $('.supply_form').find('[name="Quantity"]').val('');
                         $('.supply_form').find('[name="ExpirationDate"]').val('');
                         $('.supply_form').find('[name="Price"]').val('');
                         $('.supply_form').find('[name="Value"]').val('');
-
-                        setTimeout(function(){
-                            window.location.reload();
-                        },1000);
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Опитайте отново</p>');
                         clearTimeout(errorTimeout);
                         errorTimeout = setTimeout(function(){
                             $('.content').find('.warning').html('');
-                        }, 1500);
+                        }, 3000);
                     }
                 }
             });
@@ -802,7 +775,7 @@ $( document ).ready(function() {
                         clearTimeout(errorTimeout);
                         errorTimeout = setTimeout(function(){
                             $('.content').find('.warning').html('');
-                        }, 1500);
+                        }, 3000);
                     }
                 }
             });
@@ -816,6 +789,7 @@ $( document ).ready(function() {
     $('.storages_content .list').on('click', '.storage_availability', function(e){
         e.preventDefault();
 
+        var storage_name = $(this).text();
         var storage_id = $(this).attr('storage-id');
         var html = '';
         var errorTimeout;
@@ -828,8 +802,8 @@ $( document ).ready(function() {
                 if(result.success == true){
                     var iCounter = 0;
                     var sColor = '';
-                    html += '<div class="list" style="display: block">';
-                    html += '<div class="container"><div class="column first_column">Изделие</div><div class="column last_column">Количество</div></div>';
+                    html += '<div class="list" style="display: block">' +
+                    '<div class="container"><div class="column first_column">' + storage_name + '</div></div>';
                     $.each(result.aStorageAvailability,function(index,value){
                         if(iCounter % 2 == 0){
                             sColor = 'DDF5B7';
@@ -840,14 +814,16 @@ $( document ).ready(function() {
                         html += '<div class="container" style="background-color: #' + sColor + ';"><div class="column first_column" product-id="' + value.oProduct.Id + '">' + value.oProduct.Type.Name + ' (' +value.oProduct.ExpirationDate + ')</div><div class="column last_column">' + value.iQuantity + '</div></div>';
                     })
 
+                    html += '<div class="directions"><a href="' + base_url + 'admin/storages">Обратно</a></div>'
+
                     $('.content').html(html);
                 }
                 if(result.success == false){
-                    $('.content').find('.warning').html('<p class="request_failure">Хранилището е празно!</p>');
+                    $('.content').find('.warning').html('<p class="request_failure">Складът е празен!</p>');
                     clearTimeout(errorTimeout);
                     errorTimeout = setTimeout(function(){
                         $('.content').find('.warning').html('');
-                    }, 1500);
+                    }, 3000);
                 }
             }
         });
@@ -913,11 +889,11 @@ $( document ).ready(function() {
                 if(result.success == false ){
                     $('.distribution_form').find('select[name="Product"]').html('<option value="0" selected="selected">Изделие</option>');
 
-                    $('.content').find('.warning').html('<p class="request_failure">Хранилището е празно!</p>');
+                    $('.content').find('.warning').html('<p class="request_failure">Складът е празен!</p>');
                     clearTimeout(errorTimeout);
                     errorTimeout = setTimeout(function(){
                         $('.content').find('.warning').html('');
-                    }, 1500);
+                    }, 3000);
                 }
             }
         });
@@ -964,21 +940,16 @@ $( document ).ready(function() {
                 data: data,
                 success:function(result){
                     if(result.success == true){
-                        $('.distribution_form').find('select[name="Storage1"]').val(0);
-                        $('.distribution_form').find('[name="Storage2"]').val(0);
                         $('.distribution_form').find('[name="Product"]').val(0);
                         $('.distribution_form').find('[name="Quantity"]').val('');
                         $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
-                        setTimeout(function(){
-                            window.location.reload();
-                        },500);
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
                         clearTimeout(errorTimeout);
                         errorTimeout = setTimeout(function(){
                             $('.content').find('.warning').html('');
-                        }, 1500);
+                        }, 3000);
                     }
                 }
             });
@@ -1009,11 +980,11 @@ $( document ).ready(function() {
                 if(result.success == false ){
                     $('.distribution_form').find('select[name="Product"]').html('<option value="0" selected="selected">Изделие</option>');
 
-                    $('.content').find('.warning').html('<p class="request_failure">Хранилището е празно!</p>');
+                    $('.content').find('.warning').html('<p class="request_failure">Складът е празен!</p>');
                     clearTimeout(errorTimeout);
                     errorTimeout = setTimeout(function(){
                         $('.content').find('.warning').html('');
-                    }, 1500);
+                    }, 3000);
                 }
             }
         });
@@ -1058,20 +1029,16 @@ $( document ).ready(function() {
                 data: data,
                 success:function(result){
                     if(result.success == true){
-                        $('.sales_form').find('select[name="Storage"]').val(0);
                         $('.sales_form').find('[name="Product"]').val(0);
                         $('.sales_form').find('[name="Quantity"]').val('');
                         $('.content').find('.warning').html('<p class="request_success">Успешна операция!</p>');
-                        setTimeout(function(){
-                            window.location.reload();
-                        },500);
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
                         clearTimeout(errorTimeout);
                         errorTimeout = setTimeout(function(){
                             $('.content').find('.warning').html('');
-                        }, 1500);
+                        }, 3000);
                     }
                 }
             });
@@ -1135,20 +1102,31 @@ $( document ).ready(function() {
     }
 
     var GetDistributorVendingMachines = function (iUserId){
+        var errorTimeout;
+
         $.ajax({
             method: 'post',
             dataType: 'json',
             url: base_url + 'admin/GetDistributorVendingMachines/' + iUserId,
             success:function (result) {
-                $.each(result.aDistributorStorages, function ( index , value ){
-                    $('.vending_machines_list [type="checkbox"]').each(function(){
-                        if($(this).val() == value.Id){
-                            $(this).attr('checked','checked');
-                        }
+                if(result.success == true){
+                    $.each(result.aDistributorStorages, function ( index , value ){
+                        $('.vending_machines_list [type="checkbox"]').each(function(){
+                            if($(this).val() == value.Id){
+                                $(this).attr('checked','checked');
+                            }
+                        });
                     });
-                });
 
-                $('.vending_machines_list').show();
+                    $('.vending_machines_list').show();
+                }
+                if(result.success == false){
+                    $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
+                    clearTimeout(errorTimeout);
+                    errorTimeout = setTimeout(function(){
+                        $('.content').find('.warning').html('');
+                    }, 3000);
+                }
             }
         });
     }
