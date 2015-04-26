@@ -1,4 +1,5 @@
 <div class="product_types_content">
+    <div class="title">Типове изделия</div>
     <a class="add_product_type" href="#">Добави нов тип изделие</a>
     <div class="list" style="display:<?= is_array($aProductTypes) && !empty($aProductTypes) ? 'block' : 'none' ;?>;">
         <?php $iCounter = 0; ?>

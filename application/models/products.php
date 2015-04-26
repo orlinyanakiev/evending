@@ -57,10 +57,10 @@ class Products extends CI_Model
         return $oProduct;
     }
 
-    public function EditProduct($iProductId, $sValue)
+    public function EditProduct($iProductId, $aData)
     {
         $this->db->where('Id',$iProductId);
-        return $this->db->update($this->sProductTable,array('Value' => $sValue));
+        return $this->db->update($this->sProductTable,$aData);
     }
 
     public function ListProducts($iPage = 1, $iLimit = 0, $iType = 0)
@@ -253,7 +253,7 @@ class Products extends CI_Model
 
         if($iCount > 0){
             if($iCount > $iLimit && $iLimit != 0){
-                $iLimit = self::iLimit;
+                $iLimit = self::iTypesLimit;
                 $iOffest = ($iPage - 1) * $iLimit;
 
                 $this->db->where('IsDeleted','0');

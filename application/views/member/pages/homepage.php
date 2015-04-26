@@ -9,14 +9,15 @@
             <a class="nav_link logout" href="<?= base_url();?>member/logout">Изход</a>
         </div>
         <div class="content">
-            <p><?= $oUser->FirstName.' '.$oUser->LastName.', '?>добре дошли в складовата програма на Лион!</p>
+            <p>Здравейте, <i><?= $oUser->FirstName.' '.$oUser->LastName.'</i>! '?></p>
+            <p>Добре дошли в складовата програма на Лион!</p>
             <?php if(is_array($aExpiringProducts) && !empty($aExpiringProducts)){
                 echo '<p class="request_failure">Изделия с изтичащ срок на годност:</p>';
                 foreach($aExpiringProducts as $oExpiringProduct){
                     echo $oExpiringProduct->Type->Name.' '.$oExpiringProduct->ExpirationDate.'</br>';
                 }
             } else {
-                echo '<p class="request_success">Няма стоки с изтизащ срок на годност</p>';
+                echo '<p class="request_success">Няма стоки с изтичащ срок на годност</p>';
             }; ?>
             <div class="warning">
             </div>

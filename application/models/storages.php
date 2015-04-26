@@ -9,6 +9,7 @@ class Storages extends CI_Model
     private $sProductTable = 'products';
     private $sSalesTable = 'sales';
     private $sDistributorsTable = 'distributors';
+    private $sIncomeTable = 'income';
     const iSalesLimit = 12;
     const iStorageLimit = 12;
     const iAdjacent = 6.5;
@@ -37,15 +38,27 @@ class Storages extends CI_Model
 
     public function AddStorage($aStorageData)
     {
-        $aInsertData = array(
-            'Name' => $aStorageData['Name'],
-            'Address' => $aStorageData['Address'],
-            'Type' => $aStorageData['Type'],
-        );
+        $oStorageExists = $this->GetStorageByName($aStorageData['Name']);
 
-        $this->db->insert($this->sStoragesTable,$aInsertData);
-        $iStorageId = $this->db->insert_id();
-        return $iStorageId;
+        if(!is_object($oStorageExists)){
+            $aInsertData = array(
+                'Name' => $aStorageData['Name'],
+                'Address' => $aStorageData['Address'],
+                'Type' => $aStorageData['Type'],
+                'Cash' => $aStorageData['Cash'],
+            );
+
+            $this->db->insert($this->sStoragesTable,$aInsertData);
+            $iStorageId = $this->db->insert_id();
+            return $iStorageId;
+        }
+
+        return false;
+    }
+
+    public function GetStorageByName($sStorageName)
+    {
+        return $this->db->get_where($this->sStoragesTable,array('Name' => $sStorageName))->first_row();
     }
 
     public function GetProductByTypeAndDate($aProductData)
@@ -138,9 +151,13 @@ class Storages extends CI_Model
 
     public function EditStorageAvailability($iStorageId, array $aAvailability)
     {
-        foreach($aAvailability as $iKey => $iQuantity){
+        foreach($aAvailability as $iProductId => $iQuantity){
             if($iQuantity == 0){
-                unset($aAvailability[$iKey]);
+                unset($aAvailability[$iProductId]);
+            }
+            $oProduct = $this->products->GetProductById($iProductId);
+            if($oProduct->IsDeleted == '1'){
+                unset($aAvailability[$iProductId]);
             }
         }
 
@@ -170,8 +187,7 @@ class Storages extends CI_Model
         $aDeleteStorage['Active'] = '0';
 
         $this->db->where('Id', $iStorageId);
-        $bResult = $this->db->update($this->sStoragesTable,$aDeleteStorage);
-        return $bResult;
+        return $this->db->update($this->sStoragesTable,$aDeleteStorage);
     }
 
     public function ListStorages($iPage = 1, $iLimit = 0, $iType = 0)
@@ -294,37 +310,31 @@ class Storages extends CI_Model
             'Quantity' => $iQuantity,
             'Price' => $oProduct->Price,
             'Value' => $oProduct->Value,
-            'Date' => date('Y-m-d'),
+            'Date' => date('Y-m-d H:i:s'),
         );
 
         $bSale = $this->db->insert($this->sSalesTable,$aSaleData);
 
-        $bStorage = $this->EditStorageAvailability((int)$oStorage->Id, $aStorageAvailability);
+        $bStorage = $this->EditStorageAvailability($oStorage->Id, $aStorageAvailability);
 
         if($bSale && $bStorage){
-            return true;
+            $fCash = $oStorage->Cash + ($iQuantity * $oProduct->Price);
+
+            $this->db->where('Id', $oStorage->Id);
+            $bAddCashToStorage = $this->db->update($this->sStoragesTable,array('Cash' => $fCash));
+            if($bAddCashToStorage){
+                return true;
+            }
+
+            return false;
         }
 
         return false;
     }
 
-    public function GetDistributorVendingMachines($iUserId)
+    public function AccountIncome($iStorageId, $fIncome)
     {
-        $oDistributor = $this->db->get_where($this->sDistributorsTable, array('Id' => $iUserId))->first_row();
-
-        if(isset($oDistributor->Storages)){
-            $aDistributorStorages = json_decode($oDistributor->Storages, true);
-            if(is_array($aDistributorStorages) && !empty($aDistributorStorages)){
-                foreach($aDistributorStorages as $iKey => $iStorageId){
-                    $aDistributorStorages[$iKey] = $this->GetStorageById($iStorageId);
-                }
-                return $aDistributorStorages;
-            } else {
-                return array();
-            }
-        } else {
-            return array();
-        }
+        return $this->db->insert($this->sIncomeTable,array('StorageId' => $iStorageId, 'Value' => $fIncome, 'DateAccounted' => date('Y-m-d H:i:s')));
     }
 
 //    public function ListSales($iPage = 1, $iLimit = 0, $iStorageId = 0, $iProductId = 0, $sDate = '')
@@ -335,9 +345,9 @@ class Storages extends CI_Model
     public function GetSales($iUserId = 0, $iStorageId = 0, $sPeriod = '')
     {
         $aData = array(
-            'Expense' => 0,
-            'Income' => 0,
-            'Profit' => 0,
+            'Expense' => '0.00',
+            'Income' => '0.00',
+            'Profit' => '0.00',
         );
 
         if($iUserId != 0 ){
@@ -346,11 +356,7 @@ class Storages extends CI_Model
             if(is_array($aStorages) && !empty($aStorages)){
                 $this->db->where_in('StorageId', $aStorages);
             } else {
-                return array(
-                    'Income' => '0.00',
-                    'Expense' => '0.00',
-                    'Profit' => '0.00',
-                );
+                return $aData;
             }
         }
 
@@ -373,4 +379,25 @@ class Storages extends CI_Model
         }
         return $aData;
     }
+
+    //Vending Machines
+    public function GetDistributorVendingMachines($iUserId)
+    {
+        $oDistributor = $this->db->get_where($this->sDistributorsTable, array('Id' => $iUserId))->first_row();
+
+        if(isset($oDistributor->Storages)){
+            $aDistributorStorages = json_decode($oDistributor->Storages, true);
+            if(is_array($aDistributorStorages) && !empty($aDistributorStorages)){
+                foreach($aDistributorStorages as $iKey => $iStorageId){
+                    $aDistributorStorages[$iKey] = $this->GetStorageById($iStorageId);
+                }
+                return $aDistributorStorages;
+            } else {
+                return array();
+            }
+        } else {
+            return array();
+        }
+    }
+
 }

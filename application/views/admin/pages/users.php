@@ -1,4 +1,5 @@
 <div class="users_content">
+    <div class="title">Потребители</div>
     <div class="list" style="<?= is_array($aUsers) && !empty($aUsers) ? '' : 'display:none;' ;?>">
         <?php $iCounter = 0; ?>
         <?php foreach($aUsers as $oUserData) : ?>

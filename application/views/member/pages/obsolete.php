@@ -8,6 +8,7 @@
         <a class="nav_link logout" href="<?= base_url();?>member/logout">Изход</a>
     </div>
     <div class="content">
+
         <?php if(is_array($aStorages) && !empty($aStorages)) : ?>
             <div class="obsolete_form form">
                 <form method="post" action="">
@@ -21,7 +22,7 @@
                         <option value="0" selected="selected">Изделие</option>
                     </select>
                     <input type="text" name="Quantity" placeholder="Количество" autocomplete="off" />
-                    <button type="submit">Бракувай</button>
+<!--                    <button type="submit">Бракувай</button>-->
                 </form>
             </div>
         <?php else: ?>

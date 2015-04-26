@@ -169,6 +169,33 @@ class admin extends My_AdminController
         }
     }
 
+    public function EditStorage()
+    {
+        if(is_array($_POST) && !empty($_POST) && array_key_exists('Id', $_POST)){
+            $iStorageId = intval($_POST['Id']);
+            $bEditStorage = $this->storages->EditStorage($iStorageId, $_POST);
+
+            echo json_encode(array('success' => $bEditStorage));
+        }
+    }
+
+    public function DeleteStorage($iStorageId)
+    {
+        $bDeleteStorage = $this->storages->DeleteStorage($iStorageId);
+        echo json_encode(array('success' => $bDeleteStorage));
+    }
+
+    public function GetStorageById($iStorageId)
+    {
+        $oStorage = $this->storages->GetStorageById($iStorageId);
+        if(is_object($oStorage)){
+            echo json_encode(array('success' => true, 'oStorage' => $oStorage));
+            return;
+        }
+
+        echo json_encode(array('success' => false));
+    }
+
     public function GetDistributorVendingMachines($iUserId)
     {
         $iUserId = intval($iUserId);
@@ -257,8 +284,7 @@ class admin extends My_AdminController
     {
         if(is_array($_POST) && !empty($_POST)){
             $iProductId = intval($_POST['Id']);
-            $sNewValue = $_POST['Value'];
-            $bEditProduct = $this->products->EditProduct($iProductId, $sNewValue);
+            $bEditProduct = $this->products->EditProduct($iProductId, $_POST);
 
             echo json_encode(array('success' => $bEditProduct));
         }
@@ -332,6 +358,16 @@ class admin extends My_AdminController
         return;
     }
 
+    //Obsolete
+    public function Obsolete()
+    {
+        $this->aData['sTitle'] = 'Бракувани';
+
+        $this->load->view('admin/include/header',$this->aData);
+        $this->load->view('admin/pages/obsolete',$this->aData);
+        $this->load->view('admin/include/footer',$this->aData);
+    }
+
     //Sales
     public function Sales()
     {
@@ -347,6 +383,7 @@ class admin extends My_AdminController
         $this->load->view('admin/pages/sales',$this->aData);
         $this->load->view('admin/include/footer',$this->aData);
     }
+
     public function GetSales()
     {
         $iUserId = intval($_POST['iUserId']);

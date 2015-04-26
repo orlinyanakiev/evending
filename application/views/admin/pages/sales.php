@@ -1,4 +1,5 @@
 <div class="sales_content">
+    <div class="title">Продажби</div>
     <div class="filter">
         <select name="User">
             <option value="0">Всички потребители</option>

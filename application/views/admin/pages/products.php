@@ -1,4 +1,5 @@
 <div class="products_content">
+    <div class="title">Произведени изделия</div>
     <div class="list" style="<?= is_array($aProducts) && !empty($aProducts) ? '' : 'display:none;' ?>;">
         <?php $iCounter = 0; ?>
         <?php foreach ($aProducts as $oProduct) : ?>
@@ -14,7 +15,7 @@
         <form method="post" action="">
             <input type="hidden" name="Id" value="" />
             <div class="fake_input_field" name="Name"></div>
-            <div class="fake_input_field" name="Price"></div>
+            <input type="text" name="Price" placeholder="Стойност" value="" autocomplete="off" />
             <input type="text" name="Value" placeholder="Себестойност" value="" autocomplete="off" />
             <button type="submit">Запази</button>
         </form>

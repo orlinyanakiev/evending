@@ -18,7 +18,7 @@ $( document ).ready(function() {
     },"Wrong!");
 
     jQuery.validator.addMethod("Price",function(value,element){
-        return this.optional(element) || /^[0-9]+\.[0-9]{2}$/.test(value);
+        return this.optional(element) || /^(\-)?[0-9]+(\.[0-9]{1,2})?$/.test(value);
     },"Wrong!");
 
     jQuery.validator.addMethod("DateValidation",function(value,element){
@@ -199,6 +199,10 @@ $( document ).ready(function() {
                 success:function(result){
                     if(result.success == true){
                         $('.content').find('.warning').html('<p class="request_success">Оперецията е успешна!</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 3000);
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Опитайте отново!</p>');
@@ -312,10 +316,12 @@ $( document ).ready(function() {
                     } else {
                         colour = 'FFFF99'
                     }
-                    listing_html += '<div class="storage_container container" style="background-color: #' + colour + '">';
-                    listing_html += '<div class="column first_column"><a href="#" class="storage_availability" storage-id="' + value.Id + '">' + value.Name + '</a></div>';
-                    listing_html += '<div class="column last_column">' + value.Address + '</div>';
-                    listing_html += '</div>';
+                    listing_html += '<div class="storage_container container" storage-id="' + value.Id + '" style="background-color: #' + colour + '">' +
+                    '<div class="column first_column"><a href="#" class="storage_availability">' + value.Name + '</a></div>' +
+                    '<div class="manage_storage last_column">' +
+                    '<a href="#" class="edit_storage"><i class="fa fa-pencil"></i></a> ' +
+                    '<a href="#" class="delete_storage"><i class="fa fa-times"></i></a>' +
+                    '</div><div class="column last_column">' + value.Address + '</div></div>';
                 });
 
                 listing_html += result.sPagination;
@@ -325,6 +331,107 @@ $( document ).ready(function() {
         });
     });
 
+    //Edit storage
+    $('.storages_content').on('click', '.edit_storage', function(e){
+        e.preventDefault();
+
+        var storage_id = $(this).closest('.storage_container').attr('storage-id');
+        var errorTimeout;
+
+        $.ajax({
+            method: 'post',
+            dataType: 'json',
+            url: base_url + 'admin/GetStorageById/' + storage_id,
+            success:function(result){
+                if(result.success == true){
+                    $('.edit_storage_form').find('[name="Id"]').val(result.oStorage.Id);
+                    $('.edit_storage_form').find('[name="Name"]').val(result.oStorage.Name);
+                    $('.edit_storage_form').find('[name="Address"]').val(result.oStorage.Address);
+
+                    $('.list').hide();
+                    $('.add_storage').hide();
+                    $('.edit_storage_form').show();
+                } else {
+                    $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
+                    clearTimeout(errorTimeout);
+                    errorTimeout = setTimeout(function(){
+                        $('.content').find('.warning').html('');
+                    }, 3000);
+                }
+            }
+        });
+    });
+
+    //Update storage
+    $('.edit_storage_form').on('click','button',function(e){
+        e.preventDefault();
+
+        var this_form = $(this).closest('form');
+        var errorTimeout;
+
+        this_form.validate({
+            rules:{
+                Name: { required: true, Address: true },
+                Address: { Address: true }
+            },
+            messages:{
+                Name: '',
+                Address: ''
+            }
+        })
+
+        var form_valid = this_form.valid();
+
+        if(form_valid){
+            var data = this_form.serialize();
+
+            $.ajax({
+                dataType: 'json',
+                method: 'post',
+                url: base_url + 'admin/EditStorage/',
+                data: data,
+                success:function(result){
+                    if(result.success == true){
+                        $('.content').find('.warning').html('<p class="request_success">Запазено!</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 3000);
+                    }
+                    if(result.success == false){
+                        $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 3000);
+                    }
+                }
+            });
+        }
+    });
+
+    //Delete storage
+    $('.storages_content').on('click','.delete_storage',function(e){
+        e.preventDefault();
+
+
+        if(confirm('Сигурни ли сте, че желаете да изтриете този склад?')){
+            var storage_container = $(this).closest('.storage_container');
+            var storage_id = storage_container.attr('storage-id');
+
+            $.ajax({
+                method: 'post',
+                dataType: 'json',
+                url: base_url + 'admin/DeleteStorage/' + storage_id,
+                success:function(result){
+                    if(result.success == true){
+                        storage_container.remove();
+                    }
+                }
+            })
+        }
+    });
+
     //Show add storage form
     $('.content a.add_storage').click(function(e){
         e.preventDefault();
@@ -332,6 +439,19 @@ $( document ).ready(function() {
         $('.content').find('a.add_storage').hide();
         $('.content').find('.list').hide();
         $('.content').find('.add_storage_form').show();
+    });
+
+    //Show cash field
+    $('.add_storage_form [name="Type"]').on('change',function (e) {
+        e.preventDefault();
+
+        var storage_type = $(this).val();
+
+        if(storage_type == 3){
+            $('input[name="Cash"]').show();
+        } else {
+            $('input[name="Cash"]').hide();
+        }
     })
 
     //Add storage
@@ -369,11 +489,17 @@ $( document ).ready(function() {
                         $('.add_storage_form [name="Name"]').val('');
                         $('.add_storage_form [name="Address"]').val('');
                         $('.add_storage_form [name="Type"]').val(0);
+                        $('.add_storage_form [name="Cash"]').val('');
+                        $('.add_storage_form [name="Cash"]').hide();
 
                         $('.content').find('.warning').html('<p class="request_success">Складът беше добавен успешно!</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 3000);
                     }
                     if(result.success == false){
-                        $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Опитайте отново.</p>');
+                        $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
                         clearTimeout(errorTimeout);
                         errorTimeout = setTimeout(function(){
                             $('.content').find('.warning').html('');
@@ -461,9 +587,14 @@ $( document ).ready(function() {
                 data: data,
                 success: function (result) {
                     if(result.success == true){
-                        $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
                         this_form.find('[name="Name"]').val('');
                         this_form.find('[name="Category"]').val(0);
+
+                        $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 3000);
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Опитайте отново</p>');
@@ -543,6 +674,10 @@ $( document ).ready(function() {
                 success:function(result){
                     if(result.success == true){
                         $('.content').find('.warning').html('<p class="request_success">Оперецията е успешна!</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 3000);
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Опитайте отново!</p>');
@@ -626,7 +761,7 @@ $( document ).ready(function() {
                 if(result.success == true){
                     $('.edit_product_form').find('[name="Id"]').val(result.oProduct.Id);
                     $('.edit_product_form').find('[name="Name"]').text(result.oProduct.Type.Name);
-                    $('.edit_product_form').find('[name="Price"]').text(result.oProduct.Price);
+                    $('.edit_product_form').find('[name="Price"]').val(result.oProduct.Price);
                     $('.edit_product_form').find('[name="Value"]').val(result.oProduct.Value);
 
                     $('.products_content .list').hide();
@@ -646,10 +781,12 @@ $( document ).ready(function() {
         this_form.validate({
             rules:{
                 Id: { required: true, digits: true, GreaterThan: 0 },
-                Value: { Price: true }
+                Value: { Price: true },
+                Price: { Price: true }
             },
             messages:{
                 Id: '',
+                Price: '',
                 Value: ''
             }
         });
@@ -667,6 +804,10 @@ $( document ).ready(function() {
                 success:function(result){
                     if(result.success == true){
                         $('.content').find('.warning').html('<p class="request_success">Оперецията е успешна!</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 3000);
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Опитайте отново!</p>');
@@ -727,13 +868,18 @@ $( document ).ready(function() {
                 data: data,
                 success: function (result) {
                     if(result.success == true){
-                        $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
                         $('.supply_form').find('[name="Category"]').val(0);
                         $('.supply_form').find('[name="ProductType"]').val(0);
                         $('.supply_form').find('[name="Quantity"]').val('');
                         $('.supply_form').find('[name="ExpirationDate"]').val('');
                         $('.supply_form').find('[name="Price"]').val('');
                         $('.supply_form').find('[name="Value"]').val('');
+
+                        $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 3000);
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Възникна грешка! Опитайте отново</p>');
@@ -790,7 +936,7 @@ $( document ).ready(function() {
         e.preventDefault();
 
         var storage_name = $(this).text();
-        var storage_id = $(this).attr('storage-id');
+        var storage_id = $(this).closest('.storage_container').attr('storage-id');
         var html = '';
         var errorTimeout;
 
@@ -802,8 +948,12 @@ $( document ).ready(function() {
                 if(result.success == true){
                     var iCounter = 0;
                     var sColor = '';
+                    var fValue = 0;
+                    var fPrice = 0;
+
                     html += '<div class="list" style="display: block">' +
                     '<div class="container"><div class="column first_column">' + storage_name + '</div></div>';
+
                     $.each(result.aStorageAvailability,function(index,value){
                         if(iCounter % 2 == 0){
                             sColor = 'DDF5B7';
@@ -811,10 +961,20 @@ $( document ).ready(function() {
                             sColor = 'FFFF99';
                         }
                         iCounter += 1;
+                        fPrice += value.fPrice;
+                        fValue += value.fValue;
                         html += '<div class="container" style="background-color: #' + sColor + ';"><div class="column first_column" product-id="' + value.oProduct.Id + '">' + value.oProduct.Type.Name + ' (' +value.oProduct.ExpirationDate + ')</div><div class="column last_column">' + value.iQuantity + '</div></div>';
-                    })
+                    });
 
-                    html += '<div class="directions"><a href="' + base_url + 'admin/storages">Обратно</a></div>'
+                    html += '<div class="container"><div class="column first_column">Себестойност на изделията: ' + fValue + ' лв.</div></div>' +
+                    '<div class="container"><div class="column first_column">Цена на изделията: ' + fPrice + ' лв.</div></div>';
+
+                    if(result.fCash){
+                        html += '<div class=container><div class="column first_column">Парична наличност: ' + result.fCash + ' лв.</div></div>' +
+                        '<div class="container"><div class="column first_column">Общо: ' + result.fCurrentValue + ' лв.</div></div>';
+                    }
+
+                    html += '<div class="directions"><a href="' + base_url + 'admin/storages">Обратно</a></div>';
 
                     $('.content').html(html);
                 }
@@ -942,7 +1102,62 @@ $( document ).ready(function() {
                     if(result.success == true){
                         $('.distribution_form').find('[name="Product"]').val(0);
                         $('.distribution_form').find('[name="Quantity"]').val('');
+
                         $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 3000);
+                    }
+                    if(result.success == false){
+                        $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 3000);
+                    }
+                }
+            });
+        }
+    });
+
+    //Income submit
+    $('.revenue_form').on('click','button',function(e){
+        e.preventDefault();
+
+        var this_form = $(this).closest('form');
+        var errorTimeout;
+
+        this_form.validate({
+            rules:{
+                Storage: { GreaterThan: 0 },
+                Value: { required: true, Price: true }
+            },
+            messages:{
+                Storage: '',
+                Value: ''
+            }
+        });
+
+        var form_valid = this_form.valid();
+
+        if(form_valid){
+            var data = this_form.serialize();
+
+            $.ajax({
+                method: 'post',
+                dataType: 'json',
+                url: base_url + 'member/RevenueAccounting/',
+                data: data,
+                success:function(result){
+                    if(result.success == true){
+                        $('.revenue_form').find('[name="Value"]').val('');
+
+                        $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 3000);
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
@@ -1031,7 +1246,12 @@ $( document ).ready(function() {
                     if(result.success == true){
                         $('.sales_form').find('[name="Product"]').val(0);
                         $('.sales_form').find('[name="Quantity"]').val('');
+
                         $('.content').find('.warning').html('<p class="request_success">Успешна операция!</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 3000);
                     }
                     if(result.success == false){
                         $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');

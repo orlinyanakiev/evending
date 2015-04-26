@@ -190,7 +190,7 @@ class Member extends My_MemberController
     {
         $aStorageAvailability = $this->GetStorageAvailability($iStorageId);
         if(is_array($aStorageAvailability) && !empty($aStorageAvailability)){
-            echo json_encode(array('success' => true, 'aStorageAvailability' => $aStorageAvailability));
+            echo json_encode(array('success' => true, 'aStorageAvailability' => $aStorageAvailability['aStorageAvailability'], 'fCash' => $aStorageAvailability['fCash'], 'fCurrentValue' => $aStorageAvailability['fCurrentValue']));
             return;
         }
 
@@ -199,21 +199,32 @@ class Member extends My_MemberController
 
     public function GetStorageAvailability($iStorageId)
     {
-        $aStoragesData = $this->storages->ListStorages();
-        $aStorages = $aStoragesData['aStorages'];
-        $iStorageId = (int) $iStorageId;
+        $iStorageId = intval($iStorageId);
         $aStorageAvailability = array();
+        $fValue = '0.00';
+        $fPrice = '0.00';
 
-        foreach ($aStorages as $oStorage){
-            if((int)$oStorage->Id == $iStorageId){
-                $aAvailability = json_decode($oStorage->Availability, true);
+        $oStorage = $this->storages->GetStorageById($iStorageId);
+
+        if(is_object($oStorage)){
+            $aAvailability = json_decode($oStorage->Availability, true);
+            $fCash = $fCurrentValue = $oStorage->Cash;
+
+            if(is_array($aAvailability) && !empty($aAvailability)){
+                foreach ($aAvailability as $iProductId => $iQuantity){
+                    $oProduct = $this->products->GetProductById((int)$iProductId);
+                    if($oProduct->IsDeleted == '1'){
+                        unset($aAvailability[$iProductId]);
+                    } else {
+                        $fValue += $oProduct->Value * $iQuantity;
+                        $fPrice += $oProduct->Price * $iQuantity;
+                        $aStorageAvailability[]= array('oProduct' => $oProduct, 'iQuantity' => $iQuantity, 'fValue' => $fValue, 'fPrice' => $fPrice);
+                        $fCurrentValue += $fPrice;
+                    }
+                }
             }
-        }
-
-        if(is_array($aAvailability) && !empty($aAvailability)){
-            foreach ($aAvailability as $iProductId => $iQuantity){
-                $oProduct = $this->products->GetProductById((int)$iProductId);
-                $aStorageAvailability[]= array('oProduct' => $oProduct, 'iQuantity' => $iQuantity);
+            if(!empty($aStorageAvailability)){
+                return array('aStorageAvailability' => $aStorageAvailability, 'fCash' => floatval($fCash), 'fCurrentValue' => floatval($fCurrentValue));
             }
         }
 
@@ -232,7 +243,7 @@ class Member extends My_MemberController
     }
 
     //Income
-    public function Income()
+    public function Revenue()
     {
         if($this->aData['oUser']->Type == 0){
             redirect(base_url().'member');
@@ -249,8 +260,30 @@ class Member extends My_MemberController
         }
 
         $this->load->view('member/include/header',$this->aData);
-        $this->load->view('member/pages/income',$this->aData);
+        $this->load->view('member/pages/revenue',$this->aData);
         $this->load->view('member/include/footer',$this->aData);
+    }
+
+    public function RevenueAccounting()
+    {
+        if(is_array($_POST) && !empty($_POST)){
+            $iStorageId = intval($_POST['Storage']);
+            $fRevenue = $_POST['Value'];
+
+            $bIncome = $this->storages->AccountIncome($iStorageId, $fRevenue);
+
+            $oStorage = $this->storages->GetStorageById($iStorageId);
+
+            $aUpdateData['Cash'] = $oStorage->Cash - $fRevenue;
+            $bRevenueAccounting = $this->storages->EditStorage($iStorageId,$aUpdateData);
+
+            if($bIncome && $bRevenueAccounting){
+                echo json_encode(array('success' => $bRevenueAccounting));
+                return;
+            }
+        }
+
+        echo json_encode(array('success' => false));
     }
 
     //Sales

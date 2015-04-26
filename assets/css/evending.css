@@ -25,7 +25,7 @@ select.error {border:2px solid red;}
 
 .wrong_login {color: #FC1800;padding-top: 50px;min-height: 32px;}
 
-.nav {margin: 0 0px -2px 8px;padding-top: 15px;text-align: justify;height: 43.5px;width: 100%;}
+.nav {margin: 0 0 0 8px;padding: 8px 0 0 0;text-align: justify;height: 42px;width: 100%;}
 .nav a.nav_link {float: left;background-color: #E2B977;display: inline;border: 0.06em solid black;margin:0 1.5% 0 0;border-radius: 12px 26px 0 0;padding: 8px 0 8px 0;width: 23%;text-align: center;}
 .nav a.logout {float:right;margin: 0 16px 0 0;}
 .nav a.active {background-color: #FFE4B7; border-bottom: 2px solid #FFE4B7;}
@@ -48,7 +48,7 @@ p.request_success {color: green;}
 
 .option {font-size: 22px; text-align: left; margin: 8px;}
 
-.edit_user_form, .edit_product_type_form, .add_product_type_form, .add_storage_form, .edit_product_form, .vending_machines_list {display: none;}
+.edit_user_form, .edit_product_type_form, .add_product_type_form, .add_storage_form, .edit_storage_form, .edit_product_form, .vending_machines_list {display: none;}
 
 .sales_results{text-align: left;}
 

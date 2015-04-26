@@ -9,7 +9,7 @@
     </div>
     <div class="content">
         <?php if(is_array($aStorages) && !empty($aStorages)) : ?>
-            <div class="income_form form">
+            <div class="revenue_form form">
                 <form method="post" action="">
                     <select name="Storage">
                         <option value="0" selected="selected">От</option>
