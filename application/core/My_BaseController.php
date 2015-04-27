@@ -12,7 +12,7 @@ class My_BaseController extends CI_Controller
         
         $this->load->helper('url');
         $this->load->model('users');
-        
+
         $this->CheckUser();
     }
     

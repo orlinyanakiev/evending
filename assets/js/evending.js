@@ -242,15 +242,17 @@ $( document ).ready(function() {
                     listing_html += '<div class="column">' + value.LastName + '</div>';
                     listing_html += '<div class="manage_users last_column">';
                     listing_html += '<a href="#" class="edit_user"><i class="fa fa-pencil"></i></a> ';
+
                     if(result.oUser.Id == value.Id){
                         listing_html += '<i style="color:grey" class="fa fa-times"></i>';
                     } else {
                         listing_html += '<a href="#" class="delete_user"><i class="fa fa-times"></i></a>';
                     }
+
                     listing_html += '</div></div>';
                 });
 
-                listing_html += result.sPagination;
+                listing_html += result.sPagination + '<div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>';
 
                 $('.users_content').find('.list').html(listing_html);
             }
@@ -324,7 +326,7 @@ $( document ).ready(function() {
                     '</div><div class="column last_column">' + value.Address + '</div></div>';
                 });
 
-                listing_html += result.sPagination;
+                listing_html += result.sPagination + '<div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>';
 
                 $('.storages_content').find('.list').html(listing_html);
             }
@@ -540,7 +542,7 @@ $( document ).ready(function() {
                         '</div></div>'
                     });
 
-                    listing_html += result.sPagination;
+                    listing_html += result.sPagination + '<div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>';
 
                     $('.product_types_content').find('.list').html(listing_html);
                 }
@@ -739,7 +741,7 @@ $( document ).ready(function() {
                     listing_html += '</div>';
                 });
 
-                listing_html += result.sPagination;
+                listing_html += result.sPagination  + '<div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>';
 
                 $('.products_content').find('.list').html(listing_html);
             }
@@ -1169,6 +1171,67 @@ $( document ).ready(function() {
                 }
             });
         }
+    });
+
+    //Events pagination
+    $('.events_content').on('click', '.pagination_list a', function(e){
+        e.preventDefault();
+        var page_id = $(this).attr('page-number');
+
+        $.ajax({
+            method: 'post',
+            dataType: 'json',
+            url: base_url + 'admin/EventsPagination/',
+            data: { "iPageId": page_id },
+            success: function (result) {
+                var listing_html = '';
+                var colour = '';
+
+                $.each(result.aEvents, function( index , value ){
+                    if(index % 2 == 0){
+                        colour = 'DDF5B7';
+                    } else {
+                        colour = 'FFFF99'
+                    }
+
+                    listing_html += '<div class="event_container container" style="background-color: #' + colour + '"> ' +
+                    '<a href="#" class="event_preview" event-id="' + value.Id + '"> ' +
+                    '<div class="first_column column">' + value.DateRegistered + '</div> ' +
+                    '<div class="first_column column">' + value.UserId.FirstName + ' ' + value.UserId.LastName + '</div> ' +
+                    '<div class="first_column column">' + value.Type + '</div>' +
+                    '</a></div>';
+                });
+
+                listing_html += result.sPagination + '<div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>';
+
+                $('.events_content').find('.list').html(listing_html);
+            }
+        });
+    });
+
+    //Event preview
+    $('.events_content .list').on('click','a.event_preview',function(e){
+        e.preventDefault();
+
+        var event_id = $(this).attr('event-id');
+
+        $.ajax({
+            method: 'post',
+            dataType: 'json',
+            url: base_url + 'admin/GetEventPreview' + event_id,
+            success:function(result){
+                if(result.success == true){
+
+                }
+                else {
+                    $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
+                    clearTimeout(errorTimeout);
+                    errorTimeout = setTimeout(function(){
+                        $('.content').find('.warning').html('');
+                    }, 3000);
+                }
+            }
+        });
     });
 
     //sales select options

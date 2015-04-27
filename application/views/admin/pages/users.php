@@ -18,6 +18,7 @@
             <?php $iCounter++; ?>
         <?php endforeach; ?>
         <?= $sUsersPagination ?>
+        <div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>
     </div>
     <div class="edit_user_form form">
         <form method="post" action="">
@@ -36,6 +37,6 @@
                 <?php endif; ?>
             </div>
         </form>
+        <div class="directions"><a href="<?= base_url();?>admin/users"">Обратно</a></div>
     </div>
 </div>
-<div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>

@@ -15,6 +15,7 @@
             <?php $iCounter++; ?>
         <?php endforeach; ?>
         <?= $sStoragesPagination ?>
+        <div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>
     </div>
 
     <div class="add_storage_form form">
@@ -32,6 +33,7 @@
             <input type="text" name="Cash" placeholder="Парична наличност" value="" autocomplete="off" style="display: none;" />
             <button type="submit">Добави склад</button>
         </form>
+        <div class="directions"><a href="<?= base_url();?>admin/storages"">Обратно</a></div>
     </div>
 
     <div class="edit_storage_form form">
@@ -41,6 +43,6 @@
             <input type="text" name="Address" placeholder="Адрес" value="" autocomplete="off" />
             <button type="submit">Запази</button>
         </form>
+        <div class="directions"><a href="<?= base_url();?>admin/storages"">Обратно</a></div>
     </div>
 </div>
-<div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>

@@ -8,6 +8,7 @@
         <a class="nav_link logout" href="<?= base_url();?>member/logout">Изход</a>
     </div>
     <div class="content">
+        <div class="title">Отчитане на приходи</div>
         <?php if(is_array($aStorages) && !empty($aStorages)) : ?>
             <div class="revenue_form form">
                 <form method="post" action="">

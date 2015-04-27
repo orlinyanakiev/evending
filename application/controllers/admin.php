@@ -52,7 +52,7 @@ class admin extends My_AdminController
             $iUserId = $_POST['UserId'];
 
             //check if distributor exists
-            $oDistributor = $this->users->GetDistributorInfo($iUserId);
+            $oDistributor = $this->users->GetDistributorById($iUserId);
             $bIsDistributor = is_object($oDistributor);
 
             if($_POST['Type'] == 1 && !$bIsDistributor) {
@@ -96,6 +96,10 @@ class admin extends My_AdminController
             $bResult = $bEditUser;
         }
 
+        if($bResult){
+            $this->events->RegisterEvent($this->aData['oUser'], 324, $_POST);
+        }
+
         echo json_encode(array('success' => $bResult));
     }
 
@@ -103,8 +107,19 @@ class admin extends My_AdminController
     {
         if(is_array($_POST) && !empty($_POST) && isset($_POST['iUserId'])){
             $iUserId = (int) $_POST['iUserId'];
+            $oUser = $this->users->GetUser($iUserId);
+
+            if($oUser->Type == 1){
+                $oDistributor = $this->storages->GetDistributorById($oUser->Id);
+                $this->storages->DeleteStorage($oDistributor->StorageId);
+            }
 
             $bResult = $this->users->deleteUserById($iUserId);
+
+            if($bResult){
+                $this->events->RegisterEvent($this->aData['oUser'], 361, $_POST);
+            }
+
             echo json_encode(array('success' => $bResult));
         }
     }
@@ -165,6 +180,11 @@ class admin extends My_AdminController
             if(is_int($iStorageId)){
                 $bResult = true;
             }
+
+            if($bResult){
+                $this->events->RegisterEvent($this->aData['oUser'], 256, $_POST);
+            }
+
             echo json_encode(array('success' => $bResult));
         }
     }
@@ -286,6 +306,10 @@ class admin extends My_AdminController
             $iProductId = intval($_POST['Id']);
             $bEditProduct = $this->products->EditProduct($iProductId, $_POST);
 
+            if($bEditProduct){
+                $this->events->RegisterEvent($this->aData['oUser'], 400, $_POST);
+            }
+
             echo json_encode(array('success' => $bEditProduct));
         }
     }
@@ -293,7 +317,7 @@ class admin extends My_AdminController
     //Product types
     public function ProductTypes()
     {
-        $aProductTypesData = $this->products->ListProductTypes(1, $this->products->getLimit());
+        $aProductTypesData = $this->products->ListProductTypes(1, $this->products->getTypesLimit());
 
         $this->aData['sTitle'] = 'Типове изделия';
         $this->aData['aProductTypes'] = $aProductTypesData['aProductTypes'];
@@ -324,6 +348,10 @@ class admin extends My_AdminController
             $aProductData = $_POST;
             $bResult = $this->products->AddProductType($aProductData);
 
+            if($bResult){
+                $this->events->RegisterEvents($this->aData['oUser'], 289, $_POST);
+            }
+
             echo json_encode(array('success' => $bResult));
         }
     }
@@ -331,14 +359,23 @@ class admin extends My_AdminController
     public function EditProductType()
     {
         $bResult = $this->products->EditProductType($_POST);
+
+        if($bResult){
+            $this->events->RegisterEvent($this->aData['oUser'], 441, $_POST);
+        }
+
         echo json_encode(array('success' => $bResult));
     }
 
     public function DeleteProductType()
     {
         $iProductTypeId = $_POST['iProductTypeId'];
-
         $bResult = $this->products->DeleteProductType($iProductTypeId);
+
+        if($bResult){
+            $this->events->RegisterEvent($this->aData['oUser'], 484, $_POST);
+        }
+
         echo json_encode(array('success' => $bResult));
     }
 
@@ -393,4 +430,98 @@ class admin extends My_AdminController
         $aSalesData = $this->storages->GetSales($iUserId, $iStorageId, $sPeriod);
         echo json_encode(array('success' => true, 'aSalesData' => $aSalesData));
     }
+
+    //events
+    public function Events()
+    {
+        $this->aData['sTitle'] = 'Хронология';
+        $aEventsData = $this->events->ListEvents(1,$this->events->GetEventsLimit());
+
+        $this->aData['aEvents'] = $aEventsData['aEvents'];
+        $this->aData['sPagination'] = $aEventsData['sPagination'];
+
+        $this->load->view('admin/include/header',$this->aData);
+        $this->load->view('admin/pages/events',$this->aData);
+        $this->load->view('admin/include/footer',$this->aData);
+    }
+
+    public function EventsPagination()
+    {
+        if(is_array($_POST) && array_key_exists('iPageId',$_POST)){
+            $iPageId = intval($_POST['iPageId']);
+
+            $aEventsData = $this->events->ListEvents($iPageId, $this->events->getEventsLimit());
+
+            $aEventsData['success'] = true;
+
+            echo json_encode($aEventsData);
+            return;
+        }
+        echo json_encode(array('success' => false));
+        return;
+    }
+
+    public function GetEventPreview($iEventId)
+    {
+        $oEvent = $this->events->GetEventById($iEventId);
+
+        if(is_object($oEvent)){
+            $aEventDescription = json_decode($oEvent->Description, true);
+
+            switch($oEvent->Type){
+                case \Events::SUPPLY :
+
+
+                    break;
+                case \Events::DISTRIBUTE :
+
+
+                    break;
+                case \Events::OBSOLETE :
+
+
+                    break;
+                case \Events::SALE :
+
+
+                    break;
+                case \Events::INCOME_ACCOUNTING :
+
+
+                    break;
+                case \Events::ADD_STORAGE :
+
+
+                    break;
+                case \Events::ADD_PRODUCT_TYPE :
+
+
+                    break;
+                case \Events::EDIT_USER :
+
+
+                    break;
+                case \Events::DELETE_USER :
+
+
+                    break;
+                case \Events::EDIT_PRODUCT :
+
+
+                    break;
+                case \Events::EDIT_PRODUCT_TYPE :
+
+
+                    break;
+                case \Events::DELETE_PRODUCT_TYPE :
+
+
+                    break;
+            }
+        }
+
+        echo json_encode(array('success' => false));
+        return;
+    }
+
 }

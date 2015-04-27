@@ -8,6 +8,7 @@
         <a class="nav_link logout" href="<?= base_url();?>member/logout">Изход</a>
     </div>
     <div class="content">
+        <div class="title">Зареждане</div>
         <?php if(is_array($aStorages) && !empty($aStorages)) : ?>
             <?php if(is_array($aProductTypes) && !empty($aProductTypes)) : ?>
                 <div class="supply_form form">

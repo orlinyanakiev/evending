@@ -14,7 +14,9 @@
             <?php $iCounter++; ?>
         <?php endforeach; ?>
         <?= $sProductTypesPagination ?>
+        <div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>
     </div>
+
     <div class="add_product_type_form form">
         <? if(is_array($aProductCategories) && !empty($aProductCategories)) : ?>
             <form method="post" action="">
@@ -28,7 +30,9 @@
                 <button type="submit">Добави тип изделие</button>
             </form>
         <? endif; ?>
+        <div class="directions"><a href="<?= base_url();?>admin/producttypes"">Обратно</a></div>
     </div>
+
     <div class="edit_product_type_form form">
         <form method="post" action="">
             <input type="hidden" name="Id" value="" />
@@ -37,6 +41,6 @@
             </select>
             <button type="submit">Запази</button>
         </form>
+        <div class="directions"><a href="<?= base_url();?>admin/producttypes"">Обратно</a></div>
     </div>
 </div>
-<div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>

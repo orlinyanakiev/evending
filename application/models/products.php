@@ -75,15 +75,14 @@ class Products extends CI_Model
 
         if($iCount > 0){
             if($iCount > $iLimit && $iLimit != 0){
-                $iLimit = self::iLimit;
-                $iOffest = ($iPage - 1) * $iLimit;
+                $iOffset = ($iPage - 1) * $iLimit;
 
                 $this->db->where('IsDeleted','0');
                 if($iType != 0){
                     $this->db->where('Type', $iType);
                 }
                 $this->db->order_by("Id","asc");
-                $this->db->limit($iLimit, $iOffest);
+                $this->db->limit($iLimit, $iOffset);
 
                 $aProducts = $this->db->get($this->sProductTable)->result();
                 $sPagination = $this->GetPagination($iPage, $iCount, $iLimit);
@@ -253,15 +252,14 @@ class Products extends CI_Model
 
         if($iCount > 0){
             if($iCount > $iLimit && $iLimit != 0){
-                $iLimit = self::iTypesLimit;
-                $iOffest = ($iPage - 1) * $iLimit;
+                $iOffset = ($iPage - 1) * $iLimit;
 
                 $this->db->where('IsDeleted','0');
                 if($iType != 0){
                     $this->db->where('Type', $iType);
                 }
                 $this->db->order_by("Id","asc");
-                $this->db->limit($iLimit, $iOffest);
+                $this->db->limit($iLimit, $iOffset);
 
                 $aProducts = $this->db->get($this->sTypeTable)->result();
                 $sPagination = $this->GetPagination($iPage, $iCount, $iLimit);

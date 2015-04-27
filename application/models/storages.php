@@ -201,11 +201,10 @@ class Storages extends CI_Model
         $iCount = $oQuery->num_rows();
 
         if($iCount > $iLimit && $iLimit != 0){
-            $iLimit = self::iStorageLimit;
-            $iOffest = ($iPage - 1) * $iLimit;
+            $iOffset = ($iPage - 1) * $iLimit;
             $this->db->where('Active','1');
             $this->db->order_by("Id","asc");
-            $this->db->limit($iLimit, $iOffest);
+            $this->db->limit($iLimit, $iOffset);
 
             $aData['aStorages'] = $this->db->get($this->sStoragesTable)->result();
             $aData['sPagination'] = $this->GetPagination($iPage, $iCount, $iLimit);

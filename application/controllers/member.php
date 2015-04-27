@@ -125,18 +125,18 @@ class Member extends My_MemberController
 
     public function Distribute()
     {
-        $bDistribute = false;
         if(is_array($_POST) && !empty($_POST)){
             $aData = $_POST;
 
             $bDistribute = $this->storages->Distribute($aData);
+
             if($bDistribute){
-                echo json_encode(array('success' => $bDistribute));
-                return;
+                $this->events->RegisterEvent($this->aData['oUser'], 144, $_POST);
             }
+
+            echo json_encode(array('success' => $bDistribute));
+            return;
         }
-        echo json_encode(array('success' => $bDistribute));
-        return;
     }
 
     //Storage supply
@@ -238,6 +238,10 @@ class Member extends My_MemberController
             $oProductType = $this->products->GetProductTypeById((int)$aStorageSupplyData['ProductType']);
             $bResult = $this->storages->StorageSupply($aStorageSupplyData, $oProductType);
 
+            if($bResult){
+                $this->events->RegisterEvent($this->aData['oUser'], 121, $_POST);
+            }
+
             echo json_encode(array('success' => $bResult));
         }
     }
@@ -278,6 +282,8 @@ class Member extends My_MemberController
             $bRevenueAccounting = $this->storages->EditStorage($iStorageId,$aUpdateData);
 
             if($bIncome && $bRevenueAccounting){
+                $this->events->RegisterEvent($this->aData['oUser'], 225, $_POST);
+
                 echo json_encode(array('success' => $bRevenueAccounting));
                 return;
             }
@@ -315,9 +321,9 @@ class Member extends My_MemberController
             $aData = $_POST;
 
             $bSale = $this->storages->Sale($aData);
+
             if($bSale){
-                echo json_encode(array('success' => $bSale));
-                return;
+                $this->events->RegisterEvent($this->aData['oUser'], 196, $_POST);
             }
         }
         echo json_encode(array('success' => $bSale));

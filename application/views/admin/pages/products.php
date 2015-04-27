@@ -10,6 +10,7 @@
             <?php $iCounter++; ?>
         <?php endforeach; ?>
         <?= $sProductsPagination ?>
+        <div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>
     </div>
     <div class="edit_product_form form">
         <form method="post" action="">
@@ -19,6 +20,6 @@
             <input type="text" name="Value" placeholder="Себестойност" value="" autocomplete="off" />
             <button type="submit">Запази</button>
         </form>
+        <div class="directions"><a href="<?= base_url();?>admin/products"">Обратно</a></div>
     </div>
 </div>
-<div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>

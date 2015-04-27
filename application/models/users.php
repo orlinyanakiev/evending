@@ -50,12 +50,18 @@ class Users extends CI_Model
         if(isset($aUserData['UserId'])){
             $iUserId = intval($aUserData['UserId']);
 
+            $oUser = $this->GetUser($iUserId);
+
             $aNewUserData = array(
                 'FirstName' => $aUserData['FirstName'],
                 'LastName' => $aUserData['LastName'],
                 'LoginName' => $aUserData['LoginName'],
                 'Type' => $aUserData['Type']
             );
+
+            if(is_object($oUser) && $oUser->LoginName == $aNewUserData['LoginName']){
+                return false;
+            }
 
             $this->db->where('Id', $iUserId);
             return $this->db->update($this->sUsersTable,$aNewUserData);
@@ -141,7 +147,7 @@ class Users extends CI_Model
         $this->db->update($this->sDistributorsTable,$aDistributorData);
     }
 
-    public function GetDistributorInfo($iUserId)
+    public function GetDistributorById($iUserId)
     {
         $this->db->where('Id', $iUserId);
         return $this->db->get($this->sDistributorsTable)->first_row();
@@ -158,14 +164,13 @@ class Users extends CI_Model
         $iCount = $oQuery->num_rows();
 
         if($iCount > $iLimit && $iLimit != 0){
-            $iLimit = self::iLimit;
-            $iOffest = ($iPage - 1) * $iLimit;
+            $iOffset = ($iPage - 1) * $iLimit;
             $this->db->where('Active','1');
             if($iType != 0){
                 $this->db->where('Type',$iType);
             }
             $this->db->order_by("Id","asc");
-            $this->db->limit($iLimit, $iOffest);
+            $this->db->limit($iLimit, $iOffset);
 
             $aData['aUsers'] = $this->db->get($this->sUsersTable)->result();
             $aData['sPagination'] = $this->GetPagination($iPage, $iCount, $iLimit);

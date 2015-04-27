@@ -8,7 +8,7 @@
         <a class="nav_link logout" href="<?= base_url();?>member/logout">Изход</a>
     </div>
     <div class="content">
-
+        <div class="title">Бракуване</div>
         <?php if(is_array($aStorages) && !empty($aStorages)) : ?>
             <div class="obsolete_form form">
                 <form method="post" action="">
