@@ -97,7 +97,7 @@ class admin extends My_AdminController
         }
 
         if($bResult){
-            $this->events->RegisterEvent($this->aData['oUser'], 324, $_POST);
+            $this->events->RegisterEvent($this->aData['oUser'], \Events::EDIT_USER, $_POST);
         }
 
         echo json_encode(array('success' => $bResult));
@@ -117,7 +117,7 @@ class admin extends My_AdminController
             $bResult = $this->users->deleteUserById($iUserId);
 
             if($bResult){
-                $this->events->RegisterEvent($this->aData['oUser'], 361, $_POST);
+                $this->events->RegisterEvent($this->aData['oUser'], \Events::DELETE_USER, $_POST);
             }
 
             echo json_encode(array('success' => $bResult));
@@ -182,7 +182,7 @@ class admin extends My_AdminController
             }
 
             if($bResult){
-                $this->events->RegisterEvent($this->aData['oUser'], 256, $_POST);
+                $this->events->RegisterEvent($this->aData['oUser'], \Events::ADD_STORAGE, $_POST);
             }
 
             echo json_encode(array('success' => $bResult));
@@ -307,7 +307,7 @@ class admin extends My_AdminController
             $bEditProduct = $this->products->EditProduct($iProductId, $_POST);
 
             if($bEditProduct){
-                $this->events->RegisterEvent($this->aData['oUser'], 400, $_POST);
+                $this->events->RegisterEvent($this->aData['oUser'], \Events::EDIT_PRODUCT, $_POST);
             }
 
             echo json_encode(array('success' => $bEditProduct));
@@ -349,7 +349,7 @@ class admin extends My_AdminController
             $bResult = $this->products->AddProductType($aProductData);
 
             if($bResult){
-                $this->events->RegisterEvents($this->aData['oUser'], 289, $_POST);
+                $this->events->RegisterEvents($this->aData['oUser'], \Events::ADD_PRODUCT_TYPE, $_POST);
             }
 
             echo json_encode(array('success' => $bResult));
@@ -361,7 +361,7 @@ class admin extends My_AdminController
         $bResult = $this->products->EditProductType($_POST);
 
         if($bResult){
-            $this->events->RegisterEvent($this->aData['oUser'], 441, $_POST);
+            $this->events->RegisterEvent($this->aData['oUser'], \Events::EDIT_PRODUCT_TYPE, $_POST);
         }
 
         echo json_encode(array('success' => $bResult));
@@ -373,7 +373,7 @@ class admin extends My_AdminController
         $bResult = $this->products->DeleteProductType($iProductTypeId);
 
         if($bResult){
-            $this->events->RegisterEvent($this->aData['oUser'], 484, $_POST);
+            $this->events->RegisterEvent($this->aData['oUser'], \Events::DELETE_PRODUCT_TYPE, $_POST);
         }
 
         echo json_encode(array('success' => $bResult));
@@ -467,15 +467,30 @@ class admin extends My_AdminController
 
         if(is_object($oEvent)){
             $aEventDescription = json_decode($oEvent->Description, true);
+            $oUser = $this->users->GetUser($oEvent->UserId);
+            $sEventType = $this->aData['aEventTypes'][$oEvent->Type];
+
+            $sEventPreview = '<div class="event_container container"><div class="first_column column">'.$oEvent->DateRegistered.'</div>
+                    <div class="first_column column">'.$oUser->FirstName.' '.$oUser->LastName.'</div>
+                    <div class="first_column column">'.$sEventType.'</div></div>';
 
             switch($oEvent->Type){
                 case \Events::SUPPLY :
-
-
+//                    $oStorage = $this->storages->GetStorageById(intval($aEventDescription['Storage']));
+//                    $oProductType = $this->products->GetProductTypeById(intval($aEventDescription['ProductType']));
+//                    $sEventPreview .= '<div class="event_container container"><div class="first_column column">На: '.$oStorage->Name.' '.$oStorage->Address.'</div>
+//                    <div class="first_column column">'.$oStorageTwo->Name.' '.$oStorageTwo->Address.'</div></div>
+//                    <div class="event_container container"><div class="first_column column">Изделие: '.$oProduct->Type->Name.'</div>
+//                    <div class="first_column column">Количество: '.$aEventDescription['Quantity'].'</div></div>';
                     break;
                 case \Events::DISTRIBUTE :
-
-
+                    $oStorageOne = $this->storages->GetStorageById(intval($aEventDescription['Storage1']));
+                    $oStorageTwo = $this->storages->GetStorageById(intval($aEventDescription['Storage2']));
+                    $oProduct = $this->products->GetProductById(intval($aEventDescription['Product']));
+                    $sEventPreview .= '<div class="event_container container"><div class="first_column column">От: '.$oStorageOne->Name.' '.$oStorageOne->Address.'</div>
+                    <div class="first_column column">Към: '.$oStorageTwo->Name.' '.$oStorageTwo->Address.'</div></div>
+                    <div class="event_container container"><div class="first_column column">Изделие: '.$oProduct->Type->Name.'</div>
+                    <div class="first_column column">Количество: '.$aEventDescription['Quantity'].'</div></div>';
                     break;
                 case \Events::OBSOLETE :
 
@@ -518,6 +533,11 @@ class admin extends My_AdminController
 
                     break;
             }
+
+            $sEventPreview .= '<div class="directions"><a href="'.base_url().'admin/events">Обратно</a></div>';
+
+            echo json_encode(array('success' => true, 'sEventPreview' => $sEventPreview));
+            return;
         }
 
         echo json_encode(array('success' => false));

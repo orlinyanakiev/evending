@@ -63,7 +63,7 @@ class Events extends CI_Model
 
     public function GetEventById($iEventId)
     {
-        return $this->db->get_where($this->sEventTable,array('Id' => $iEventId));
+        return $this->db->get_where($this->sEventTable,array('Id' => $iEventId))->first_row();
     }
 
     public function ListEvents($iPage = 1, $iLimit = 0, $iUserId = 0, $iType = 0, $sStartDate = '', $sEndDate = '')

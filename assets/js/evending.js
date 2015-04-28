@@ -252,7 +252,7 @@ $( document ).ready(function() {
                     listing_html += '</div></div>';
                 });
 
-                listing_html += result.sPagination + '<div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>';
+                listing_html += result.sPagination + '<div class="directions"><a href="' + base_url + 'admin/manage"">Обратно</a></div>';
 
                 $('.users_content').find('.list').html(listing_html);
             }
@@ -326,7 +326,7 @@ $( document ).ready(function() {
                     '</div><div class="column last_column">' + value.Address + '</div></div>';
                 });
 
-                listing_html += result.sPagination + '<div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>';
+                listing_html += result.sPagination + '<div class="directions"><a href="' + base_url + 'admin/manage"">Обратно</a></div>';
 
                 $('.storages_content').find('.list').html(listing_html);
             }
@@ -542,7 +542,7 @@ $( document ).ready(function() {
                         '</div></div>'
                     });
 
-                    listing_html += result.sPagination + '<div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>';
+                    listing_html += result.sPagination + '<div class="directions"><a href="' + base_url + 'admin/manage"">Обратно</a></div>';
 
                     $('.product_types_content').find('.list').html(listing_html);
                 }
@@ -741,7 +741,7 @@ $( document ).ready(function() {
                     listing_html += '</div>';
                 });
 
-                listing_html += result.sPagination  + '<div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>';
+                listing_html += result.sPagination  + '<div class="directions"><a href="' + base_url + 'admin/manage"">Обратно</a></div>';
 
                 $('.products_content').find('.list').html(listing_html);
             }
@@ -1105,6 +1105,35 @@ $( document ).ready(function() {
                         $('.distribution_form').find('[name="Product"]').val(0);
                         $('.distribution_form').find('[name="Quantity"]').val('');
 
+                        var iSelectedStorageId = $('.distribution_form').find('[name="Storage1"]').val();
+                        var products_html = '';
+
+                        $.ajax({
+                            method: 'post',
+                            dataType: 'json',
+                            url: base_url + 'member/AjaxGetStorageAvailability/' + iSelectedStorageId,
+                            success:function(result){
+                                if(result.success == true){
+                                    products_html += '<option value="0">Изделие</option>';
+                                    $.each(result.aStorageAvailability,function(index,value){
+                                        products_html += '<option value="' + value.oProduct.Id + '" product-quantity="'+ value.iQuantity +'">' + value.oProduct.Type.Name + ' (' + value.oProduct.ExpirationDate + ')</option>';
+                                    });
+
+                                    $('.distribution_form').find('select[name="Product"]').html(products_html);
+                                }
+                                if(result.success == false ){
+                                    $('.distribution_form').find('select[name="Product"]').html('<option value="0" selected="selected">Изделие</option>');
+
+                                    $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>' +
+                                    '<p class="request_failure">Няма повече изделия в склада!</p>');
+                                    clearTimeout(errorTimeout);
+                                    errorTimeout = setTimeout(function(){
+                                        $('.content').find('.warning').html('');
+                                    }, 3000);
+                                }
+                            }
+                        });
+
                         $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
                         clearTimeout(errorTimeout);
                         errorTimeout = setTimeout(function(){
@@ -1202,7 +1231,7 @@ $( document ).ready(function() {
                     '</a></div>';
                 });
 
-                listing_html += result.sPagination + '<div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>';
+                listing_html += result.sPagination + '<div class="directions"><a href="' + base_url + 'admin/manage"">Обратно</a></div>';
 
                 $('.events_content').find('.list').html(listing_html);
             }
@@ -1210,7 +1239,7 @@ $( document ).ready(function() {
     });
 
     //Event preview
-    $('.events_content .list').on('click','a.event_preview',function(e){
+    $('.events_content .list').on('click','a.show_event_preview',function(e){
         e.preventDefault();
 
         var event_id = $(this).attr('event-id');
@@ -1218,10 +1247,10 @@ $( document ).ready(function() {
         $.ajax({
             method: 'post',
             dataType: 'json',
-            url: base_url + 'admin/GetEventPreview' + event_id,
+            url: base_url + 'admin/GetEventPreview/' + event_id,
             success:function(result){
                 if(result.success == true){
-
+                    $('.events_content .list').html(result.sEventPreview);
                 }
                 else {
                     $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');

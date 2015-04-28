@@ -5,7 +5,7 @@
             <?php $iCounter = 0; ?>
             <?php foreach($aEvents as $oEvent) : ?>
                 <div class="event_container container" style="background-color: #<?= $iCounter % 2 == 0 ? 'DDF5B7' : 'FFFF99' ?>">
-                    <a href="#" class="event_preview" event-id="<?= $oEvent->Id;?>">
+                    <a href="#" class="show_event_preview" event-id="<?= $oEvent->Id;?>">
                         <div class="first_column column"><?=$oEvent->DateRegistered?></div>
                         <div class="first_column column"><?=$oEvent->UserId->FirstName.' '.$oEvent->UserId->LastName?></div>
                         <div class="first_column column"><?=$oEvent->Type;?></div>

@@ -131,7 +131,7 @@ class Member extends My_MemberController
             $bDistribute = $this->storages->Distribute($aData);
 
             if($bDistribute){
-                $this->events->RegisterEvent($this->aData['oUser'], 144, $_POST);
+                $this->events->RegisterEvent($this->aData['oUser'], \Events::DISTRIBUTE, $_POST);
             }
 
             echo json_encode(array('success' => $bDistribute));
@@ -239,7 +239,7 @@ class Member extends My_MemberController
             $bResult = $this->storages->StorageSupply($aStorageSupplyData, $oProductType);
 
             if($bResult){
-                $this->events->RegisterEvent($this->aData['oUser'], 121, $_POST);
+                $this->events->RegisterEvent($this->aData['oUser'], \Events::SUPPLY, $_POST);
             }
 
             echo json_encode(array('success' => $bResult));
@@ -282,7 +282,7 @@ class Member extends My_MemberController
             $bRevenueAccounting = $this->storages->EditStorage($iStorageId,$aUpdateData);
 
             if($bIncome && $bRevenueAccounting){
-                $this->events->RegisterEvent($this->aData['oUser'], 225, $_POST);
+                $this->events->RegisterEvent($this->aData['oUser'], \Events::INCOME_ACCOUNTING, $_POST);
 
                 echo json_encode(array('success' => $bRevenueAccounting));
                 return;
@@ -323,7 +323,7 @@ class Member extends My_MemberController
             $bSale = $this->storages->Sale($aData);
 
             if($bSale){
-                $this->events->RegisterEvent($this->aData['oUser'], 196, $_POST);
+                $this->events->RegisterEvent($this->aData['oUser'], \Events::SALE, $_POST);
             }
         }
         echo json_encode(array('success' => $bSale));
