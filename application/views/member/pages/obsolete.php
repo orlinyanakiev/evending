@@ -22,7 +22,7 @@
                         <option value="0" selected="selected">Изделие</option>
                     </select>
                     <input type="text" name="Quantity" placeholder="Количество" autocomplete="off" />
-<!--                    <button type="submit">Бракувай</button>-->
+                    <button type="submit">Бракувай</button>
                 </form>
             </div>
         <?php else: ?>

@@ -110,7 +110,7 @@ class admin extends My_AdminController
             $oUser = $this->users->GetUser($iUserId);
 
             if($oUser->Type == 1){
-                $oDistributor = $this->storages->GetDistributorById($oUser->Id);
+                $oDistributor = $this->users->GetDistributorById($oUser->Id);
                 $this->storages->DeleteStorage($oDistributor->StorageId);
             }
 
@@ -349,7 +349,7 @@ class admin extends My_AdminController
             $bResult = $this->products->AddProductType($aProductData);
 
             if($bResult){
-                $this->events->RegisterEvents($this->aData['oUser'], \Events::ADD_PRODUCT_TYPE, $_POST);
+                $this->events->RegisterEvent($this->aData['oUser'], \Events::ADD_PRODUCT_TYPE, $_POST);
             }
 
             echo json_encode(array('success' => $bResult));
@@ -476,12 +476,15 @@ class admin extends My_AdminController
 
             switch($oEvent->Type){
                 case \Events::SUPPLY :
-//                    $oStorage = $this->storages->GetStorageById(intval($aEventDescription['Storage']));
-//                    $oProductType = $this->products->GetProductTypeById(intval($aEventDescription['ProductType']));
-//                    $sEventPreview .= '<div class="event_container container"><div class="first_column column">На: '.$oStorage->Name.' '.$oStorage->Address.'</div>
-//                    <div class="first_column column">'.$oStorageTwo->Name.' '.$oStorageTwo->Address.'</div></div>
-//                    <div class="event_container container"><div class="first_column column">Изделие: '.$oProduct->Type->Name.'</div>
-//                    <div class="first_column column">Количество: '.$aEventDescription['Quantity'].'</div></div>';
+                    $oStorage = $this->storages->GetStorageById(intval($aEventDescription['Storage']));
+                    $oProductType = $this->products->GetProductTypeById(intval($aEventDescription['ProductType']));
+                    $iQuantity = intval($aEventDescription['Quantity']);
+                    $sExpirationDate = $aEventDescription['ExpirationDate'];
+                    $sEventPreview .= '<div class="event_container container"><div class="first_column column">На: '.$oStorage->Name.' '.$oStorage->Address.'</div></div>
+                    <div class="event_container container"><div class="first_column column">Изделие: '.$oProductType->Name.' ('.$sExpirationDate.')</div></div>
+                    <div class="event_container container"><div class="first_column column">Количество: '.$iQuantity.'</div>
+                    <div class="first_column column">Цена: '.$aEventDescription['Price'].' лв.</div>
+                    <div class="first_column column">Себестойност: '.$aEventDescription['Value'].' лв.</div></div>';
                     break;
                 case \Events::DISTRIBUTE :
                     $oStorageOne = $this->storages->GetStorageById(intval($aEventDescription['Storage1']));
@@ -489,48 +492,72 @@ class admin extends My_AdminController
                     $oProduct = $this->products->GetProductById(intval($aEventDescription['Product']));
                     $sEventPreview .= '<div class="event_container container"><div class="first_column column">От: '.$oStorageOne->Name.' '.$oStorageOne->Address.'</div>
                     <div class="first_column column">Към: '.$oStorageTwo->Name.' '.$oStorageTwo->Address.'</div></div>
-                    <div class="event_container container"><div class="first_column column">Изделие: '.$oProduct->Type->Name.'</div>
+                    <div class="event_container container"><div class="first_column column">Изделие: '.$oProduct->Type->Name.' ('.$oProduct->ExpirationDate.')</div>
                     <div class="first_column column">Количество: '.$aEventDescription['Quantity'].'</div></div>';
                     break;
                 case \Events::OBSOLETE :
-
-
+                    $oStorage = $this->storages->GetStorageById(intval($aEventDescription['Storage']));
+                    $oProduct = $this->products->GetProductById(intval($aEventDescription['Product']));
+                    $sEventPreview .= '<div class="event_container container"><div class="first_column column">От: '.$oStorage->Name.' '.$oStorage->Address.'</div></div>
+                    <div class="event_container container"><div class="first_column column">Изделие: '.$oProduct->Type->Name.' ('.$oProduct->ExpirationDate.')</div>
+                    <div class="first_column column">Количество: '.$aEventDescription['Quantity'].'</div></div>';
                     break;
                 case \Events::SALE :
-
-
+                    $oStorage = $this->storages->GetStorageById(intval($aEventDescription['Storage']));
+                    $oProduct = $this->products->GetProductById(intval($aEventDescription['Product']));
+                    $sEventPreview .= '<div class="event_container container"><div class="first_column column">От: '.$oStorage->Name.' '.$oStorage->Address.'</div></div>
+                    <div class="event_container container"><div class="first_column column">Изделие: '.$oProduct->Type->Name.' ('.$oProduct->ExpirationDate.')</div>
+                    <div class="first_column column">Количество: '.$aEventDescription['Quantity'].'</div></div>';
                     break;
                 case \Events::INCOME_ACCOUNTING :
-
-
+                    $oStorage = $this->storages->GetStorageById($aEventDescription['Storage']);
+                    $sEventPreview .= '<div class="event_container container"><div class="first_column column">От: '.$oStorage->Name.' '.$oStorage->Address.'</div>
+                    <div class="first_column column"> '.$aEventDescription['Value'].' лв.</div></div>';
                     break;
                 case \Events::ADD_STORAGE :
-
-
+                    $sEventPreview .= '<div class="event_container container"><div class="first_column column">'.$aEventDescription['Name'].' '.$aEventDescription['Address'].'</div>
+                    <div class="first_column column">Тип: '.$this->aData['aStorageTypes'][$aEventDescription['Type']].'</div></div>';
+                    if($aEventDescription['Type'] == 3){
+                        $sEventPreview .= '<div class="event_container container"><div class="first_column column">Добавена налична сума: '.$aEventDescription['Cash'].' лв.</div></div>';
+                    }
                     break;
                 case \Events::ADD_PRODUCT_TYPE :
-
-
+                    $sEventPreview .= '<div class="event_container container"><div class="first_column column">Име: '.$aEventDescription['Name'].'</div>
+                    <div class="first_column column">Категория: '.$this->aData['aProductCategories'][$aEventDescription['Category']].'</div></div>';
                     break;
                 case \Events::EDIT_USER :
-
-
+                    $sEventPreview .= '<div class="event_container container"><div class="first_column column">Име: '.$aEventDescription['FirstName'].'</div>
+                    <div class="first_column column">Фамилия: '.$aEventDescription['LastName'].'</div></div>
+                    <div class="event_container container"><div class="first_column column">Потребителско име: '.$aEventDescription['LoginName'].'</div>
+                    <div class="first_column column">Тип: '.$this->aData['aUserTypes'][$aEventDescription['Type']].'</div></div>';
+                    if($aEventDescription['Type'] == 1){
+                        $aStorages = $aEventDescription['vending_machine'];
+                        if(is_array($aStorages) && !empty($aStorages)){
+                            $sEventPreview .= '<div class="event_container container"><div class="first_column column">Възможност за работа с:</div></div>';
+                            foreach ($aStorages as $iStorageId){
+                                $oStorage = $this->storages->GetStorageById($iStorageId);
+                                $sEventPreview .= '<div class="event_container container"><div class="first_column column">'.$oStorage->Name.' '.$oStorage->Address.'</div></div>';
+                            }
+                        }
+                    }
                     break;
                 case \Events::DELETE_USER :
-
-
+                    $oUser = $this->users->GetUser($aEventDescription['iUserId']);
+                    $sEventPreview .= '<div class="event_container container"><div class="first_column column">'.$oUser->FirstName.' '.$oUser->LastName.'</div></div> ';
                     break;
                 case \Events::EDIT_PRODUCT :
-
-
+                    $oProduct = $this->products->GetProductById($aEventDescription['Id']);
+                    $sEventPreview .= '<div class="event_container container"><div class="first_column column">'.$oProduct->Type->Name.'</div></div>
+                    <div class="event_container container"><div class="first_column column">Цена: '.$aEventDescription['Price'].'</div>
+                    <div class="first_column column">Себестойност: '.$aEventDescription['Value'].'</div></div>';
                     break;
                 case \Events::EDIT_PRODUCT_TYPE :
-
-
+                    $sEventPreview .= '<div class="event_container container"><div class="first_column column">'.$aEventDescription['Name'].'</div></div>
+                    <div class="event_container container"><div class="first_column column">Категория: '.$this->aData['aProductCategories'][$aEventDescription['Category']].'</div></div>';
                     break;
                 case \Events::DELETE_PRODUCT_TYPE :
-
-
+                    $oProductType = $this->products->GetProductTypeById($aEventDescription['iProductTypeId']);
+                    $sEventPreview .= '<div class="event_container container"><div class="first_column column">'.$oProductType->Name.'</div></div>';
                     break;
             }
 

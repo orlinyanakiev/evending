@@ -12,7 +12,7 @@
             <div class="actions_navigation list">
                 <div class="option"><a href="<?= base_url();?>member/supply">Зареждане</a></div>
                 <div class="option"><a href="<?= base_url();?>member/distribution">Дистрибуция</a></div>
-<!--                <div class="option"><a href="--><?//= base_url();?><!--member/obsolete">Бракуване</a></div>-->
+                <div class="option"><a href="<?= base_url();?>member/obsolete">Бракуване</a></div>
                 <div class="option"><a href="<?= base_url();?>member/revenue">Отчитане на приходи</a></div>
                 <div class="option"><a href="<?= base_url();?>member/sales">Продажба</a></div>
             </div>

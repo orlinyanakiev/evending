@@ -10,24 +10,41 @@
     <div class="content">
         <div class="title">Дистрибуция</div>
         <?php if(is_array($aStorages) && !empty($aStorages)) : ?>
-            <div class="distribution_form form">
-                <form method="post" action="">
-                    <select class="<?= is_object($oDistributor) ? 'distributor' : '' ;?>" name="Storage1">
-                        <option value="0" selected="selected">От</option>
-                        <?php foreach($aStorages as $oStorage) : ?>
-                            <option value="<?=$oStorage->Id?>"><?=$oStorage->Name?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    <select name="Storage2">
-                        <option value="0" selected="selected">Към</option>
-                    </select>
-                    <select name="Product">
-                        <option value="0" selected="selected">Изделие</option>
-                    </select>
-                    <input type="text" name="Quantity" placeholder="Количество" autocomplete="off" />
-                    <button type="submit">Прехвърли</button>
-                </form>
-            </div>
+            <?php if(is_array($aAdditionalStorages) && !empty($aAdditionalStorages)) : ?>
+                <?php if(is_array($aProducts) && !empty($aProducts)) : ?>
+                    <div class="distribution_form form">
+                        <form method="post" action="">
+                            <select name="Storage1">
+                                <?php foreach($aStorages as $oStorage) : ?>
+                                    <option value="<?=$oStorage->Id?>"><?=$oStorage->Name?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <select name="Storage2">
+                                <option value="0">Към</option>
+                                <?php foreach($aAdditionalStorages as $oAdditionalStorage) : ?>
+                                    <option value="<?=$oAdditionalStorage->Id?>"><?=$oAdditionalStorage->Name?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <select name="Product">
+                                <option value="0">Изделие</option>
+                                <?php foreach($aProducts as $oProduct):?>
+                                    <option quantity="<?=$oProduct['iQuantity']?>" value="<?=$oProduct['oProduct']->Id?>"><?=$oProduct['oProduct']->Type->Name.' ('.$oProduct['oProduct']->ExpirationDate.')'?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <input type="text" name="Quantity" placeholder="Количество" autocomplete="off" />
+                            <button type="submit">Прехвърли</button>
+                        </form>
+                    </div>
+                <?php else: ?>
+                    <div class="no_products">Складът е празен!</div>
+                <?php endif; ?>
+            <?php else: ?>
+                <?php if(is_object($oDistributor)) : ?>
+                    <div class="no_vendings">Нямате назначени вендинг машини!</div>
+                <?php else: ?>
+                    <div class="no_distributors">Няма въведени складове!</div>
+                <?php endif; ?>
+            <?php endif; ?>
         <?php else: ?>
             <div class="no_storages">Няма въведени складове!</div>
         <?php endif; ?>

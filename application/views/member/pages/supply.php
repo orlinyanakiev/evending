@@ -15,7 +15,6 @@
                     <form>
                         <?php if(!is_object($oDistributor)) : ?>
                             <select name="Storage">
-                                <option value="0">Склад</option>
                                 <?php foreach($aStorages as $oStorage) : ?>
                                     <option value="<?=$oStorage->Id?>"><?=$oStorage->Name?></option>
                                 <?php endforeach; ?>

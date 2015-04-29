@@ -60,11 +60,11 @@ class Users extends CI_Model
             );
 
             if(is_object($oUser) && $oUser->LoginName == $aNewUserData['LoginName']){
+                $this->db->where('Id', $iUserId);
+                return $this->db->update($this->sUsersTable,$aNewUserData);
+            } else {
                 return false;
             }
-
-            $this->db->where('Id', $iUserId);
-            return $this->db->update($this->sUsersTable,$aNewUserData);
         }
 
         return false;
@@ -151,6 +151,11 @@ class Users extends CI_Model
     {
         $this->db->where('Id', $iUserId);
         return $this->db->get($this->sDistributorsTable)->first_row();
+    }
+
+    public function GetDistributorByStorageId($iStorageId)
+    {
+        return $this->db->get_where($this->sDistributorsTable,array('StorageId' => $iStorageId))->first_row();
     }
 
     public function ListUsers($iPage = 1, $iLimit = 0, $iType = 0)

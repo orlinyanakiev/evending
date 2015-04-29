@@ -6,7 +6,7 @@ if (!defined('BASEPATH'))
 class Events extends CI_Model
 {
     const iAdjacent = 6.5;
-    const iEventsLimit = 12;
+    const iEventsLimit = 15;
 
     public function GetEventsLimit()
     {

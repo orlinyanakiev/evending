@@ -336,10 +336,45 @@ class Storages extends CI_Model
         return $this->db->insert($this->sIncomeTable,array('StorageId' => $iStorageId, 'Value' => $fIncome, 'DateAccounted' => date('Y-m-d H:i:s')));
     }
 
-//    public function ListSales($iPage = 1, $iLimit = 0, $iStorageId = 0, $iProductId = 0, $sDate = '')
-//    {
-//
-//    }
+    public function Obsolete($aData)
+    {
+        $iProductId = (int)$aData['Product'];
+        $iQuantity = (int)$aData['Quantity'];
+        $iStorageId = (int)$aData['Storage'];
+        $oStorage = $this->GetStorageById($iStorageId);
+
+        $aStorageAvailability = json_decode($oStorage->Availability, true);
+        if(is_array($aStorageAvailability)){
+            if($aStorageAvailability[$iProductId] >= $iQuantity){
+                $aStorageAvailability[$iProductId] -= $iQuantity;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+        $oProduct = $this->products->GetProductById($iProductId);
+
+        $aSaleData = array(
+            'StorageId' => $iStorageId,
+            'ProductId' => $iProductId,
+            'Quantity' => $iQuantity,
+            'Price' => $oProduct->Price,
+            'Value' => $oProduct->Value,
+            'Date' => date('Y-m-d H:i:s'),
+        );
+
+        $bSale = $this->db->insert($this->sSalesTable,$aSaleData);
+
+        $bStorage = $this->EditStorageAvailability($oStorage->Id, $aStorageAvailability);
+
+        if($bSale && $bStorage){
+            return true;
+        }
+
+        return false;
+    }
 
     public function GetSales($iUserId = 0, $iStorageId = 0, $sPeriod = '')
     {

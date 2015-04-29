@@ -43,15 +43,12 @@ class Member extends My_MemberController
             redirect(base_url().'member');
         }
 
-        $aStoragesData = $this->storages->ListStorages();
-        $aProductsData = $this->products->ListProducts();
+        $aStoragesData = $this->storages->ListStorages(1, 0, 3);
 
         $this->aData['sTitle'] = 'Операции/Бракуване';
-        $this->aData['aProducts'] = $aProductsData['aProducts'];
         $this->aData['aStorages'] = $aStoragesData['aStorages'];
         if(is_object($this->aData['oDistributor'])){
-            $aDistributorStorages = $this->GetRemainingDistributorStorages();
-            $this->aData['aStorages'] = $aDistributorStorages;
+
         }
 
         $this->load->view('member/include/header',$this->aData);
@@ -59,21 +56,46 @@ class Member extends My_MemberController
         $this->load->view('member/include/footer',$this->aData);
     }
 
+    public function ObsoleteProduct()
+    {
+        $bObsolete = false;
+        if(is_array($_POST) && !empty($_POST)){
+            $aData = $_POST;
+
+            $bObsolete = $this->storages->Obsolete($aData);
+
+            if($bObsolete){
+                $this->events->RegisterEvent($this->aData['oUser'], \Events::OBSOLETE, $_POST);
+            }
+        }
+        echo json_encode(array('success' => $bObsolete));
+        return;
+    }
+
     public function Distribution()
     {
         if($this->aData['oUser']->Type == 0){
             redirect(base_url().'member');
         }
-
-        $aStoragesData = $this->storages->ListStorages();
-        $aProductsData = $this->products->ListProducts();
+        $aAdditionalStorages = $this->storages->ListStorages(1, 0, 2);
+        $aStoragesData = $this->storages->ListStorages(1, 0, 1);
+        $aStorageAvailability = $this->GetStorageAvailability($aStoragesData['aStorages'][0]->Id);
 
         $this->aData['sTitle'] = 'Операции/Дистрибуция';
-        $this->aData['aProducts'] = $aProductsData['aProducts'];
         $this->aData['aStorages'] = $aStoragesData['aStorages'];
+        $this->aData['aProducts'] = $aStorageAvailability['aStorageAvailability'];
+        $this->aData['aAdditionalStorages'] = $aAdditionalStorages['aStorages'];
         if(is_object($this->aData['oDistributor'])){
-            $aDistributorStorages = $this->GetRemainingDistributorStorages();
-            $this->aData['aStorages'] = $aDistributorStorages;
+            $aStorageAvailability = $this->GetStorageAvailability($this->aData['oDistributor']->StorageId);
+            $aStorages = json_decode($this->aData['oDistributor']->Storages, true);
+            if(is_array($aStorages) && !empty($aStorages))
+            foreach($aStorages as $iKey => $iStorageId){
+                $aStorages[$iKey] = $this->storages->GetStorageById($iStorageId);
+            }
+
+            $this->aData['aAdditionalStorages'] = $aStorages;
+            $this->aData['aStorages'] = array($this->storages->GetStorageById($this->aData['oDistributor']->StorageId));
+            $this->aData['aProducts'] = $aStorageAvailability['aStorageAvailability'];
         }
 
         $this->load->view('member/include/header',$this->aData);
@@ -102,22 +124,19 @@ class Member extends My_MemberController
         return;
     }
 
-    public function AjaxGetRemainingDistributorStorages($iTakenStorageId = 0)
+    public function AjaxGetDistributorStorages($iDistributorAsStorageId = 0)
     {
-        $aDistributorStorages = $this->GetRemainingDistributorStorages($iTakenStorageId);
-        echo json_encode(array('success' => true, 'aRemainingStorages' => $aDistributorStorages));
+        $aDistributorStorages = $this->GetDistributorStorages($iDistributorAsStorageId);
+        echo json_encode(array('success' => true, 'aDistributorStorages' => $aDistributorStorages));
     }
 
-    public function GetRemainingDistributorStorages($iTakenStorageId = 0)
+    public function GetDistributorStorages($iDistributorAsStorageId = 0)
     {
-        $aDistributorStorages = $this->storages->GetDistributorVendingMachines($this->aData['oDistributor']->Id);
-        $iDistributorStorageId = intval($this->aData['oDistributor']->StorageId);
-        $aDistributorStorages[] = $this->storages->GetStorageById($iDistributorStorageId);
+        $oDistributor = $this->users->GetDistributorByStorageId($iDistributorAsStorageId);
+        $aDistributorStorages = json_decode($oDistributor->Storages,true);
 
-        foreach($aDistributorStorages as $iKey => $oStorage){
-            if($oStorage->Id == $iTakenStorageId){
-                unset($aDistributorStorages[$iKey]);
-            }
+        foreach($aDistributorStorages as $iKey => $iStorageId){
+            $aDistributorStorages[$iKey] = $this->storages->GetStorageById($iStorageId);
         }
 
         return $aDistributorStorages;
@@ -146,12 +165,11 @@ class Member extends My_MemberController
             redirect(base_url().'member');
         }
 
-        $aStoragesData = $this->storages->ListStorages();
+        $aStoragesData = $this->storages->ListStorages(1, 0, 1);
         $aProductTypesData = $this->products->ListProductTypes();
 
         $this->aData['sTitle'] = 'Операции/Зареждане';
         $this->aData['aStorages'] = $aStoragesData['aStorages'];
-        $this->aData['sStoragesPagination'] = $aStoragesData['sPagination'];
         $this->aData['aProductTypes'] = $aProductTypesData['aProductTypes'];
 
         $this->load->view('member/include/header',$this->aData);
@@ -201,8 +219,6 @@ class Member extends My_MemberController
     {
         $iStorageId = intval($iStorageId);
         $aStorageAvailability = array();
-        $fValue = '0.00';
-        $fPrice = '0.00';
 
         $oStorage = $this->storages->GetStorageById($iStorageId);
 
@@ -216,6 +232,8 @@ class Member extends My_MemberController
                     if($oProduct->IsDeleted == '1'){
                         unset($aAvailability[$iProductId]);
                     } else {
+                        $fValue = '0.00';
+                        $fPrice = '0.00';
                         $fValue += $oProduct->Value * $iQuantity;
                         $fPrice += $oProduct->Price * $iQuantity;
                         $aStorageAvailability[]= array('oProduct' => $oProduct, 'iQuantity' => $iQuantity, 'fValue' => $fValue, 'fPrice' => $fPrice);
