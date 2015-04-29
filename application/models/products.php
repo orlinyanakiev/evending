@@ -63,6 +63,12 @@ class Products extends CI_Model
         return $this->db->update($this->sProductTable,$aData);
     }
 
+    public function DeleteProduct($iProductId)
+    {
+        $this->db->where('Id',$iProductId);
+        return $this->db->update($this->sProductTable,array('IsDeleted' => '1'));
+    }
+
     public function ListProducts($iPage = 1, $iLimit = 0, $iType = 0)
     {
         $this->db->where('IsDeleted', '0');

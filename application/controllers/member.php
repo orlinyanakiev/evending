@@ -16,7 +16,29 @@ class Member extends My_MemberController
 
     public function Homepage()
     {
-        $this->aData['aExpiringProducts'] = $this->products->GetProductByExpirationDate();
+        $aStoragesData = $this->storages->ListStorages();
+        $aStorages = $aStoragesData['aStorages'];
+        $aAvailableProducts = array();
+        foreach ($aStorages as $oStorage){
+            $aStorageAvailability = json_decode($oStorage->Availability,true);
+            if(is_array($aStorageAvailability) && !empty($aStorageAvailability)){
+                foreach ($aStorageAvailability as $iProductId => $iQuantity){
+                    if(!in_array($iProductId,$aAvailableProducts)){
+                        $aAvailableProducts[] = $iProductId;
+                    }
+                }
+            }
+        }
+        $aExpiringProducts = $this->products->GetProductByExpirationDate();
+
+        foreach ($aExpiringProducts as $iKey => $oExpiringProduct){
+            if(!in_array($oExpiringProduct->Id,$aAvailableProducts)){
+                $this->products->DeleteProduct($oExpiringProduct->Id);
+                unset($aExpiringProducts[$iKey]);
+            }
+        }
+
+        $this->aData['aExpiringProducts'] = $aExpiringProducts;
         $this->aData['sTitle'] = 'Начало';
 
         $this->load->view('member/include/header',$this->aData);
@@ -48,7 +70,7 @@ class Member extends My_MemberController
         $this->aData['sTitle'] = 'Операции/Бракуване';
         $this->aData['aStorages'] = $aStoragesData['aStorages'];
         if(is_object($this->aData['oDistributor'])){
-
+            $this->aData['aStorages'] = $this->storages->GetDistributorVendingMachines(intval($this->aData['oDistributor']->Id));
         }
 
         $this->load->view('member/include/header',$this->aData);
@@ -135,8 +157,12 @@ class Member extends My_MemberController
         $oDistributor = $this->users->GetDistributorByStorageId($iDistributorAsStorageId);
         $aDistributorStorages = json_decode($oDistributor->Storages,true);
 
-        foreach($aDistributorStorages as $iKey => $iStorageId){
-            $aDistributorStorages[$iKey] = $this->storages->GetStorageById($iStorageId);
+        if(is_array($aDistributorStorages) && !empty($aDistributorStorages)){
+            foreach($aDistributorStorages as $iKey => $iStorageId){
+                $aDistributorStorages[$iKey] = $this->storages->GetStorageById($iStorageId);
+            }
+        } else {
+            $aDistributorStorages = array();
         }
 
         return $aDistributorStorages;
