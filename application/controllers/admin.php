@@ -97,7 +97,7 @@ class admin extends My_AdminController
         }
 
         if($bResult){
-            $this->events->RegisterEvent($this->aData['oUser'], \Events::EDIT_USER, $_POST);
+////            $this->events->RegisterEvent($this->aData['oUser'], \Events::EDIT_USER, $_POST);
         }
 
         echo json_encode(array('success' => $bResult));
@@ -110,14 +110,14 @@ class admin extends My_AdminController
             $oUser = $this->users->GetUser($iUserId);
 
             if($oUser->Type == 1){
-                $oDistributor = $this->storages->GetDistributorById($oUser->Id);
+                $oDistributor = $this->users->GetDistributorById($oUser->Id);
                 $this->storages->DeleteStorage($oDistributor->StorageId);
             }
 
             $bResult = $this->users->deleteUserById($iUserId);
 
             if($bResult){
-                $this->events->RegisterEvent($this->aData['oUser'], \Events::DELETE_USER, $_POST);
+////                $this->events->RegisterEvent($this->aData['oUser'], \Events::DELETE_USER, $_POST);
             }
 
             echo json_encode(array('success' => $bResult));
@@ -182,7 +182,7 @@ class admin extends My_AdminController
             }
 
             if($bResult){
-                $this->events->RegisterEvent($this->aData['oUser'], \Events::ADD_STORAGE, $_POST);
+////                $this->events->RegisterEvent($this->aData['oUser'], \Events::ADD_STORAGE, $_POST);
             }
 
             echo json_encode(array('success' => $bResult));
@@ -307,7 +307,7 @@ class admin extends My_AdminController
             $bEditProduct = $this->products->EditProduct($iProductId, $_POST);
 
             if($bEditProduct){
-                $this->events->RegisterEvent($this->aData['oUser'], \Events::EDIT_PRODUCT, $_POST);
+////                $this->events->RegisterEvent($this->aData['oUser'], \Events::EDIT_PRODUCT, $_POST);
             }
 
             echo json_encode(array('success' => $bEditProduct));
@@ -349,7 +349,7 @@ class admin extends My_AdminController
             $bResult = $this->products->AddProductType($aProductData);
 
             if($bResult){
-                $this->events->RegisterEvents($this->aData['oUser'], \Events::ADD_PRODUCT_TYPE, $_POST);
+////                $this->events->RegisterEvents($this->aData['oUser'], \Events::ADD_PRODUCT_TYPE, $_POST);
             }
 
             echo json_encode(array('success' => $bResult));
@@ -361,7 +361,7 @@ class admin extends My_AdminController
         $bResult = $this->products->EditProductType($_POST);
 
         if($bResult){
-            $this->events->RegisterEvent($this->aData['oUser'], \Events::EDIT_PRODUCT_TYPE, $_POST);
+////            $this->events->RegisterEvent($this->aData['oUser'], \Events::EDIT_PRODUCT_TYPE, $_POST);
         }
 
         echo json_encode(array('success' => $bResult));
@@ -373,7 +373,7 @@ class admin extends My_AdminController
         $bResult = $this->products->DeleteProductType($iProductTypeId);
 
         if($bResult){
-            $this->events->RegisterEvent($this->aData['oUser'], \Events::DELETE_PRODUCT_TYPE, $_POST);
+////            $this->events->RegisterEvent($this->aData['oUser'], \Events::DELETE_PRODUCT_TYPE, $_POST);
         }
 
         echo json_encode(array('success' => $bResult));
@@ -431,117 +431,117 @@ class admin extends My_AdminController
         echo json_encode(array('success' => true, 'aSalesData' => $aSalesData));
     }
 
-    //events
-    public function Events()
-    {
-        $this->aData['sTitle'] = 'Хронология';
-        $aEventsData = $this->events->ListEvents(1,$this->events->GetEventsLimit());
+//    //events
+//    public function Events()
+//    {
+//        $this->aData['sTitle'] = 'Хронология';
+//        $aEventsData = $this->events->ListEvents(1,$this->events->GetEventsLimit());
+//
+//        $this->aData['aEvents'] = $aEventsData['aEvents'];
+//        $this->aData['sPagination'] = $aEventsData['sPagination'];
+//
+//        $this->load->view('admin/include/header',$this->aData);
+//        $this->load->view('admin/pages/events',$this->aData);
+//        $this->load->view('admin/include/footer',$this->aData);
+//    }
 
-        $this->aData['aEvents'] = $aEventsData['aEvents'];
-        $this->aData['sPagination'] = $aEventsData['sPagination'];
-
-        $this->load->view('admin/include/header',$this->aData);
-        $this->load->view('admin/pages/events',$this->aData);
-        $this->load->view('admin/include/footer',$this->aData);
-    }
-
-    public function EventsPagination()
-    {
-        if(is_array($_POST) && array_key_exists('iPageId',$_POST)){
-            $iPageId = intval($_POST['iPageId']);
-
-            $aEventsData = $this->events->ListEvents($iPageId, $this->events->getEventsLimit());
-
-            $aEventsData['success'] = true;
-
-            echo json_encode($aEventsData);
-            return;
-        }
-        echo json_encode(array('success' => false));
-        return;
-    }
-
-    public function GetEventPreview($iEventId)
-    {
-        $oEvent = $this->events->GetEventById($iEventId);
-
-        if(is_object($oEvent)){
-            $aEventDescription = json_decode($oEvent->Description, true);
-            $oUser = $this->users->GetUser($oEvent->UserId);
-            $sEventType = $this->aData['aEventTypes'][$oEvent->Type];
-
-            $sEventPreview = '<div class="event_container container"><div class="first_column column">'.$oEvent->DateRegistered.'</div>
-                    <div class="first_column column">'.$oUser->FirstName.' '.$oUser->LastName.'</div>
-                    <div class="first_column column">'.$sEventType.'</div></div>';
-
-            switch($oEvent->Type){
-                case \Events::SUPPLY :
+//    public function EventsPagination()
+//    {
+//        if(is_array($_POST) && array_key_exists('iPageId',$_POST)){
+//            $iPageId = intval($_POST['iPageId']);
+//
+//            $aEventsData = $this->events->ListEvents($iPageId, $this->events->getEventsLimit());
+//
+//            $aEventsData['success'] = true;
+//
+//            echo json_encode($aEventsData);
+//            return;
+//        }
+//        echo json_encode(array('success' => false));
+//        return;
+//    }
+//
+//    public function GetEventPreview($iEventId)
+//    {
+//        $oEvent = $this->events->GetEventById($iEventId);
+//
+//        if(is_object($oEvent)){
+//            $aEventDescription = json_decode($oEvent->Description, true);
+//            $oUser = $this->users->GetUser($oEvent->UserId);
+//            $sEventType = $this->aData['aEventTypes'][$oEvent->Type];
+//
+//            $sEventPreview = '<div class="event_container container"><div class="first_column column">'.$oEvent->DateRegistered.'</div>
+//                    <div class="first_column column">'.$oUser->FirstName.' '.$oUser->LastName.'</div>
+//                    <div class="first_column column">'.$sEventType.'</div></div>';
+//
+//            switch($oEvent->Type){
+//                case \Events::SUPPLY :
 //                    $oStorage = $this->storages->GetStorageById(intval($aEventDescription['Storage']));
 //                    $oProductType = $this->products->GetProductTypeById(intval($aEventDescription['ProductType']));
 //                    $sEventPreview .= '<div class="event_container container"><div class="first_column column">На: '.$oStorage->Name.' '.$oStorage->Address.'</div>
-//                    <div class="first_column column">'.$oStorageTwo->Name.' '.$oStorageTwo->Address.'</div></div>
+//                    <div class="first_column column">Изделие: '.$oProductType->Name.'</div></div>
+//                    <div class="event_container container"><div class="first_column column">Количество: '.$aEventDescription['Quantity'].'</div></div>';
+//                    break;
+//                case \Events::DISTRIBUTE :
+//                    $oStorageOne = $this->storages->GetStorageById(intval($aEventDescription['Storage1']));
+//                    $oStorageTwo = $this->storages->GetStorageById(intval($aEventDescription['Storage2']));
+//                    $oProduct = $this->products->GetProductById(intval($aEventDescription['Product']));
+//                    $sEventPreview .= '<div class="event_container container"><div class="first_column column">От: '.$oStorageOne->Name.' '.$oStorageOne->Address.'</div>
+//                    <div class="first_column column">Към: '.$oStorageTwo->Name.' '.$oStorageTwo->Address.'</div></div>
 //                    <div class="event_container container"><div class="first_column column">Изделие: '.$oProduct->Type->Name.'</div>
 //                    <div class="first_column column">Количество: '.$aEventDescription['Quantity'].'</div></div>';
-                    break;
-                case \Events::DISTRIBUTE :
-                    $oStorageOne = $this->storages->GetStorageById(intval($aEventDescription['Storage1']));
-                    $oStorageTwo = $this->storages->GetStorageById(intval($aEventDescription['Storage2']));
-                    $oProduct = $this->products->GetProductById(intval($aEventDescription['Product']));
-                    $sEventPreview .= '<div class="event_container container"><div class="first_column column">От: '.$oStorageOne->Name.' '.$oStorageOne->Address.'</div>
-                    <div class="first_column column">Към: '.$oStorageTwo->Name.' '.$oStorageTwo->Address.'</div></div>
-                    <div class="event_container container"><div class="first_column column">Изделие: '.$oProduct->Type->Name.'</div>
-                    <div class="first_column column">Количество: '.$aEventDescription['Quantity'].'</div></div>';
-                    break;
-                case \Events::OBSOLETE :
-
-
-                    break;
-                case \Events::SALE :
-
-
-                    break;
-                case \Events::INCOME_ACCOUNTING :
-
-
-                    break;
-                case \Events::ADD_STORAGE :
-
-
-                    break;
-                case \Events::ADD_PRODUCT_TYPE :
-
-
-                    break;
-                case \Events::EDIT_USER :
-
-
-                    break;
-                case \Events::DELETE_USER :
-
-
-                    break;
-                case \Events::EDIT_PRODUCT :
-
-
-                    break;
-                case \Events::EDIT_PRODUCT_TYPE :
-
-
-                    break;
-                case \Events::DELETE_PRODUCT_TYPE :
-
-
-                    break;
-            }
-
-            $sEventPreview .= '<div class="directions"><a href="'.base_url().'admin/events">Обратно</a></div>';
-
-            echo json_encode(array('success' => true, 'sEventPreview' => $sEventPreview));
-            return;
-        }
-
-        echo json_encode(array('success' => false));
-        return;
-    }
+//                    break;
+//                case \Events::OBSOLETE :
+//                    break;
+//                case \Events::SALE :
+//                    $oStorage = $this->storages->GetStorageById(intval($aEventDescription['Storage']));
+//                    $oProduct = $this->products->GetProductById(intval($aEventDescription['Product']));
+//                    $sEventPreview .= '<div class="event_container container"><div class="first_column column">От: '.$oStorage->Name.' '.$oStorage->Address.'</div>
+//                    <div class="event_container container"><div class="first_column column">Изделие: '.$oProduct->Type->Name.'</div>
+//                    <div class="first_column column">Количество: '.$aEventDescription['Quantity'].'</div></div>';
+//                    break;
+//                case \Events::INCOME_ACCOUNTING :
+//
+//
+//                    break;
+//                case \Events::ADD_STORAGE :
+//
+//
+//                    break;
+//                case \Events::ADD_PRODUCT_TYPE :
+//
+//
+//                    break;
+//                case \Events::EDIT_USER :
+//
+//
+//                    break;
+//                case \Events::DELETE_USER :
+//
+//
+//                    break;
+//                case \Events::EDIT_PRODUCT :
+//
+//
+//                    break;
+//                case \Events::EDIT_PRODUCT_TYPE :
+//
+//
+//                    break;
+//                case \Events::DELETE_PRODUCT_TYPE :
+//
+//
+//                    break;
+//            }
+//
+//            $sEventPreview .= '<div class="directions"><a href="'.base_url().'admin/events">Обратно</a></div>';
+//
+//            echo json_encode(array('success' => true, 'sEventPreview' => $sEventPreview));
+//            return;
+//        }
+//
+//        echo json_encode(array('success' => false));
+//        return;
+//    }
 
 }

@@ -21,6 +21,7 @@ class Users extends CI_Model
     public function __construct()
     {
         parent::__construct();
+        $this->load->model('storages');
     }
     
     public function CheckUser($sLoginName,$sPassword)
@@ -151,6 +152,22 @@ class Users extends CI_Model
     {
         $this->db->where('Id', $iUserId);
         return $this->db->get($this->sDistributorsTable)->first_row();
+    }
+
+    public function GetAllDistributors()
+    {
+        $aDistributors = $this->db->get($this->sDistributorsTable)->result();
+
+        if(is_array($aDistributors) && !empty($aDistributors)){
+            foreach ($aDistributors as $iKey => $oDistributor){
+                $aDistributors[$iKey]->Id = $this->GetUser($oDistributor->Id);
+                $aDistributors[$iKey]->StorageId = $this->storages->GetStorageById($oDistributor->StorageId);
+            }
+
+            return $aDistributors;
+        }
+
+        return false;
     }
 
     public function ListUsers($iPage = 1, $iLimit = 0, $iType = 0)

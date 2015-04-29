@@ -2,9 +2,7 @@
     <div class="nav">
         <a class="nav_link" href="<?= base_url();?>member/homepage">Начало</a>
         <a class="nav_link active" href="<?= base_url();?>member/actions">Действия</a>
-        <?php if($oUser->Type > '1') : ?>
-            <a class="nav_link" href="<?= base_url();?>admin/">Управление</a>
-        <?php endif; ?>
+        <a class="nav_link" href="<?= base_url();?>admin/">Управление</a>
         <a class="nav_link logout" href="<?= base_url();?>member/logout">Изход</a>
     </div>
     <div class="content">
@@ -12,10 +10,12 @@
         <?php if(is_array($aStorages) && !empty($aStorages)) : ?>
             <div class="distribution_form form">
                 <form method="post" action="">
-                    <select class="<?= is_object($oDistributor) ? 'distributor' : '' ;?>" name="Storage1">
+                    <select name="Storage1">
                         <option value="0" selected="selected">От</option>
                         <?php foreach($aStorages as $oStorage) : ?>
-                            <option value="<?=$oStorage->Id?>"><?=$oStorage->Name?></option>
+                            <?php if($oStorage->Type == 1) : ?>
+                                <option type="<?=$oStorage->Type?>" value="<?=$oStorage->Id?>"><?=$oStorage->Name?></option>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                     </select>
                     <select name="Storage2">

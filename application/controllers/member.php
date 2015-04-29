@@ -66,25 +66,19 @@ class Member extends My_MemberController
         }
 
         $aStoragesData = $this->storages->ListStorages();
-        $aProductsData = $this->products->ListProducts();
 
         $this->aData['sTitle'] = 'Операции/Дистрибуция';
-        $this->aData['aProducts'] = $aProductsData['aProducts'];
         $this->aData['aStorages'] = $aStoragesData['aStorages'];
-        if(is_object($this->aData['oDistributor'])){
-            $aDistributorStorages = $this->GetRemainingDistributorStorages();
-            $this->aData['aStorages'] = $aDistributorStorages;
-        }
 
         $this->load->view('member/include/header',$this->aData);
         $this->load->view('member/pages/distribution',$this->aData);
         $this->load->view('member/include/footer',$this->aData);
     }
 
-    public function GetRemainingStorages()
+    public function GetDistributorStorages()
     {
         if(is_array($_POST) && !empty($_POST) && isset($_POST['iSelectedStorageId'])){
-            $aStoragesData = $this->storages->ListStorages();
+            $aStoragesData = $this->storages->ListStorages(1, 0, 2);
             $aAllStorages = $aStoragesData['aStorages'];
             $aRemainingStorages = array();
 
@@ -131,7 +125,7 @@ class Member extends My_MemberController
             $bDistribute = $this->storages->Distribute($aData);
 
             if($bDistribute){
-                $this->events->RegisterEvent($this->aData['oUser'], \Events::DISTRIBUTE, $_POST);
+//                $this->events->RegisterEvent($this->aData['oUser'], \Events::DISTRIBUTE, $_POST);
             }
 
             echo json_encode(array('success' => $bDistribute));
@@ -146,13 +140,16 @@ class Member extends My_MemberController
             redirect(base_url().'member');
         }
 
-        $aStoragesData = $this->storages->ListStorages();
+        $aStoragesData = $this->storages->ListStorages(1,0,1);
         $aProductTypesData = $this->products->ListProductTypes();
 
         $this->aData['sTitle'] = 'Операции/Зареждане';
         $this->aData['aStorages'] = $aStoragesData['aStorages'];
-        $this->aData['sStoragesPagination'] = $aStoragesData['sPagination'];
         $this->aData['aProductTypes'] = $aProductTypesData['aProductTypes'];
+        if(is_object($this->aData['oDistributor'])){
+            $aDistributorStorages = $this->GetRemainingDistributorStorages();
+            $this->aData['aStorages'] = $aDistributorStorages;
+        }
 
         $this->load->view('member/include/header',$this->aData);
         $this->load->view('member/pages/supply',$this->aData);
@@ -201,8 +198,6 @@ class Member extends My_MemberController
     {
         $iStorageId = intval($iStorageId);
         $aStorageAvailability = array();
-        $fValue = '0.00';
-        $fPrice = '0.00';
 
         $oStorage = $this->storages->GetStorageById($iStorageId);
 
@@ -216,15 +211,15 @@ class Member extends My_MemberController
                     if($oProduct->IsDeleted == '1'){
                         unset($aAvailability[$iProductId]);
                     } else {
-                        $fValue += $oProduct->Value * $iQuantity;
-                        $fPrice += $oProduct->Price * $iQuantity;
+                        $fValue = $oProduct->Value * $iQuantity;
+                        $fPrice = $oProduct->Price * $iQuantity;
                         $aStorageAvailability[]= array('oProduct' => $oProduct, 'iQuantity' => $iQuantity, 'fValue' => $fValue, 'fPrice' => $fPrice);
                         $fCurrentValue += $fPrice;
                     }
                 }
             }
             if(!empty($aStorageAvailability)){
-                return array('aStorageAvailability' => $aStorageAvailability, 'fCash' => floatval($fCash), 'fCurrentValue' => floatval($fCurrentValue));
+                return array('aStorageAvailability' => $aStorageAvailability, 'fCash' => $fCash, 'fCurrentValue' => $fCurrentValue);
             }
         }
 
@@ -239,33 +234,126 @@ class Member extends My_MemberController
             $bResult = $this->storages->StorageSupply($aStorageSupplyData, $oProductType);
 
             if($bResult){
-                $this->events->RegisterEvent($this->aData['oUser'], \Events::SUPPLY, $_POST);
+//                $this->events->RegisterEvent($this->aData['oUser'], \Events::SUPPLY, $_POST);
             }
 
             echo json_encode(array('success' => $bResult));
         }
     }
 
-    //Income
-    public function Revenue()
+    //Vending machines
+    public function Vending()
     {
         if($this->aData['oUser']->Type == 0){
             redirect(base_url().'member');
         }
 
+        $aDistributorsData = $this->users->GetAllDistributors();
         $aStoragesData = $this->storages->ListStorages(1, 0, 3);
 
-        $this->aData['sTitle'] = 'Приходи';
+        $this->aData['sTitle'] = 'Вендинг';
         $this->aData['aStorages'] = $aStoragesData['aStorages'];
-        $this->aData['sStoragesPagination'] = $aStoragesData['sPagination'];
+        $this->aData['aDistributors'] = $aDistributorsData;
 
         if(is_object($this->aData['oDistributor'])){
             $this->aData['aStorages'] = $this->storages->GetDistributorVendingMachines(intval($this->aData['oDistributor']->Id));
         }
 
         $this->load->view('member/include/header',$this->aData);
-        $this->load->view('member/pages/revenue',$this->aData);
+        $this->load->view('member/pages/vending',$this->aData);
         $this->load->view('member/include/footer',$this->aData);
+    }
+
+    public function VendingSubmit()
+    {
+        if(is_array($_POST) && !empty($_POST)){
+            $iDistributeProductId = intval($_POST['DistributeProduct']);
+            $iObsoleteProductId = intval($_POST['ObsoleteProduct']);
+            $sVendingMachineCash = $_POST['VendingMachineCash'];
+            $iDistributorId = intval($_POST['Distributor']);
+            $oDistributor = $this->users->GetDistributorById($iDistributorId);
+
+            if($iDistributeProductId != 0 && $_POST['DistributeQuantity'] != ''){
+                $aDistributionData = array(
+                    'Storage1' => $oDistributor->StorageId,
+                    'Storage2' => $_POST['VendingMachine'],
+                    'Product' => $iDistributeProductId,
+                    'Quantity' => $_POST['DistributeQuantity']
+                );
+
+                $bDistribute = $this->storages->Distribute($aDistributionData);
+
+                if($bDistribute){
+//                    $this->events->RegisterEvent($this->aData['oUser'], \Events::DISTRIBUTE, $aDistributionData);
+                }
+
+            }
+
+            if($iObsoleteProductId != 0 && $_POST['ObsoleteQuantity'] != ''){
+                $aData = array(
+                    'Storage' => $_POST['VendingMachine'],
+                    'Product' => $_POST['ObsoleteProduct'],
+                    'Quantity' => $_POST['ObsoleteQuantity']
+                );
+
+                $bSale = $this->products->Obsolete($aData);
+
+                if($bSale){
+//                    $this->events->RegisterEvent($this->aData['oUser'], \Events::OBSOLETE, $aData);
+                }
+            }
+
+            if($sVendingMachineCash != ''){
+                $iStorageId = intval($_POST['VendingMachine']);
+                $fRevenue = $sVendingMachineCash;
+                $aRevenueData = array(
+                    'Storage' => $iStorageId,
+                    'Value' => $fRevenue
+                );
+
+                $bIncome = $this->storages->AccountIncome($iStorageId, $fRevenue);
+
+                $oStorage = $this->storages->GetStorageById($iStorageId);
+
+                $aUpdateData['Cash'] = $oStorage->Cash - $fRevenue;
+                $bRevenueAccounting = $this->storages->EditStorage($iStorageId,$aUpdateData);
+
+                if($bIncome && $bRevenueAccounting){
+//                    $this->events->RegisterEvent($this->aData['oUser'], \Events::INCOME_ACCOUNTING, $aRevenueData);
+                }
+
+            }
+            echo json_encode(array('success' => true));
+            return;
+        }
+        echo json_encode(array('success' => false));
+        return;
+    }
+
+    public function GetDistributorDataById($iDistributorId)
+    {
+        $oDistributor = $this->users->GetDistributorById($iDistributorId);
+
+        if(is_object($oDistributor)){
+            $aDistributorStorages = json_decode($oDistributor->Storages, true);
+            if(is_array($aDistributorStorages) && !empty($aDistributorStorages)){
+                $aDistributorAvailability = $this->GetStorageAvailability($oDistributor->StorageId);
+
+                foreach($aDistributorStorages as $iKey => $iStorageId){
+                    $aDistributorStorages[$iKey] = $this->storages->GetStorageById($iStorageId);
+                }
+
+                echo json_encode(array(
+                    'success' => true,
+                    'aDistributorAvailability' => $aDistributorAvailability['aStorageAvailability'],
+                    'aDistributorStorages' => $aDistributorStorages
+                ));
+                return;
+            }
+        }
+
+        echo json_encode(array('success' => false));
+        return;
     }
 
     public function RevenueAccounting()
@@ -282,7 +370,7 @@ class Member extends My_MemberController
             $bRevenueAccounting = $this->storages->EditStorage($iStorageId,$aUpdateData);
 
             if($bIncome && $bRevenueAccounting){
-                $this->events->RegisterEvent($this->aData['oUser'], \Events::INCOME_ACCOUNTING, $_POST);
+//                $this->events->RegisterEvent($this->aData['oUser'], \Events::INCOME_ACCOUNTING, $_POST);
 
                 echo json_encode(array('success' => $bRevenueAccounting));
                 return;
@@ -323,7 +411,7 @@ class Member extends My_MemberController
             $bSale = $this->storages->Sale($aData);
 
             if($bSale){
-                $this->events->RegisterEvent($this->aData['oUser'], \Events::SALE, $_POST);
+//                $this->events->RegisterEvent($this->aData['oUser'], \Events::SALE, $_POST);
             }
         }
         echo json_encode(array('success' => $bSale));

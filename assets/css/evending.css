@@ -2,6 +2,8 @@ body {color: #512200;background-color: aliceblue;letter-spacing: 0px;font-family
 
 div.ui-datepicker{font-size:20px;}
 
+.form_label {margin:10px 0 -8px 32px;padding:0;font-size: 16px;}
+
 p {margin: 0px;padding-top: 20px;}
 a {color: green;text-decoration: none;}
 
@@ -11,7 +13,9 @@ a {color: green;text-decoration: none;}
 
 .page_wrapper {position:relative; border: 1px solid black;border-radius: 8px;margin:auto;padding:0;min-height: 480px;width: 720px;background-color: #FFE4B7;}
 
-.form {padding-top: 20px;padding-left: 50%;margin-left: -175px;width: 350px;}
+.vending_machine_form form {text-align: left;}
+
+.form {padding: 0 0 20px 50%;margin: 0 0 0 -175px;width: 350px;}
 form input[type="text"],input[type="password"] {color: #512200;display: block;font-size: 16px;border: 2px solid green;background-color: #F0FDEA;border-radius: 5px;padding: 8px;margin: 10px 5px -6px 5px;min-width: 330px;}
 .fake_input_field {color: #512200;font-size: 16px;border: 2px solid green;background-color: #F0FDEA;border-radius: 5px;padding: 8px;margin: 10px 5px -5px 5px;min-width: 330px;text-align: left;}
 button {display: block;letter-spacing: 0px;border: 2px solid green;border-radius: 5px;font-size: 16px;background-color: #F0FDEA;padding:8px;margin: 10px 5px -6px 80px;min-width: 210px;}

@@ -7,6 +7,7 @@ class Products extends CI_Model
 {
     private $sProductTable = 'products';
     private $sTypeTable = 'producttypes';
+    private $sObsoleteTable = 'obsolete';
 
     const iTypesLimit = 12;
     const iLimit = 12;
@@ -46,6 +47,7 @@ class Products extends CI_Model
     public function __construct()
     {
         parent::__construct();
+        $this->load->model('storages');
     }
 
     public function GetProductById($iProductId){
@@ -61,6 +63,46 @@ class Products extends CI_Model
     {
         $this->db->where('Id',$iProductId);
         return $this->db->update($this->sProductTable,$aData);
+    }
+
+    public function Obsolete($aData)
+    {
+        $iProductId = (int)$aData['Product'];
+        $iQuantity = (int)$aData['Quantity'];
+        $iStorageId = (int)$aData['Storage'];
+        $oStorage = $this->storages->GetStorageById($iStorageId);
+
+        $aStorageAvailability = json_decode($oStorage->Availability, true);
+        if(is_array($aStorageAvailability)){
+            if($aStorageAvailability[$iProductId] >= $iQuantity){
+                $aStorageAvailability[$iProductId] -= $iQuantity;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+
+        $oProduct = $this->GetProductById($iProductId);
+
+        $aObsoleteData = array(
+            'StorageId' => $iStorageId,
+            'ProductId' => $iProductId,
+            'Quantity' => $iQuantity,
+            'Price' => $oProduct->Price,
+            'Value' => $oProduct->Value,
+            'Date' => date('Y-m-d H:i:s'),
+        );
+
+        $bObsolete = $this->db->insert($this->sObsoleteTable,$aObsoleteData);
+
+        $bStorage = $this->storages->EditStorageAvailability($oStorage->Id, $aStorageAvailability);
+
+        if($bObsolete && $bStorage){
+            return true;
+        }
+
+        return false;
     }
 
     public function ListProducts($iPage = 1, $iLimit = 0, $iType = 0)

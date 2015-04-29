@@ -1,5 +1,6 @@
 $( document ).ready(function() {
     var base_url = 'http://localhost/evending/';
+    var errorTimeout;
 
     jQuery.validator.addMethod("Person",function(value,element){
         return this.optional(element) || /^[^\`\~\!\@\#\$\%\^\&\*\(\)\_\+\-\=\+\{\}\[\]\;\'\\\:\"\|\<\>\?\,\.\/\s0-9]{2,32}$/.test(value);
@@ -110,7 +111,6 @@ $( document ).ready(function() {
     $('.users_content .list').off('click').on('click','.edit_user i', function (e) {
         e.preventDefault();
         var user_id = $(this).closest('.user_container').attr('user-id');
-        var errorTimeout;
 
         $.ajax({
             method: 'post',
@@ -169,7 +169,6 @@ $( document ).ready(function() {
         e.preventDefault();
 
         var this_form = $(this).closest("form");
-        var errorTimeout;
 
         this_form.validate({
             rules:{
@@ -338,7 +337,6 @@ $( document ).ready(function() {
         e.preventDefault();
 
         var storage_id = $(this).closest('.storage_container').attr('storage-id');
-        var errorTimeout;
 
         $.ajax({
             method: 'post',
@@ -369,7 +367,6 @@ $( document ).ready(function() {
         e.preventDefault();
 
         var this_form = $(this).closest('form');
-        var errorTimeout;
 
         this_form.validate({
             rules:{
@@ -461,7 +458,6 @@ $( document ).ready(function() {
         e.preventDefault();
 
         var this_form = $(this).closest('form');
-        var errorTimeout;
 
         this_form.validate({
             rules:{
@@ -564,7 +560,6 @@ $( document ).ready(function() {
         e.preventDefault();
 
         var this_form = $(this).closest("form");
-        var errorTimeout;
 
         this_form.validate({
             rules:{
@@ -649,7 +644,6 @@ $( document ).ready(function() {
         e.preventDefault();
 
         var this_form = $(this).closest("form");
-        var errorTimeout;
 
         this_form.validate({
             rules:{
@@ -778,7 +772,6 @@ $( document ).ready(function() {
         e.preventDefault();
 
         var this_form = $(this).closest("form");
-        var errorTimeout;
 
         this_form.validate({
             rules:{
@@ -835,7 +828,6 @@ $( document ).ready(function() {
         e.preventDefault();
 
         var this_form = $(this).closest("form");
-        var errorTimeout;
 
         this_form.validate({
             rules:{
@@ -898,7 +890,6 @@ $( document ).ready(function() {
     //Storage supply category filter
     $('.supply_form select[name="Category"]').change(function(){
         var selected_category_id = $(this).find('option:selected').val();
-        var errorTimeout;
 
         var products_html = '';
         if(selected_category_id > 0){
@@ -940,7 +931,6 @@ $( document ).ready(function() {
         var storage_name = $(this).text();
         var storage_id = $(this).closest('.storage_container').attr('storage-id');
         var html = '';
-        var errorTimeout;
 
         $.ajax({
             method: 'post',
@@ -994,9 +984,12 @@ $( document ).ready(function() {
     //distribution select options
     $('.distribution_form select[name="Storage1"]').change(function(){
         var iSelectedStorageId = $(this).val();
+        var iStorageType = $(this).find('option:selected').attr('type');
+
+        console.log(iStorageType);
 
         var second_storage_html = '';
-        if($(this).hasClass('distributor')) {
+        if(iStorageType == 2) {
             $.ajax({
                 method: 'post',
                 dataType: 'json',
@@ -1016,7 +1009,7 @@ $( document ).ready(function() {
             $.ajax({
                 method: 'post',
                 dataType: 'json',
-                url: base_url + 'member/GetRemainingStorages/',
+                url: base_url + 'member/GetDistributorStorages/',
                 data: { "iSelectedStorageId" : iSelectedStorageId },
                 success:function(result){
                     if(result.success == true){
@@ -1032,7 +1025,6 @@ $( document ).ready(function() {
         }
 
         var products_html = '';
-        var errorTimeout;
 
         $.ajax({
             method: 'post',
@@ -1073,7 +1065,6 @@ $( document ).ready(function() {
         e.preventDefault();
 
         var this_form = $(this).closest('form');
-        var errorTimeout;
 
         this_form.validate({
             rules:{
@@ -1152,123 +1143,72 @@ $( document ).ready(function() {
         }
     });
 
-    //Income submit
-    $('.revenue_form').on('click','button',function(e){
-        e.preventDefault();
-
-        var this_form = $(this).closest('form');
-        var errorTimeout;
-
-        this_form.validate({
-            rules:{
-                Storage: { GreaterThan: 0 },
-                Value: { required: true, Price: true }
-            },
-            messages:{
-                Storage: '',
-                Value: ''
-            }
-        });
-
-        var form_valid = this_form.valid();
-
-        if(form_valid){
-            var data = this_form.serialize();
-
-            $.ajax({
-                method: 'post',
-                dataType: 'json',
-                url: base_url + 'member/RevenueAccounting/',
-                data: data,
-                success:function(result){
-                    if(result.success == true){
-                        $('.revenue_form').find('[name="Value"]').val('');
-
-                        $('.content').find('.warning').html('<p class="request_success">Операцията е успешна!</p>');
-                        clearTimeout(errorTimeout);
-                        errorTimeout = setTimeout(function(){
-                            $('.content').find('.warning').html('');
-                        }, 3000);
-                    }
-                    if(result.success == false){
-                        $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
-                        clearTimeout(errorTimeout);
-                        errorTimeout = setTimeout(function(){
-                            $('.content').find('.warning').html('');
-                        }, 3000);
-                    }
-                }
-            });
-        }
-    });
-
     //Events pagination
-    $('.events_content').on('click', '.pagination_list a', function(e){
-        e.preventDefault();
-        var page_id = $(this).attr('page-number');
-
-        $.ajax({
-            method: 'post',
-            dataType: 'json',
-            url: base_url + 'admin/EventsPagination/',
-            data: { "iPageId": page_id },
-            success: function (result) {
-                var listing_html = '';
-                var colour = '';
-
-                $.each(result.aEvents, function( index , value ){
-                    if(index % 2 == 0){
-                        colour = 'DDF5B7';
-                    } else {
-                        colour = 'FFFF99'
-                    }
-
-                    listing_html += '<div class="event_container container" style="background-color: #' + colour + '"> ' +
-                    '<a href="#" class="event_preview" event-id="' + value.Id + '"> ' +
-                    '<div class="first_column column">' + value.DateRegistered + '</div> ' +
-                    '<div class="first_column column">' + value.UserId.FirstName + ' ' + value.UserId.LastName + '</div> ' +
-                    '<div class="first_column column">' + value.Type + '</div>' +
-                    '</a></div>';
-                });
-
-                listing_html += result.sPagination + '<div class="directions"><a href="' + base_url + 'admin/manage"">Обратно</a></div>';
-
-                $('.events_content').find('.list').html(listing_html);
-            }
-        });
-    });
-
-    //Event preview
-    $('.events_content .list').on('click','a.show_event_preview',function(e){
-        e.preventDefault();
-
-        var event_id = $(this).attr('event-id');
-
-        $.ajax({
-            method: 'post',
-            dataType: 'json',
-            url: base_url + 'admin/GetEventPreview/' + event_id,
-            success:function(result){
-                if(result.success == true){
-                    $('.events_content .list').html(result.sEventPreview);
-                }
-                else {
-                    $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
-                    clearTimeout(errorTimeout);
-                    errorTimeout = setTimeout(function(){
-                        $('.content').find('.warning').html('');
-                    }, 3000);
-                }
-            }
-        });
-    });
+    //$('.events_content').on('click', '.pagination_list a', function(e){
+    //    e.preventDefault();
+    //    var page_id = $(this).attr('page-number');
+    //
+    //    $.ajax({
+    //        method: 'post',
+    //        dataType: 'json',
+    //        url: base_url + 'admin/EventsPagination/',
+    //        data: { "iPageId": page_id },
+    //        success: function (result) {
+    //            var listing_html = '';
+    //            var colour = '';
+    //
+    //            $.each(result.aEvents, function( index , value ){
+    //                if(index % 2 == 0){
+    //                    colour = 'DDF5B7';
+    //                } else {
+    //                    colour = 'FFFF99'
+    //                }
+    //
+    //                listing_html += '<div class="event_container container" style="background-color: #' + colour + '"> ' +
+    //                '<a href="#" class="show_event_preview" event-id="' + value.Id + '"> ' +
+    //                '<div class="first_column column">' + value.DateRegistered + '</div> ' +
+    //                '<div class="first_column column">' + value.UserId.FirstName + ' ' + value.UserId.LastName + '</div> ' +
+    //                '<div class="first_column column">' + value.Type + '</div>' +
+    //                '</a></div>';
+    //            });
+    //
+    //            listing_html += result.sPagination + '<div class="directions"><a href="' + base_url + 'admin/manage"">Обратно</a></div>';
+    //
+    //            $('.events_content').find('.list').html(listing_html);
+    //        }
+    //    });
+    //});
+    //
+    ////Event preview
+    //$('.events_content .list').on('click','a.show_event_preview',function(e){
+    //    e.preventDefault();
+    //
+    //    var event_id = $(this).attr('event-id');
+    //
+    //    $.ajax({
+    //        method: 'post',
+    //        dataType: 'json',
+    //        url: base_url + 'admin/GetEventPreview/' + event_id,
+    //        success:function(result){
+    //            if(result.success == true){
+    //                $('.events_content .list').html(result.sEventPreview);
+    //            }
+    //            else {
+    //                $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
+    //                clearTimeout(errorTimeout);
+    //                errorTimeout = setTimeout(function(){
+    //                    $('.content').find('.warning').html('');
+    //                }, 3000);
+    //            }
+    //        }
+    //    });
+    //});
 
     //sales select options
     $('.sales_form select[name="Storage"]').change(function(){
         var iSelectedStorageId = $(this).val();
 
         var products_html = '';
-        var errorTimeout;
 
         $.ajax({
             method: 'post',
@@ -1309,7 +1249,6 @@ $( document ).ready(function() {
         e.preventDefault();
 
         var this_form = $(this).closest('form');
-        var errorTimeout;
 
         this_form.validate({
             rules:{
@@ -1338,6 +1277,37 @@ $( document ).ready(function() {
                     if(result.success == true){
                         $('.sales_form').find('[name="Product"]').val(0);
                         $('.sales_form').find('[name="Quantity"]').val('');
+
+                        var iSelectedStorageId = $('.sales_form [name="Storage"]').val();
+
+                        var products_html = '';
+
+                        $.ajax({
+                            method: 'post',
+                            dataType: 'json',
+                            url: base_url + 'member/AjaxGetStorageAvailability/' + iSelectedStorageId,
+                            success:function(result){
+                                if(result.success == true){
+                                    products_html += '<option value="0">Изделие</option>';
+                                    $.each(result.aStorageAvailability,function(index,value){
+                                        products_html += '<option value="' + value.oProduct.Id + '" product-quantity="'+ value.iQuantity +'">' + value.oProduct.Type.Name + ' (' + value.oProduct.ExpirationDate + ')</option>';
+                                    });
+
+                                    $('.sales_form').find('select[name="Product"]').html(products_html);
+                                    $('.content').find('.warning').html('');
+                                }
+                                if(result.success == false ){
+                                    $('.distribution_form').find('select[name="Product"]').html('<option value="0" selected="selected">Изделие</option>');
+
+                                    $('.content').find('.warning').html('<p class="request_success">Успешна операция!</p>' +
+                                    '<p class="request_failure">Складът е празен!</p>');
+                                    clearTimeout(errorTimeout);
+                                    errorTimeout = setTimeout(function(){
+                                        $('.content').find('.warning').html('');
+                                    }, 3000);
+                                }
+                            }
+                        });
 
                         $('.content').find('.warning').html('<p class="request_success">Успешна операция!</p>');
                         clearTimeout(errorTimeout);
@@ -1397,6 +1367,219 @@ $( document ).ready(function() {
         });
     });
 
+    //Vending
+    //Select distributor
+    $('[name="Distributor"]').on('change', function(e){
+        e.preventDefault();
+
+        var iDistributorId = $(this).find('option:selected').val();
+        var sDistributorAvailabilityHTML = '';
+        var sDistributorStoragesHTML = '';
+
+        if(iDistributorId > 0){
+            $.ajax({
+                method: 'post',
+                dataType: 'json',
+                url: base_url + 'member/GetDistributorDataById/' + iDistributorId,
+                success:function(result){
+                    if(result.success == true){
+                        sDistributorStoragesHTML +='<option value="0" selected="selected">Вендинг машина</option>';
+                        $.each(result.aDistributorStorages,function(index,value){
+                            sDistributorStoragesHTML +='<option value="' + value.Id + '">' + value.Name + '</option>';
+                        });
+
+                        sDistributorAvailabilityHTML += '<option value="0">Изделие</option>';
+                        $.each(result.aDistributorAvailability,function(index,value){
+                            sDistributorAvailabilityHTML +='<option quantity="' + value.iQuantity + '" value="' + value.oProduct.Id + '">' + value.oProduct.Type.Name + '</option>';
+                        });
+
+                        $('.vending_machine_form').find('[name="DistributeProduct"]').html(sDistributorAvailabilityHTML);
+                        $('.vending_machine_form').find('[name="VendingMachine"]').html(sDistributorStoragesHTML);
+                    }
+                    if(result.success == false){
+                        $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 3000);
+                    }
+                }
+            });
+        }
+    });
+
+    //Machine select
+    $('[name="VendingMachine"]').on('change', function(e){
+        e.preventDefault();
+
+        var iVendingId = $(this).find('option:selected').val();
+
+        if(iVendingId > 0){
+            var sVendingMachineHTML = '';
+
+            $.ajax({
+                method: 'post',
+                dataType: 'json',
+                url: base_url + 'member/AjaxGetStorageAvailability/' + iVendingId,
+                success:function(result){
+                    if(result.success == true){
+                        sVendingMachineHTML += '<option value="0" selected="selected">Вендинг машина</option>';
+                        $.each(result.aStorageAvailability, function (index, value) {
+                            sVendingMachineHTML += '<option quantity="' + value.iQuantity + '" value="' + value.oProduct.Id + '">' + value.oProduct.Type.Name + '</option>';
+                        });
+
+                        $('[name="ObsoleteProduct"]').html(sVendingMachineHTML);
+                        $('[name="VendingMachineCash"]').val(result.fCash);
+                    }
+                    if(result.success == false){
+                        $('.content').find('.warning').html('<p class="request_failure">Вендинг машината е празна!</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 3000);
+                    }
+                }
+            });
+        }
+    });
+
+    //Distribute product quantity
+    $('[name="DistributeProduct"]').on('change', function (e) {
+        e.preventDefault();
+        var iProductId = $(this).find('option:selected').val();
+
+        if(iProductId > 0){
+            var iQuantity = $(this).find('option:selected').attr('quantity');
+
+            $('[name="DistributeQuantity"]').val(iQuantity);
+        } else {
+            $('[name="DistributeQuantity"]').val('');
+        }
+    });
+
+    //Obsolete product quantity
+    $('[name="ObsoleteProduct"]').on('change', function (e) {
+        e.preventDefault();
+        var iProductId = $(this).find('option:selected').val();
+
+        if(iProductId > 0){
+            var iQuantity = $(this).find('option:selected').attr('quantity');
+
+            $('[name="ObsoleteQuantity"]').val(iQuantity);
+        } else {
+            $('[name="ObsoleteQuantity"]').val('');
+
+        }
+    });
+
+    //Vending form submit
+    $('.vending_machine_form').on('click','button',function(e){
+        e.preventDefault();
+
+        var this_form = $(this).closest("form");
+
+        this_form.validate({
+            rules:{
+                Distributor: { required: true, GreaterThan: 0 },
+                VendingMachine: { required: true, GreaterThan: 0 },
+                DistributeQuantity: { digits: true },
+                ObsoleteQuantity: { digits: true },
+                VendingMachineCash: { Price: true }
+            },
+            messages:{
+                Distributor: '',
+                VendingMachine: '',
+                DistributeQuantity: '',
+                ObsoleteQuantity: '',
+                VendingMachineCash: ''
+            }
+        });
+
+        var form_valid = this_form.valid();
+
+        if(form_valid){
+            var data = this_form.serialize();
+
+            $.ajax({
+                dataType: 'json',
+                method: 'post',
+                url: base_url + 'member/VendingSubmit/',
+                data: data,
+                success:function(result){
+                    if(result.success == true){
+                        $(this_form).find('[name="DistributeQuantity"]').val('');
+                        $(this_form).find('[name="ObsoleteQuantity"]').val('');
+                        $(this_form).find('[name="VendingMachineCash"]').val('');
+
+                        var iVendingId = $(this_form).find('[name="VendingMachine"]').val();
+
+                        var iDistributorId = $(this_form).find('[name="Distributor"]').val();
+                        var sDistributorAvailabilityHTML = '';
+
+                        if(iDistributorId > 0){
+                            $.ajax({
+                                method: 'post',
+                                dataType: 'json',
+                                url: base_url + 'member/GetDistributorDataById/' + iDistributorId,
+                                success:function(result){
+                                    if(result.success == true){
+                                        sDistributorAvailabilityHTML += '<option value="0">Изделие</option>';
+                                        $.each(result.aDistributorAvailability,function(index,value){
+                                            sDistributorAvailabilityHTML +='<option quantity="' + value.iQuantity + '" value="' + value.oProduct.Id + '">' + value.oProduct.Type.Name + '</option>';
+                                        });
+
+                                        $('.vending_machine_form').find('[name="DistributeProduct"]').html(sDistributorAvailabilityHTML);
+                                    }
+                                    if(result.success == false){
+                                        $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
+                                        clearTimeout(errorTimeout);
+                                        errorTimeout = setTimeout(function(){
+                                            $('.content').find('.warning').html('');
+                                        }, 3000);
+                                    }
+                                }
+                            });
+                        }
+
+                        if(iVendingId > 0){
+                            var sVendingMachineHTML = '';
+
+                            $.ajax({
+                                method: 'post',
+                                dataType: 'json',
+                                url: base_url + 'member/AjaxGetStorageAvailability/' + iVendingId,
+                                success:function(result){
+                                    if(result.success == true){
+                                        sVendingMachineHTML += '<option value="0" selected="selected">Вендинг машина</option>';
+                                        $.each(result.aStorageAvailability, function (index, value) {
+                                            sVendingMachineHTML += '<option quantity="' + value.iQuantity + '" value="' + value.oProduct.Id + '">' + value.oProduct.Type.Name + '</option>';
+                                        });
+
+                                        $('[name="ObsoleteProduct"]').html(sVendingMachineHTML);
+                                        $('[name="VendingMachineCash"]').val(result.fCash);
+                                    }
+                                    if(result.success == false){
+                                        $('.content').find('.warning').html('<p class="request_success">Действието е успешна!</p>');
+                                        $('.content').find('.warning').html('<p class="request_failure">Вендинг машината е празна!</p>');
+                                        clearTimeout(errorTimeout);
+                                        errorTimeout = setTimeout(function(){
+                                            $('.content').find('.warning').html('');
+                                        }, 3000);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                    if(result.success == false){
+                        if(result.warning == "username"){
+                            $('.public').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
+                        }
+                    }
+                }
+            });
+        }
+    });
+
     var GetSales = function (iUserId, iStorageId, sPeriod) {
         $.ajax({
             method: 'post',
@@ -1414,7 +1597,6 @@ $( document ).ready(function() {
     }
 
     var GetDistributorVendingMachines = function (iUserId){
-        var errorTimeout;
 
         $.ajax({
             method: 'post',
