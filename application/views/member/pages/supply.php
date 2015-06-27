@@ -26,9 +26,6 @@
 
                         <select name="Category">
                             <option value="0">Категория</option>
-                            <?php foreach($aProductCategories as $iCategoryId => $sCategory){
-                                echo "<option value='{$iCategoryId}'>{$sCategory}</option>";
-                            }?>
                         </select>
                         <select name="ProductType">
                             <option value="0">Тип изделие</option>

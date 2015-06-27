@@ -6,9 +6,9 @@ if (!defined('BASEPATH'))
 class Products extends CI_Model
 {
     private $sProductTable = 'products';
-    private $sTypeTable = 'producttypes';
+    private $sCategoryTable = 'productcategories';
 
-    const iTypesLimit = 12;
+    const iCategoriesLimit = 12;
     const iLimit = 12;
     const iAdjacent = 6.5;
 
@@ -17,41 +17,40 @@ class Products extends CI_Model
         return self::iLimit;
     }
 
-    public function getTypesLimit()
+    public function getCategoriesLimit()
     {
         return self::iLimit;
     }
-
-    public $aProductCategories = array(
-        '1' => 'Салати',
-        '2' => 'Супи',
-        '3' => 'Постна серия',
-        '4' => 'Ястия с пилешко',
-        '5' => 'Ястия с телешко',
-        '6' => 'Ястия със свинско',
-        '7' => 'Ястия с кайма',
-        '8' => 'Пикантни ястия',
-        '9' => 'Меню на шефа',
-        '10' => 'Италианска серия',
-        '11' => 'Печено с гарнитура',
-        '12' => 'Серия XXL',
-        '13' => 'Сандвичи',
-        '14' => 'Тортили',
-        '15' => 'Банички',
-        '16' => 'Захарни',
-        '17' => 'Млечни',
-        '18' => 'Други',
-    );
 
     public function __construct()
     {
         parent::__construct();
     }
 
+    public function CheckIfProductExists($aProductData)
+    {
+        return $this->db->get_where($this->sProductTable,array('Category' => $aProductData['Category'], 'ExpirationDate' => $aProductData['ExpirationDate']))->first_row();
+    }
+
+    public function UpdateProductQuantity($iProductId, $iQuantity, $fValue)
+    {
+        $aUpdateData = array(
+            'Quantity' => $iQuantity,
+            'Value' => $fValue,
+        );
+        $this->db->where('Id',$iProductId);
+        return $this->db->update($this->sProductTable,$aUpdateData);
+    }
+
+    public function AddProduct($aProductData)
+    {
+        return $this->db->insert($this->sProductTable, $aProductData);
+    }
+
     public function GetProductById($iProductId){
         $oProduct = $this->db->get_where($this->sProductTable,array('Id' => $iProductId))->first_row();
         if(is_object($oProduct)){
-            $oProduct->Type = $this->GetProductTypeById($oProduct->Type);
+            $oProduct->Category = $this->GetProductCategoryById($oProduct->Category);
         }
 
         return $oProduct;
@@ -69,13 +68,14 @@ class Products extends CI_Model
         return $this->db->update($this->sProductTable,array('IsDeleted' => '1'));
     }
 
-    public function ListProducts($iPage = 1, $iLimit = 0, $iType = 0)
+    public function ListProducts($iPage = 1, $iLimit = 0, $iCategory = 0)
     {
         $this->db->where('IsDeleted', '0');
-        if($iType != 0){
-            $this->db->where('Type', $iType);
+        $this->db->where('Quantity >', '0');
+        if($iCategory != 0){
+            $this->db->where('Category', $iCategory);
         }
-        $this->db->order_by("Id","asc");
+        $this->db->order_by("Category","asc");
         $oQuery = $this->db->get($this->sProductTable);
         $iCount = $oQuery->num_rows();
 
@@ -84,17 +84,18 @@ class Products extends CI_Model
                 $iOffset = ($iPage - 1) * $iLimit;
 
                 $this->db->where('IsDeleted','0');
-                if($iType != 0){
-                    $this->db->where('Type', $iType);
+                $this->db->where('Quantity >', '0');
+                if($iCategory != 0){
+                    $this->db->where('Category', $iCategory);
                 }
-                $this->db->order_by("Id","asc");
+                $this->db->order_by("Category","asc");
                 $this->db->limit($iLimit, $iOffset);
 
                 $aProducts = $this->db->get($this->sProductTable)->result();
                 $sPagination = $this->GetPagination($iPage, $iCount, $iLimit);
 
                 foreach ($aProducts as $iKey => $oProduct){
-                    $oProduct->Type = $this->GetProductTypeById($oProduct->Type);
+                    $oProduct->Category = $this->GetProductCategoryById($oProduct->Category);
                     $aProducts[$iKey] = $oProduct;
                 }
 
@@ -107,7 +108,7 @@ class Products extends CI_Model
             $aProducts = $oQuery->result();
 
             foreach ($aProducts as $iKey => $oProduct){
-                $oProduct->Type = $this->GetProductTypeById($oProduct->Type);
+                $oProduct->Category = $this->GetProductCategoryById($oProduct->Category);
                 $aProducts[$iKey] = $oProduct;
             }
 
@@ -122,7 +123,7 @@ class Products extends CI_Model
 
         if(is_array($aExpiringProducts) && !empty($aExpiringProducts)){
             foreach($aExpiringProducts as $iKey => $oExpiringProduct){
-                $aExpiringProducts[$iKey]->Type = $this->GetProductTypeById($oExpiringProduct->Type);
+                $aExpiringProducts[$iKey]->Category = $this->GetProductCategoryById($oExpiringProduct->Category);
             }
         }
 
@@ -197,63 +198,70 @@ class Products extends CI_Model
         return $sPagination;
     }
 
-    //Product Types
-    public function AddProductType($aProductTypeData)
+    //Product Categories
+    public function AddProductCategory($aProductCategoryData)
     {
-        $oExistingProduct = $this->GetProductTypeByName($aProductTypeData['Name']);
+        $oCategoryWithTheSameName = $this->GetProductCategoryByName($aProductCategoryData['Name']);
+        $oCategoryWithTheSameBarcode = $this->GetProductCategoryByBarcode($aProductCategoryData['Barcode']);
 
-        if(!is_object($oExistingProduct)){
-            $aProductTypeInsertData = array(
-                'Name' => $aProductTypeData['Name'],
-                'Category' => $aProductTypeData['Category'],
+        if(!is_object($oCategoryWithTheSameBarcode) && !is_object($oCategoryWithTheSameName)){
+            $aProductCategoryInsertData = array(
+                'Name' => $aProductCategoryData['Name'],
+                'Barcode' => $aProductCategoryData['Barcode'],
             );
 
-            return $this->db->insert($this->sTypeTable,$aProductTypeInsertData);
+            return $this->db->insert($this->sCategoryTable,$aProductCategoryInsertData);
         }
 
         return false;
     }
 
-    public function EditProductType($aEditProductTypeData)
+    public function EditProductCategory($aEditProductCategoryData)
     {
-        $iProductTypeId = intval($aEditProductTypeData['Id']);
+        $iProductCategoryId = intval($aEditProductCategoryData['Id']);
         $aPTData = array(
-            'Name' => $aEditProductTypeData['Name'],
-            'Category' => $aEditProductTypeData['Category']
+            'Name' => $aEditProductCategoryData['Name'],
+            'Category' => $aEditProductCategoryData['Category']
         );
 
-        $this->db->where('Id',$iProductTypeId);
-        return $this->db->update($this->sTypeTable,$aPTData);
+        $this->db->where('Id',$iProductCategoryId);
+        return $this->db->update($this->sCategoryTable,$aPTData);
     }
 
-    public function DeleteProductType($iProductTypeId)
+    public function DeleteProductCategory($iProductCategoryId)
     {
-        $iProductTypeId = intval($iProductTypeId);
-        $aDeleteProductType['IsDeleted'] = '1';
+        $iProductCategoryId = intval($iProductCategoryId);
+        $aDeleteProductCategory['IsDeleted'] = '1';
 
-        $this->db->where('Id',$iProductTypeId);
-        return $this->db->update($this->sTypeTable,$aDeleteProductType);
+        $this->db->where('Id',$iProductCategoryId);
+        return $this->db->update($this->sCategoryTable,$aDeleteProductCategory);
     }
 
-    public function GetProductTypeByName($sProductName)
+    public function GetProductCategoryByName($sProductCategoryName)
     {
-        $this->db->where(array('Name' => $sProductName, 'IsDeleted' => '0'));
-        return $this->db->get($this->sTypeTable)->first_row();
+        $this->db->where(array('Name' => $sProductCategoryName, 'IsDeleted' => '0'));
+        return $this->db->get($this->sCategoryTable)->first_row();
     }
 
-    public function GetProductTypeById($iId)
+    public function GetProductCategoryByBarcode($iBarcode)
     {
-        return $this->db->get_where($this->sTypeTable,array('Id' => $iId))->first_row();
+        $this->db->where(array('Barcode' => $iBarcode, 'IsDeleted' => '0'));
+        return $this->db->get($this->sCategoryTable)->first_row();
     }
 
-    public function ListProductTypes($iPage = 1, $iLimit = 0, $iType = 0)
+    public function GetProductCategoryById($iId)
+    {
+        return $this->db->get_where($this->sCategoryTable,array('Id' => $iId))->first_row();
+    }
+
+    public function ListProductCategories($iPage = 1, $iLimit = 0, $iCategory = 0)
     {
         $this->db->where('IsDeleted', '0');
-        if($iType != 0){
-            $this->db->where('Type', $iType);
+        if($iCategory != 0){
+            $this->db->where('Category', $iCategory);
         }
-        $this->db->order_by("Id","asc");
-        $oQuery = $this->db->get($this->sTypeTable);
+        $this->db->order_by("Barcode","asc");
+        $oQuery = $this->db->get($this->sCategoryTable);
         $iCount = $oQuery->num_rows();
 
         if($iCount > 0){
@@ -261,24 +269,24 @@ class Products extends CI_Model
                 $iOffset = ($iPage - 1) * $iLimit;
 
                 $this->db->where('IsDeleted','0');
-                if($iType != 0){
-                    $this->db->where('Type', $iType);
+                if($iCategory != 0){
+                    $this->db->where('Category', $iCategory);
                 }
-                $this->db->order_by("Id","asc");
+                $this->db->order_by("Barcode","asc");
                 $this->db->limit($iLimit, $iOffset);
 
-                $aProducts = $this->db->get($this->sTypeTable)->result();
+                $aProducts = $this->db->get($this->sCategoryTable)->result();
                 $sPagination = $this->GetPagination($iPage, $iCount, $iLimit);
 
                 return $aData = array(
-                    'aProductTypes' => $aProducts,
+                    'aProductCategories' => $aProducts,
                     'sPagination' => $sPagination,
                 );
             }
 
             $aProducts = $oQuery->result();
 
-            return $aData = array('aProductTypes' => $aProducts, 'sPagination' => '');
+            return $aData = array('aProductCategories' => $aProducts, 'sPagination' => '');
         }
     }
 }

@@ -14,10 +14,10 @@ class My_AdminController extends My_MemberController
 
     public function CheckRole($bRedirect = false)
     {
-        if($this->aData['oUser']->Type > 1){
-            return;
-        } elseif ($bRedirect) {
-            redirect(base_url()+ 'member/Distribution');
-        }
+//        if($this->aData['oUser']->Type > 1){
+//            return;
+//        } elseif ($bRedirect) {
+//            redirect(base_url().'member/');
+//        }
     }
 }

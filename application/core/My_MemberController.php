@@ -13,8 +13,6 @@ class My_MemberController extends My_BaseController
         $this->load->model('events');
 
         $this->aData['aEventTypes'] = $this->events->aEventTypes;
-        $this->aData['aProductCategories'] = $this->products->aProductCategories;
-        $this->aData['aStorageTypes'] = $this->storages->aStorageTypes;
         $this->aData['oDistributor'] = array();
 
         if($this->aData['oUser']->Type == 1){

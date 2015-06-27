@@ -1,26 +1,40 @@
-<div class="users_content">
-    <div class="title">Потребители</div>
-    <div class="list" style="<?= is_array($aUsers) && !empty($aUsers) ? '' : 'display:none;' ;?>">
-        <?php $iCounter = 0; ?>
-        <?php foreach($aUsers as $oUserData) : ?>
-            <div class="user_container container" user-id="<?=$oUserData->Id?>" style="background-color: #<?= $iCounter % 2 == 0 ? 'DDF5B7' : 'FFFF99' ?>">
-                <div class="column first_column"><?= $oUserData->FirstName?></div>
-                <div class="column"><?=$oUserData->LastName?></div>
-                <div class="manage_users last_column">
-                    <a href="#" class="edit_user"><i class="fa fa-pencil"></i></a>
-                    <?php if($oUserData->Id != $oUser->Id) : ?>
-                        <a href="#" class="delete_user"><i class="fa fa-times"></i></a>
-                    <?php else: ?>
-                        <i style="color:grey" class="fa fa-times"></i>
-                    <?php endif; ?>
-                </div>
-            </div>
-            <?php $iCounter++; ?>
-        <?php endforeach; ?>
-        <?= $sUsersPagination ?>
-        <div class="directions"><a href="<?= base_url();?>admin/manage"">Обратно</a></div>
+<ul class="nav nav-pills nav-stacked nav-panel">
+    <li><a href="<?=base_url()?>admin/">Централен склад</a></li>
+    <li><a href="<?=base_url()?>admin/distributors">Дистрибутори</a></li>
+    <li><a href="<?=base_url()?>admin/vending">Вендинг машини</a></li>
+    <li><a href="<?=base_url()?>admin/categories">Категории стоки</a></li>
+    <li class="active"><a href="<?=base_url()?>admin/users">Потребители</a></li>
+</ul>
+</div>
+
+<div class="container col-sm-10 content">
+    <div class="users_list col-sm-10">
+        <table class="table table-condensed table-hover">
+            <thead><tr><th>Име</th><th>Фамилия</th><th>Потребителско име</th><th>Дата на регистрация</th><th>Тип</th></tr></thead>
+            <tbody>
+            <?php foreach($aUsers as $oUserData) : ?>
+                <tr user-id="<?=$oUserData->Id?>">
+                    <td><?= $oUserData->FirstName?></td>
+                    <td><?=$oUserData->LastName?></td>
+                    <td><?=$oUserData->LoginName?></td>
+                    <td><?=$oUserData->Registered?></td>
+                    <td>
+                        <select name="Type">
+                            <?php foreach($aUserTypes as $iKey => $sUserType) : ?>
+                                <option value="<?=$iKey?>" <?= $iKey == $oUserData->Type ? 'selected="selected"' : ''?>><?=$sUserType?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+        <div class="container col-sm-12" style="text-align: center;">
+            <?= $sUsersPagination ?>
+        </div>
     </div>
-    <div class="edit_user_form form">
+
+    <div class="edit_user_form form" style="display: none;">
         <form method="post" action="">
             <input type="hidden" name="UserId" value="">
             <input type="text" name="FirstName" placeholder="Първо име" autocomplete="off"/>
@@ -39,4 +53,3 @@
         </form>
         <div class="directions"><a href="<?= base_url();?>admin/users"">Обратно</a></div>
     </div>
-</div>

@@ -8,6 +8,16 @@ class Member extends My_MemberController
     {
         parent::__construct();
     }
+
+    private function CheckUserPermissions()
+    {
+//        $iPermissions = $this->aData['oUser']->Type;
+//        if($iPermissions < 1){
+//            redirect(base_url().'member/');
+//        } elseif ($iPermissions > 1){
+//            redirect(base_url().'admin/');
+//        }
+    }
     
     public function index()
     {
@@ -16,6 +26,7 @@ class Member extends My_MemberController
 
     public function Homepage()
     {
+        $this->CheckUserPermissions();
         $aStoragesData = $this->storages->ListStorages();
         $aStorages = $aStoragesData['aStorages'];
         $aAvailableProducts = array();
@@ -48,10 +59,7 @@ class Member extends My_MemberController
 
     public function Actions()
     {
-        if($this->aData['oUser']->Type == 0){
-            redirect(base_url().'member');
-        }
-
+        $this->CheckUserPermissions();
         $this->aData['sTitle'] = 'Действия';
 
         $this->load->view('member/include/header',$this->aData);
@@ -61,10 +69,7 @@ class Member extends My_MemberController
 
     public function Obsolete()
     {
-        if($this->aData['oUser']->Type == 0){
-            redirect(base_url().'member');
-        }
-
+        $this->CheckUserPermissions();
         $aStoragesData = $this->storages->ListStorages(1, 0, 3);
 
         $this->aData['sTitle'] = 'Операции/Бракуване';
@@ -96,9 +101,7 @@ class Member extends My_MemberController
 
     public function Distribution()
     {
-        if($this->aData['oUser']->Type == 0){
-            redirect(base_url().'member');
-        }
+        $this->CheckUserPermissions();
         $aAdditionalStorages = $this->storages->ListStorages(1, 0, 2);
         $aStoragesData = $this->storages->ListStorages(1, 0, 1);
         $aStorageAvailability = $this->GetStorageAvailability($aStoragesData['aStorages'][0]->Id);
@@ -127,6 +130,7 @@ class Member extends My_MemberController
 
     public function GetRemainingStorages()
     {
+        $this->CheckUserPermissions();
         if(is_array($_POST) && !empty($_POST) && isset($_POST['iSelectedStorageId'])){
             $aStoragesData = $this->storages->ListStorages();
             $aAllStorages = $aStoragesData['aStorages'];
@@ -187,10 +191,7 @@ class Member extends My_MemberController
     //Storage supply
     public function Supply()
     {
-        if($this->aData['oUser']->Type == 0){
-            redirect(base_url().'member');
-        }
-
+        $this->CheckUserPermissions();
         $aStoragesData = $this->storages->ListStorages(1, 0, 1);
         $aProductTypesData = $this->products->ListProductTypes();
 
@@ -293,6 +294,7 @@ class Member extends My_MemberController
     //Income
     public function Revenue()
     {
+        $this->CheckUserPermissions();
         if($this->aData['oUser']->Type == 0){
             redirect(base_url().'member');
         }
@@ -339,9 +341,7 @@ class Member extends My_MemberController
     //Sales
     public function Sales()
     {
-        if($this->aData['oUser']->Type == 0){
-            redirect(base_url().'member');
-        }
+        $this->CheckUserPermissions();
 
         $aStoragesData = $this->storages->ListStorages(1, 0, 3);
 
@@ -372,6 +372,26 @@ class Member extends My_MemberController
         }
         echo json_encode(array('success' => $bSale));
         return;
+    }
+
+    public function Vending()
+    {
+        $this->CheckUserPermissions();
+
+        $aDistributorsAsStoragesData = $this->storages->ListStorages(1, 0, 2);
+
+        $this->aData['sTitle'] = 'Продажба';
+        $this->aData['aDistributorsAsStorages'] = $aDistributorsAsStoragesData['aStorages'];
+
+        if(is_object($this->aData['oDistributor'])) {
+            $aDistributorAvailabilityData = $this->GetStorageAvailability($this->aData['oDistributor']->StorageId);
+            $this->aData['aVendingMachines'] = $this->storages->GetDistributorVendingMachines(intval($this->aData['oDistributor']->Id));
+            $this->aData['aDistributorAvailability'] = $aDistributorAvailabilityData['aStorageAvailability'];
+        }
+
+        $this->load->view('member/include/header',$this->aData);
+        $this->load->view('member/pages/vending',$this->aData);
+        $this->load->view('member/include/footer',$this->aData);
     }
 
     public function Logout()

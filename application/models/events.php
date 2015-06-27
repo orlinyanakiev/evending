@@ -19,12 +19,13 @@ class Events extends CI_Model
     const SALE = 196;
     const INCOME_ACCOUNTING = 225;
     const ADD_STORAGE = 256;
-    const ADD_PRODUCT_TYPE = 289;
-    const EDIT_USER = 324;
+    const ADD_PRODUCT_CATEGORY = 289;
+    const CHANGE_USER_TYPE = 324;
     const DELETE_USER = 361;
     const EDIT_PRODUCT = 400;
-    const EDIT_PRODUCT_TYPE = 441;
-    const DELETE_PRODUCT_TYPE = 484;
+    const EDIT_PRODUCT_CATEGORY = 441;
+    const DELETE_PRODUCT_CATEGORY = 484;
+    const MAIN_STORAGE_SUPPLY = 529;
 
     public $aEventTypes = array (
         self::SUPPLY => 'Зареждане',
@@ -33,12 +34,13 @@ class Events extends CI_Model
         self::SALE => 'Продажба',
         self::INCOME_ACCOUNTING => 'Заприходяване',
         self::ADD_STORAGE => 'Добавяне на склад',
-        self::ADD_PRODUCT_TYPE => 'Добавяне на тип изделие',
-        self::EDIT_USER => 'Коригиране на потребител',
+        self::ADD_PRODUCT_CATEGORY => 'Добавяне на категория стока',
+        self::CHANGE_USER_TYPE => 'Коригиране на потребител',
         self::DELETE_USER => 'Изтриване на потребител',
-        self::EDIT_PRODUCT => 'Коригиране на изделие',
-        self::EDIT_PRODUCT_TYPE => 'Коригиране на тип изделие',
-        self::DELETE_PRODUCT_TYPE => 'Изтриване на тип изделие',
+        self::EDIT_PRODUCT => 'Коригиране на стока',
+        self::EDIT_PRODUCT_CATEGORY => 'Коригиране на категория стока',
+        self::DELETE_PRODUCT_CATEGORY => 'Изтриване на категория стока',
+        self::MAIN_STORAGE_SUPPLY => 'Зареждане на централен склад',
     );
 
     private $sEventTable = 'events';

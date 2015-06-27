@@ -14,11 +14,16 @@
                 <?php if(is_array($aProducts) && !empty($aProducts)) : ?>
                     <div class="distribution_form form">
                         <form method="post" action="">
-                            <select name="Storage1">
-                                <?php foreach($aStorages as $oStorage) : ?>
-                                    <option value="<?=$oStorage->Id?>"><?=$oStorage->Name?></option>
-                                <?php endforeach; ?>
-                            </select>
+                            <?php if(!is_object($oDistributor)) : ?>
+                                <select name="Storage1">
+                                    <?php foreach($aStorages as $oStorage) : ?>
+                                        <option value="<?=$oStorage->Id?>"><?=$oStorage->Name?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            <?php else : ?>
+                                <input type="hidden" name="Storage1" value="<?= $oDistributor->StorageId; ?>" />
+                                <div class="fake_input_field"><?= $oDistributorStorage->Name ?></div>
+                            <?php endif; ?>
                             <select name="Storage2">
                                 <option value="0">Към</option>
                                 <?php foreach($aAdditionalStorages as $oAdditionalStorage) : ?>

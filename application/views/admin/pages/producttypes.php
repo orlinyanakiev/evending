@@ -18,18 +18,13 @@
     </div>
 
     <div class="add_product_type_form form">
-        <? if(is_array($aProductCategories) && !empty($aProductCategories)) : ?>
-            <form method="post" action="">
-                <input type="text" name="Name" placeholder="Име" autocomplete="off" />
-                <select name="Category">
-                    <option value="0">Категория</option>
-                    <?php foreach($aProductCategories as $iKey => $sCategory){
-                        echo "<option value='{$iKey}'>{$sCategory}</option>";};
-                    ?>
-                </select>
-                <button type="submit">Добави тип изделие</button>
-            </form>
-        <? endif; ?>
+        <form method="post" action="">
+            <input type="text" name="Name" placeholder="Име" autocomplete="off" />
+            <select name="Category">
+                <option value="0">Категория</option>
+            </select>
+            <button type="submit">Добави тип изделие</button>
+        </form>
         <div class="directions"><a href="<?= base_url();?>admin/producttypes"">Обратно</a></div>
     </div>
 

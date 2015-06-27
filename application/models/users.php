@@ -8,15 +8,19 @@ class Users extends CI_Model
     public $aUserTypes = array(
         '0' => 'Посетител',
         '1' => 'Дистрибутор',
-        '2' => 'Оператор',
-        '3' => 'Администратор'
+        '2' => 'Администратор'
     );
 
-    const iLimit = 12;
+    const iLimit = 30;
     const iAdjacent = 5.5;
 
     private $sDistributorsTable = 'distributors';
     private $sUsersTable = 'users';
+
+    public function getLimit()
+    {
+        return self::iLimit;
+    }
 
     public function __construct()
     {
@@ -28,7 +32,7 @@ class Users extends CI_Model
         $aUserData = array(
             'LoginName' => $sLoginName,
             'Password' => sha1($sPassword),
-            'Active' => '1',
+            'IsDeleted' => '0',
         );
 
         $this->db->where($aUserData);
@@ -40,52 +44,16 @@ class Users extends CI_Model
         return array();
     }
 
-    public function getLimit()
-    {
-        return self::iLimit;
-    }
-
-    public function EditUser($aUserData)
-    {
-        if(isset($aUserData['UserId'])){
-            $iUserId = intval($aUserData['UserId']);
-
-            $oUser = $this->GetUser($iUserId);
-
-            $aNewUserData = array(
-                'FirstName' => $aUserData['FirstName'],
-                'LastName' => $aUserData['LastName'],
-                'LoginName' => $aUserData['LoginName'],
-                'Type' => $aUserData['Type']
-            );
-
-            if(is_object($oUser) && $oUser->LoginName == $aNewUserData['LoginName']){
-                $this->db->where('Id', $iUserId);
-                return $this->db->update($this->sUsersTable,$aNewUserData);
-            } else {
-                return false;
-            }
-        }
-
-        return false;
-    }
-
-    public function DeleteUserById($iUserId)
-    {
-        $this->db->where('Id',$iUserId);
-        return $this->db->update($this->sUsersTable,array('Active' => '0'));
-    }
-    
     public function GetUser($iUserId)
     {
         $iUserId = (int)$iUserId;
 
         $this->db->where(array(
             'Id' => $iUserId,
-            'Active' => '1',
+            'IsDeleted' => '0',
         ));
         
-        $oUser = $this->db->get($this->sUsersTable)->row();
+        $oUser = $this->db->get($this->sUsersTable)->first_row();
         if(isset($oUser->LoginName)){
             return $oUser;
         }
@@ -103,6 +71,12 @@ class Users extends CI_Model
         }
         
         return false;
+    }
+
+    public function ChangeUserType($iUserId, $iType)
+    {
+        $this->db->where('Id',$iUserId);
+        return $this->db->update($this->sUsersTable,array('Type' => $iType));
     }
     
     public function AddUser(array $aUserData)
@@ -160,7 +134,7 @@ class Users extends CI_Model
 
     public function ListUsers($iPage = 1, $iLimit = 0, $iType = 0)
     {
-        $this->db->where('Active','1');
+        $this->db->where('IsDeleted','0');
         if($iType != 0){
             $this->db->where('Type',$iType);
         }
@@ -170,7 +144,7 @@ class Users extends CI_Model
 
         if($iCount > $iLimit && $iLimit != 0){
             $iOffset = ($iPage - 1) * $iLimit;
-            $this->db->where('Active','1');
+            $this->db->where('IsDeleted','0');
             if($iType != 0){
                 $this->db->where('Type',$iType);
             }
@@ -196,61 +170,109 @@ class Users extends CI_Model
         $iPrev = $iPage - 1;
         $iNext = $iPage + 1;
 
+        $stuff ='
+                    <li>
+                      <a href="#" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                      </a>
+                    </li>
+                    <li><a href="#">1</a></li>
+                    <li><a href="#">2</a></li>
+                    <li><a href="#">3</a></li>
+                    <li><a href="#">4</a></li>
+                    <li><a href="#">5</a></li>
+                    <li>
+                      <a href="#" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                      </a>
+                    </li>';
+
         if ($iLastPage > 1){
             //Prev and Next button
             if ($iPage > 1) {
-                $sPrev.= "<a class=\"prev\" href=\"javascript:void(0);\" page-number=\"$iPrev\"><i class=\"fa fa-angle-left\"></i> </a>";
+                $sPrev.= "<li><a class=\"prev\" href=\"javascript:void(0);\" page-number=\"$iPrev\"><i class=\"fa fa-angle-left\"></i></a></li>";
             }
             if ($iPage < $iLastPage) {
-                $sNext.= "<a class=\"next\" href=\"javascript:void(0);\" page-number=\"$iNext\"> <i class=\"fa fa-angle-right\"></i></a>";
+                $sNext.= "<li><a class=\"next\" href=\"javascript:void(0);\" page-number=\"$iNext\"><i class=\"fa fa-angle-right\"></i></a></li>";
             }
 
             //All pages are shown
             if ($iLastPage <= ceil($iAdjacent + 1) * 2){
                 for ($iCounter = 1; $iCounter <= $iLastPage; $iCounter++){
                     if ($iPage == $iCounter){
-                        $sPagination.="<a class=\"active\" href=\"javascript:void(0);\">$iCounter</a>";
+                        $sPagination.="<li><a class=\"active\" href=\"javascript:void(0);\">$iCounter</a></li>";
                     } else {
-                        $sPagination.="<a href=\"javascript:void(0);\" page-number=\"$iCounter\">$iCounter</a>";
+                        $sPagination.="<li><a href=\"javascript:void(0);\" page-number=\"$iCounter\">$iCounter</a></li>";
                     }
                 }
             } //Page at start - hiding pages at the end
             elseif ($iPage <= 1 + ceil($iAdjacent)){
                 for ($iCounter = 1; $iCounter <= ceil($iAdjacent) * 2; $iCounter++){
                     if ($iPage == $iCounter){
-                        $sPagination.="<a class=\"active\" href=\"javascript:void(0);\">$iCounter</a>";
+                        $sPagination.="<li><a class=\"active\" href=\"javascript:void(0);\">$iCounter</a></li>";
                     } else {
-                        $sPagination.="<a href=\"javascript:void(0);\" page-number=\"$iCounter\">$iCounter</a>";
+                        $sPagination.="<li><a href=\"javascript:void(0);\" page-number=\"$iCounter\">$iCounter</a></li>";
                     }
                 }
-                $sLast ="<a class=\"last\" href=\"javascript:void(0);\" page-number=\"$iLastPage\"> <i class=\"fa fa-angle-double-right\"></i></a>";
+                $sLast ="<li><a class=\"last\" href=\"javascript:void(0);\" page-number=\"$iLastPage\"> <i class=\"fa fa-angle-double-right\"></i></a></li>";
             } //Page in the middle - hiding pages at the start and at the end;
             elseif ($iPage < $iLastPage - ceil($iAdjacent)){
-                $sFirst = "<a class=\"first\" href=\"javascript:void(0);\" page-number=\"1\"><i class=\"fa fa-angle-double-left\"></i> </a> ";
+                $sFirst = "<li><a class=\"first\" href=\"javascript:void(0);\" page-number=\"1\"><i class=\"fa fa-angle-double-left\"></i></a></li>";
                 for ($iCounter = $iPage - floor($iAdjacent); $iCounter <= $iPage + floor($iAdjacent); $iCounter++){
                     if ($iPage == $iCounter){
-                        $sPagination.="<a class=\"active\" href=\"javascript:void(0);\">$iCounter</a>";
+                        $sPagination.="<li><a class=\"active\" href=\"javascript:void(0);\">$iCounter</a></li>";
                     } else {
-                        $sPagination.="<a href=\"javascript:void(0);\" page-number=\"$iCounter\">$iCounter</a>";
+                        $sPagination.="<li><a href=\"javascript:void(0);\" page-number=\"$iCounter\">$iCounter</a></li>";
                     }
                 }
-                $sLast = " <a class=\"last\" href=\"javascript:void(0);\" page-number=\"$iLastPage\"> <i class=\"fa fa-angle-double-right\"></i></a>";
+                $sLast = "<li><a class=\"last\" href=\"javascript:void(0);\" page-number=\"$iLastPage\"> <i class=\"fa fa-angle-double-right\"></i></a></li>";
             } //Page is at the end - hiding pages at the start
             else {
-                $sFirst = "<a class=\"first\" href=\"javascript:void(0);\" page-number=\"1\"><i class=\"fa fa-angle-double-left\"></i> </a> ";
+                $sFirst = "<li><a class=\"first\" href=\"javascript:void(0);\" page-number=\"1\"><i class=\"fa fa-angle-double-left\"></i></a></li>";
                 for ($iCounter = $iLastPage - $iAdjacent * 2; $iCounter <= $iLastPage; $iCounter++){
                     if ($iPage == $iCounter){
-                        $sPagination.="<a class=\"active\" href=\"javascript:void(0);\">$iCounter</a>";
+                        $sPagination.="<li><a class=\"active\" href=\"javascript:void(0);\">$iCounter</a></li>";
                     } else {
-                        $sPagination.="<a href=\"javascript:void(0);\" page-number=\"$iCounter\">$iCounter</a>";
+                        $sPagination.="<li><a href=\"javascript:void(0);\" page-number=\"$iCounter\">$iCounter</a></li>";
                     }
                 }
             }
 
-            $sPagination = "<div class=\"pagination_list\">" . $sFirst . $sPrev . $sPagination . $sNext . $sLast . "</div>\n";
+            $sPagination = "<nav><ul class=\"pagination\">" . $sFirst . $sPrev . $sPagination . $sNext . $sLast . "</ul></nav>\n";
         }
 
         return $sPagination;
     }
+
+//    public function EditUser($aUserData)
+//    {
+//        if(isset($aUserData['UserId'])){
+//            $iUserId = intval($aUserData['UserId']);
+//
+//            $oUser = $this->GetUser($iUserId);
+//
+//            $aNewUserData = array(
+//                'FirstName' => $aUserData['FirstName'],
+//                'LastName' => $aUserData['LastName'],
+//                'LoginName' => $aUserData['LoginName'],
+//                'Type' => $aUserData['Type']
+//            );
+//
+//            if(is_object($oUser) && $oUser->LoginName == $aNewUserData['LoginName']){
+//                $this->db->where('Id', $iUserId);
+//                return $this->db->update($this->sUsersTable,$aNewUserData);
+//            } else {
+//                return false;
+//            }
+//        }
+//
+//        return false;
+//    }
+
+//    public function DeleteUserById($iUserId)
+//    {
+//        $this->db->where('Id',$iUserId);
+//        return $this->db->update($this->sUsersTable,array('IsDeleted' => '1'));
+//    }
 
 }

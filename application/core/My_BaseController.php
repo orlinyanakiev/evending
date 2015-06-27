@@ -27,7 +27,7 @@ class My_BaseController extends CI_Controller
             if(isset($iUserId)){
                 $this->aData['oUser'] = $this->users->GetUser($iUserId);
             }
-            
+
         } elseif ($bRedirect) {
             redirect(base_url());
         }

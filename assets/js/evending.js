@@ -296,217 +296,217 @@ $( document ).ready(function() {
             });
         }
     });
-
-    //Storages pagination
-    $('.storages_content').on('click', '.pagination_list a', function(e){
-        e.preventDefault();
-        var page_id = $(this).attr('page-number');
-
-        $.ajax({
-            method: 'post',
-            dataType: 'json',
-            url: base_url + 'admin/StoragesPagination/',
-            data: { "iPageId": page_id },
-            success: function (result) {
-                var listing_html = '';
-                var colour = '';
-
-                $.each(result.aStorages, function( index , value ){
-                    if(index % 2 == 0){
-                        colour = 'DDF5B7';
-                    } else {
-                        colour = 'FFFF99'
-                    }
-                    listing_html += '<div class="storage_container container" storage-id="' + value.Id + '" style="background-color: #' + colour + '">' +
-                    '<div class="column first_column"><a href="#" class="storage_availability">' + value.Name + '</a></div>' +
-                    '<div class="manage_storage last_column">' +
-                    '<a href="#" class="edit_storage"><i class="fa fa-pencil"></i></a> ' +
-                    '<a href="#" class="delete_storage"><i class="fa fa-times"></i></a>' +
-                    '</div><div class="column last_column">' + value.Address + '</div></div>';
-                });
-
-                listing_html += result.sPagination + '<div class="directions"><a href="' + base_url + 'admin/manage"">Обратно</a></div>';
-
-                $('.storages_content').find('.list').html(listing_html);
-            }
-        });
-    });
-
-    //Edit storage
-    $('.storages_content').on('click', '.edit_storage', function(e){
-        e.preventDefault();
-
-        var storage_id = $(this).closest('.storage_container').attr('storage-id');
-
-        $.ajax({
-            method: 'post',
-            dataType: 'json',
-            url: base_url + 'admin/GetStorageById/' + storage_id,
-            success:function(result){
-                if(result.success == true){
-                    $('.edit_storage_form').find('[name="Id"]').val(result.oStorage.Id);
-                    $('.edit_storage_form').find('[name="Name"]').val(result.oStorage.Name);
-                    $('.edit_storage_form').find('[name="Address"]').val(result.oStorage.Address);
-
-                    $('.list').hide();
-                    $('.add_storage').hide();
-                    $('.edit_storage_form').show();
-                } else {
-                    $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
-                    clearTimeout(errorTimeout);
-                    errorTimeout = setTimeout(function(){
-                        $('.content').find('.warning').html('');
-                    }, 3000);
-                }
-            }
-        });
-    });
-
-    //Update storage
-    $('.edit_storage_form').on('click','button',function(e){
-        e.preventDefault();
-
-        var this_form = $(this).closest('form');
-
-        this_form.validate({
-            rules:{
-                Name: { required: true, Address: true },
-                Address: { Address: true }
-            },
-            messages:{
-                Name: '',
-                Address: ''
-            }
-        })
-
-        var form_valid = this_form.valid();
-
-        if(form_valid){
-            var data = this_form.serialize();
-
-            $.ajax({
-                dataType: 'json',
-                method: 'post',
-                url: base_url + 'admin/EditStorage/',
-                data: data,
-                success:function(result){
-                    if(result.success == true){
-                        $('.content').find('.warning').html('<p class="request_success">Запазено!</p>');
-                        clearTimeout(errorTimeout);
-                        errorTimeout = setTimeout(function(){
-                            $('.content').find('.warning').html('');
-                        }, 3000);
-                    }
-                    if(result.success == false){
-                        $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
-                        clearTimeout(errorTimeout);
-                        errorTimeout = setTimeout(function(){
-                            $('.content').find('.warning').html('');
-                        }, 3000);
-                    }
-                }
-            });
-        }
-    });
-
-    //Delete storage
-    $('.storages_content').on('click','.delete_storage',function(e){
-        e.preventDefault();
-
-
-        if(confirm('Сигурни ли сте, че желаете да изтриете този склад?')){
-            var storage_container = $(this).closest('.storage_container');
-            var storage_id = storage_container.attr('storage-id');
-
-            $.ajax({
-                method: 'post',
-                dataType: 'json',
-                url: base_url + 'admin/DeleteStorage/' + storage_id,
-                success:function(result){
-                    if(result.success == true){
-                        storage_container.remove();
-                    }
-                }
-            })
-        }
-    });
-
-    //Show add storage form
-    $('.content a.add_storage').click(function(e){
-        e.preventDefault();
-
-        $('.content').find('a.add_storage').hide();
-        $('.content').find('.list').hide();
-        $('.content').find('.add_storage_form').show();
-    });
-
-    //Show cash field
-    $('.add_storage_form [name="Type"]').on('change',function (e) {
-        e.preventDefault();
-
-        var storage_type = $(this).val();
-
-        if(storage_type == 3){
-            $('input[name="Cash"]').show();
-        } else {
-            $('input[name="Cash"]').hide();
-        }
-    })
-
-    //Add storage
-    $('.add_storage_form button').click(function(e){
-        e.preventDefault();
-
-        var this_form = $(this).closest('form');
-
-        this_form.validate({
-            rules:{
-                Name: { required: true, Address: true },
-                Address: { Address: true },
-                Type: { GreaterThan: 0 }
-            },
-            messages:{
-                Name: '',
-                Address: '',
-                Type: ''
-            }
-        })
-
-        var form_valid = this_form.valid();
-
-        if(form_valid){
-            var data = this_form.serialize();
-
-            $.ajax({
-                dataType: 'json',
-                method: 'post',
-                url: base_url + 'admin/AddStorage/',
-                data: data,
-                success:function(result){
-                    if(result.success == true){
-                        $('.add_storage_form [name="Name"]').val('');
-                        $('.add_storage_form [name="Address"]').val('');
-                        $('.add_storage_form [name="Type"]').val(0);
-                        $('.add_storage_form [name="Cash"]').val('');
-                        $('.add_storage_form [name="Cash"]').hide();
-
-                        $('.content').find('.warning').html('<p class="request_success">Складът беше добавен успешно!</p>');
-                        clearTimeout(errorTimeout);
-                        errorTimeout = setTimeout(function(){
-                            $('.content').find('.warning').html('');
-                        }, 3000);
-                    }
-                    if(result.success == false){
-                        $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
-                        clearTimeout(errorTimeout);
-                        errorTimeout = setTimeout(function(){
-                            $('.content').find('.warning').html('');
-                        }, 3000);
-                    }
-                }
-            });
-        }
-    });
+    //
+    ////Storages pagination
+    //$('.storages_content').on('click', '.pagination_list a', function(e){
+    //    e.preventDefault();
+    //    var page_id = $(this).attr('page-number');
+    //
+    //    $.ajax({
+    //        method: 'post',
+    //        dataType: 'json',
+    //        url: base_url + 'admin/StoragesPagination/',
+    //        data: { "iPageId": page_id },
+    //        success: function (result) {
+    //            var listing_html = '';
+    //            var colour = '';
+    //
+    //            $.each(result.aStorages, function( index , value ){
+    //                if(index % 2 == 0){
+    //                    colour = 'DDF5B7';
+    //                } else {
+    //                    colour = 'FFFF99'
+    //                }
+    //                listing_html += '<div class="storage_container container" storage-id="' + value.Id + '" style="background-color: #' + colour + '">' +
+    //                '<div class="column first_column"><a href="#" class="storage_availability">' + value.Name + '</a></div>' +
+    //                '<div class="manage_storage last_column">' +
+    //                '<a href="#" class="edit_storage"><i class="fa fa-pencil"></i></a> ' +
+    //                '<a href="#" class="delete_storage"><i class="fa fa-times"></i></a>' +
+    //                '</div><div class="column last_column">' + value.Address + '</div></div>';
+    //            });
+    //
+    //            listing_html += result.sPagination + '<div class="directions"><a href="' + base_url + 'admin/manage"">Обратно</a></div>';
+    //
+    //            $('.storages_content').find('.list').html(listing_html);
+    //        }
+    //    });
+    //});
+    //
+    ////Edit storage
+    //$('.storages_content').on('click', '.edit_storage', function(e){
+    //    e.preventDefault();
+    //
+    //    var storage_id = $(this).closest('.storage_container').attr('storage-id');
+    //
+    //    $.ajax({
+    //        method: 'post',
+    //        dataType: 'json',
+    //        url: base_url + 'admin/GetStorageById/' + storage_id,
+    //        success:function(result){
+    //            if(result.success == true){
+    //                $('.edit_storage_form').find('[name="Id"]').val(result.oStorage.Id);
+    //                $('.edit_storage_form').find('[name="Name"]').val(result.oStorage.Name);
+    //                $('.edit_storage_form').find('[name="Address"]').val(result.oStorage.Address);
+    //
+    //                $('.list').hide();
+    //                $('.add_storage').hide();
+    //                $('.edit_storage_form').show();
+    //            } else {
+    //                $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
+    //                clearTimeout(errorTimeout);
+    //                errorTimeout = setTimeout(function(){
+    //                    $('.content').find('.warning').html('');
+    //                }, 3000);
+    //            }
+    //        }
+    //    });
+    //});
+    //
+    ////Update storage
+    //$('.edit_storage_form').on('click','button',function(e){
+    //    e.preventDefault();
+    //
+    //    var this_form = $(this).closest('form');
+    //
+    //    this_form.validate({
+    //        rules:{
+    //            Name: { required: true, Address: true },
+    //            Address: { Address: true }
+    //        },
+    //        messages:{
+    //            Name: '',
+    //            Address: ''
+    //        }
+    //    })
+    //
+    //    var form_valid = this_form.valid();
+    //
+    //    if(form_valid){
+    //        var data = this_form.serialize();
+    //
+    //        $.ajax({
+    //            dataType: 'json',
+    //            method: 'post',
+    //            url: base_url + 'admin/EditStorage/',
+    //            data: data,
+    //            success:function(result){
+    //                if(result.success == true){
+    //                    $('.content').find('.warning').html('<p class="request_success">Запазено!</p>');
+    //                    clearTimeout(errorTimeout);
+    //                    errorTimeout = setTimeout(function(){
+    //                        $('.content').find('.warning').html('');
+    //                    }, 3000);
+    //                }
+    //                if(result.success == false){
+    //                    $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
+    //                    clearTimeout(errorTimeout);
+    //                    errorTimeout = setTimeout(function(){
+    //                        $('.content').find('.warning').html('');
+    //                    }, 3000);
+    //                }
+    //            }
+    //        });
+    //    }
+    //});
+    //
+    ////Delete storage
+    //$('.storages_content').on('click','.delete_storage',function(e){
+    //    e.preventDefault();
+    //
+    //
+    //    if(confirm('Сигурни ли сте, че желаете да изтриете този склад?')){
+    //        var storage_container = $(this).closest('.storage_container');
+    //        var storage_id = storage_container.attr('storage-id');
+    //
+    //        $.ajax({
+    //            method: 'post',
+    //            dataType: 'json',
+    //            url: base_url + 'admin/DeleteStorage/' + storage_id,
+    //            success:function(result){
+    //                if(result.success == true){
+    //                    storage_container.remove();
+    //                }
+    //            }
+    //        })
+    //    }
+    //});
+    //
+    ////Show add storage form
+    //$('.content a.add_storage').click(function(e){
+    //    e.preventDefault();
+    //
+    //    $('.content').find('a.add_storage').hide();
+    //    $('.content').find('.list').hide();
+    //    $('.content').find('.add_storage_form').show();
+    //});
+    //
+    ////Show cash field
+    //$('.add_storage_form [name="Type"]').on('change',function (e) {
+    //    e.preventDefault();
+    //
+    //    var storage_type = $(this).val();
+    //
+    //    if(storage_type == 3){
+    //        $('input[name="Cash"]').show();
+    //    } else {
+    //        $('input[name="Cash"]').hide();
+    //    }
+    //})
+    //
+    ////Add storage
+    //$('.add_storage_form button').click(function(e){
+    //    e.preventDefault();
+    //
+    //    var this_form = $(this).closest('form');
+    //
+    //    this_form.validate({
+    //        rules:{
+    //            Name: { required: true, Address: true },
+    //            Address: { Address: true },
+    //            Type: { GreaterThan: 0 }
+    //        },
+    //        messages:{
+    //            Name: '',
+    //            Address: '',
+    //            Type: ''
+    //        }
+    //    })
+    //
+    //    var form_valid = this_form.valid();
+    //
+    //    if(form_valid){
+    //        var data = this_form.serialize();
+    //
+    //        $.ajax({
+    //            dataType: 'json',
+    //            method: 'post',
+    //            url: base_url + 'admin/AddStorage/',
+    //            data: data,
+    //            success:function(result){
+    //                if(result.success == true){
+    //                    $('.add_storage_form [name="Name"]').val('');
+    //                    $('.add_storage_form [name="Address"]').val('');
+    //                    $('.add_storage_form [name="Type"]').val(0);
+    //                    $('.add_storage_form [name="Cash"]').val('');
+    //                    $('.add_storage_form [name="Cash"]').hide();
+    //
+    //                    $('.content').find('.warning').html('<p class="request_success">Складът беше добавен успешно!</p>');
+    //                    clearTimeout(errorTimeout);
+    //                    errorTimeout = setTimeout(function(){
+    //                        $('.content').find('.warning').html('');
+    //                    }, 3000);
+    //                }
+    //                if(result.success == false){
+    //                    $('.content').find('.warning').html('<p class="request_failure">Възникна грешка!</p>');
+    //                    clearTimeout(errorTimeout);
+    //                    errorTimeout = setTimeout(function(){
+    //                        $('.content').find('.warning').html('');
+    //                    }, 3000);
+    //                }
+    //            }
+    //        });
+    //    }
+    //});
 
     //Product types pagination
     $('.product_types_content').on('click', '.pagination_list a', function(e){
@@ -618,19 +618,6 @@ $( document ).ready(function() {
             data: { "iProductTypeId" : pt_id },
             success: function (result) {
                 if(result.success == true){
-                    $('.add_product_type').hide();
-                    $('.list').hide();
-                    $('.edit_product_type_form').show();
-
-                    var select_html = '<option value="0">Категория</option>';
-                    $.each ( result.aCategories , function ( index , value ) {
-                        if ( result.oProductType.Category == index ){
-                            select_html += '<option selected="selected" value="' + index + '">' + value + '</option>';
-                        } else {
-                            select_html += '<option value="' + index + '">' + value + '</option>';
-                        }
-                    });
-
                     $('.edit_product_type_form').find('[name="Id"]').val( result.oProductType.Id );
                     $('.edit_product_type_form').find('[name="Category"]').html( select_html );
                     $('.edit_product_type_form').find('[name="Name"]').val( result.oProductType.Name );
@@ -1435,6 +1422,49 @@ $( document ).ready(function() {
                 GetSales (user_id , storage_id , period);
             }
         });
+    });
+
+    //vending
+    $('select[name="VendingMachine"]').on('change',function(e){
+        e.preventDefault();
+
+        var iSelectedStorageId = $(this).find('option:selected').val();
+        var products_html = '';
+
+        if(iSelectedStorageId > 0){
+            $.ajax({
+                method: 'post',
+                dataType: 'json',
+                url: base_url + 'member/AjaxGetStorageAvailability/' + iSelectedStorageId,
+                success:function(result){
+                    if(result.success == true){
+                        products_html += '<option quantity="" value="0">Изделие</option>';
+                        $.each(result.aStorageAvailability,function(index,value){
+                            products_html += '<option value="' + value.oProduct.Id + '" quantity="'+ value.iQuantity +'">' + value.oProduct.Type.Name + ' (' + value.oProduct.ExpirationDate + ')</option>';
+                        });
+
+                        $('.vending_form').find('select[name="ObsoleteProduct"]').html(products_html);
+                    }
+                    if(result.success == false ){
+                        $('.vending_form').find('select[name="ObsoleteProduct"]').html('<option value="0" selected="selected">Изделие</option>');
+
+                        $('.content').find('.warning').html('<p class="request_success">Машината е празна!</p>');
+                        clearTimeout(errorTimeout);
+                        errorTimeout = setTimeout(function(){
+                            $('.content').find('.warning').html('');
+                        }, 3000);
+                    }
+                }
+            });
+        }
+    });
+
+    $('[name="DistributeProduct"]').on('change',function(e){
+        e.preventDefault();
+
+        var iDistributeQuantity = $(this).find('option:selected').attr('quantity');
+
+
     });
 
     var GetSales = function (iUserId, iStorageId, sPeriod) {

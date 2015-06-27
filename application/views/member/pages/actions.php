@@ -15,6 +15,7 @@
                 <div class="option"><a href="<?= base_url();?>member/obsolete">Бракуване</a></div>
                 <div class="option"><a href="<?= base_url();?>member/revenue">Отчитане на приходи</a></div>
                 <div class="option"><a href="<?= base_url();?>member/sales">Продажба</a></div>
+                <div class="option"><a href="<?= base_url();?>member/vending">Вендинг</a></div>
             </div>
             <div class="warning">
             </div>

@@ -13,7 +13,11 @@ class General extends My_BaseController
     {
         $iUserId = $this->session->userdata('iUserId');
         if($iUserId > 0){
-            redirect(base_url().'member/');
+            if($this->aData['oUser']->Type <= 1){
+                redirect(base_url().'member/');
+            } else {
+                redirect(base_url().'admin/');
+            }
         }
     }
     

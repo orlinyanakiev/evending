@@ -6,19 +6,12 @@ if (!defined('BASEPATH'))
 class Storages extends CI_Model
 {
     private $sStoragesTable = 'storages';
-    private $sProductTable = 'products';
     private $sSalesTable = 'sales';
     private $sDistributorsTable = 'distributors';
     private $sIncomeTable = 'income';
     const iSalesLimit = 12;
     const iStorageLimit = 12;
     const iAdjacent = 6.5;
-
-    public $aStorageTypes = array(
-        '1' => 'Склад',
-        '2' => 'Дистрибутор',
-        '3' => 'Вендинг машина',
-    );
 
     public function __construct()
     {
@@ -36,24 +29,65 @@ class Storages extends CI_Model
         return self::iSalesLimit;
     }
 
-    public function AddStorage($aStorageData)
+    public function MainStorageSupply($aStorageSupplyData)
     {
-        $oStorageExists = $this->GetStorageByName($aStorageData['Name']);
+        $iCategoryId = (int) $aStorageSupplyData['Category'];
+        $iQuantity = (int) $aStorageSupplyData['Quantity'];
+        $sExpirationDate = date('Y-m-d',strtotime(str_replace('.','-',$aStorageSupplyData['ExpirationDate']).' 00:00:00'));
+
+        $aProductData = array(
+            'Category' => $iCategoryId,
+            'Quantity' => $iQuantity,
+            'ExpirationDate' => $sExpirationDate,
+        );
+
+        $oProduct = $this->products->CheckIfProductExists($aProductData);
+
+        if(is_object($oProduct)){
+            $fOldValue = $oProduct->Value * $oProduct->Quantity;
+            $fNewValue = $fOldValue + $aStorageSupplyData['SupplyValue'];
+            $iNewQuantity = $oProduct->Quantity + $iQuantity;
+            $fNewAvgValue = round($fNewValue/$iNewQuantity, 2);
+            $bResult = $this->products->UpdateProductQuantity($oProduct->Id, $iNewQuantity, $fNewAvgValue);
+        } else {
+            $aProductData['Value'] = round($aStorageSupplyData['SupplyValue'], 2);
+            $bResult = $this->products->AddProduct($aProductData);
+        }
+
+        return $bResult;
+    }
+
+    public function AddVendingMachine($aData)
+    {
+        $oStorageExists = $this->GetStorageByName($aData['Name']);
 
         if(!is_object($oStorageExists)){
             $aInsertData = array(
-                'Name' => $aStorageData['Name'],
-                'Address' => $aStorageData['Address'],
-                'Type' => $aStorageData['Type'],
-                'Cash' => $aStorageData['Cash'],
+                'Name' => $aData['Name'],
+                'Address' => $aData['Address'],
+                'Type' => '3',
+                'Cash' => $aData['Cash'],
             );
 
-            $this->db->insert($this->sStoragesTable,$aInsertData);
-            $iStorageId = $this->db->insert_id();
-            return $iStorageId;
+            return $this->db->insert($this->sStoragesTable,$aInsertData);
         }
 
         return false;
+    }
+
+    public function AddDistributorStorage($iUserId)
+    {
+        $oUser = $this->users->GetUser($iUserId);
+
+        $aDistributorStorageData = array(
+            'Name' => $oUser->FirstName.' '.$oUser->LastName,
+            'Address' => '',
+            'Cash' => '',
+            'Type' => '2',
+        );
+
+        $this->db->insert($this->sStoragesTable,$aDistributorStorageData);
+        return $this->db->insert_id();
     }
 
     public function GetStorageByName($sStorageName)
@@ -184,7 +218,7 @@ class Storages extends CI_Model
 
     public function DeleteStorage($iStorageId)
     {
-        $aDeleteStorage['Active'] = '0';
+        $aDeleteStorage['IsDeleted'] = '1';
 
         $this->db->where('Id', $iStorageId);
         return $this->db->update($this->sStoragesTable,$aDeleteStorage);
@@ -192,7 +226,7 @@ class Storages extends CI_Model
 
     public function ListStorages($iPage = 1, $iLimit = 0, $iType = 0)
     {
-        $this->db->where('Active','1');
+        $this->db->where('IsDeleted','0');
         if($iType != 0){
             $this->db->where('Type', $iType);
         }
@@ -202,7 +236,7 @@ class Storages extends CI_Model
 
         if($iCount > $iLimit && $iLimit != 0){
             $iOffset = ($iPage - 1) * $iLimit;
-            $this->db->where('Active','1');
+            $this->db->where('IsDeleted','0');
             $this->db->order_by("Id","asc");
             $this->db->limit($iLimit, $iOffset);
 
